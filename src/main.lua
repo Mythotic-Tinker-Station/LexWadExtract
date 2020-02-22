@@ -6,6 +6,14 @@ function love.load(arg)
         require("mobdebug").start()
     end
 
+    print(0/0)
+
+    class               = require("mod30log")
+    streamReader        = require("clsStreamReader")
+    streamWriter        = require("clsStreamWriter")
+    wad                 = require("modWad")
+
+    local doom2 = wad("doom2.wad")
 
 end
 
