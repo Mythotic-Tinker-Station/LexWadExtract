@@ -10,7 +10,7 @@ function love.conf(t)
     t.audio.mic = false                 -- Request and use microphone capabilities in Android (boolean)
     t.audio.mixwithsystem = false       -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
-    t.window.title = "Lunarite"         -- The window title (string)
+    t.window.title = "LexExtract"       -- The window title (string)
     t.window.icon = nil                 -- Filepath to an image to use as the window's icon (string)
     t.window.width = 800                -- The window width (number)
     t.window.height = 600               -- The window height (number)
@@ -30,12 +30,12 @@ function love.conf(t)
     t.window.x = nil                    -- The x-coordinate of the window's position in the specified display (number)
     t.window.y = nil                    -- The y-coordinate of the window's position in the specified display (number)
 
-    local window = false
+    local window = true
     t.modules.graphics = window         -- Enable the graphics module (boolean)
     t.modules.window = window           -- Enable the window module (boolean)
     t.modules.font = window             -- Enable the font module (boolean)
+    t.modules.image = window            -- Enable the image module (boolean)
 
-    t.modules.image = false             -- Enable the image module (boolean)
     t.modules.audio = false             -- Enable the audio module (boolean)
 
     t.modules.data = true               -- Enable the data module (boolean)
@@ -47,7 +47,7 @@ function love.conf(t)
     t.modules.physics = false           -- Enable the physics module (boolean)
     t.modules.sound = false             -- Enable the sound module (boolean)
     t.modules.system = true             -- Enable the system module (boolean)
-    t.modules.thread = false            -- Enable the thread module (boolean)
+    t.modules.thread = true            -- Enable the thread module (boolean)
     t.modules.timer = true              -- Enable the timer module (boolean), Disabling it will result 0 delta time in love.update
     t.modules.touch = false             -- Enable the touch module (boolean)
     t.modules.video = false             -- Enable the video module (boolean)
