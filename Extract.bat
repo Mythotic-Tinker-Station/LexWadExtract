@@ -1,0 +1,1 @@
+start C:\GitHub\LexWadExtract\tools\extractor\Love2D\love.exe C:\GitHub\LexWadExtract\tools\extractor\src

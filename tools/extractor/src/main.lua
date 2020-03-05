@@ -5,6 +5,7 @@
 
 
 
+-- lua cant create folders, which is kind of annoying
 
 function love.load(arg)
     -- Zerobrane debugging
@@ -18,11 +19,16 @@ function love.load(arg)
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
     local apppath = love.filesystem.getSourceBaseDirectory()
-    local pk3path = apppath:sub(1, -16) .. "/pk3"
+    local pk3path = apppath:sub(1, -16) .. "pk3"
 
     doom2 = wad(apppath .. "/doom2.wad")
-    mapset = wad(apppath .. "/epic2.wad", "EPC2", doom2)
+    mapset = wad(apppath .. "/epic2.wad", "EPC2", doom2, pk3path)
+
+
 end
+
+
+
 
 function love.update(dt)
 

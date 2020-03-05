@@ -22,13 +22,82 @@ local wad = class("wad",
 	maps = {},
 	dups = {},
 	doomdups = {},
+	animdefs = {},
+	switchlist =
+	{
+		{"SW1BRCOM", 	"SW2BRCOM"},
+		{"SW1BRN1",		"SW2BRN1"},
+		{"SW1BRN2",		"SW2BRN2"},
+		{"SW1BRNGN", 	"SW2BRNGN"},
+		{"SW1BROWN", 	"SW2BROWN"},
+		{"SW1COMM",		"SW2COMM"},
+		{"SW1COMP",		"SW2COMP"},
+		{"SW1DIRT",		"SW2DIRT"},
+		{"SW1EXIT",		"SW2EXIT"},
+		{"SW1GRAY",		"SW2GRAY"},
+		{"SW1GRAY1", 	"SW2GRAY1"},
+		{"SW1METAL", 	"SW2METAL"},
+		{"SW1PIPE",		"SW2PIPE"},
+		{"SW1SLAD",		"SW2SLAD"},
+		{"SW1STARG", 	"SW2STARG"},
+		{"SW1STON1", 	"SW2STON1"},
+		{"SW1STON2", 	"SW2STON2"},
+		{"SW1STONE", 	"SW2STONE"},
+		{"SW1STRTN", 	"SW2STRTN"},
+		{"SW1BLUE",		"SW2BLUE"},
+		{"SW1CMT",		"SW2CMT"},
+		{"SW1GARG",		"SW2GARG"},
+		{"SW1GSTON", 	"SW2GSTON"},
+		{"SW1HOT",		"SW2HOT"},
+		{"SW1LION",		"SW2LION"},
+		{"SW1SATYR", 	"SW2SATYR"},
+		{"SW1SKIN",		"SW2SKIN"},
+		{"SW1VINE",		"SW2VINE"},
+		{"SW1WOOD",		"SW2WOOD"},
+		{"SW1PANEL", 	"SW2PANEL"},
+		{"SW1ROCK",		"SW2ROCK"},
+		{"SW1MET2",		"SW2MET2"},
+		{"SW1WDMET", 	"SW2WDMET"},
+		{"SW1BRIK",		"SW2BRIK"},
+		{"SW1MOD1",		"SW2MOD1"},
+		{"SW1ZIM",		"SW2ZIM"},
+		{"SW1STON6", 	"SW2STON6"},
+		{"SW1TEK",		"SW2TEK"},
+		{"SW1MARB",		"SW2MARB"},
+		{"SW1SKULL", 	"SW2SKULL"},
+	},
+	animlist =
+	{
+		{"flat",	"BLOOD1",		"BLOOD3"},
+		{"flat",	"FWATER1",		"FWATER4"},
+		{"flat",	"LAVA1",		"LAVA4"},
+		{"flat",	"NUKAGE1",		"NUKAGE3"},
+		{"flat",	"RROCK05",		"RROCK08"},
+		{"flat",	"SLIME01",		"SLIME04"},
+		{"flat",	"SLIME05",		"SLIME08"},
+		{"flat",	"SLIME09",		"SLIME12"},
+		{"flat",	"SWATER1",		"SWATER4"},
+		{"texture",	"BFALL1",		"BFALL4"},
+		{"texture",	"BLODGR1",		"BLODGR4", 	"allowdecals"},
+		{"texture",	"BLODRIP1",		"BLODRIP4", "allowdecals"},
+		{"texture",	"DBRAIN1",		"DBRAIN4"},
+		{"texture",	"FIREBLU1",		"FIREBLU2"},
+		{"texture",	"FIRELAV3",		"FIRELAVA"},
+		{"texture",	"FIREMAG1",		"FIREMAG3"},
+		{"texture",	"FIREWALA",		"FIREWALL"},
+		{"texture",	"GSTFONT1",		"GSTFONT3", "allowdecals"},
+		{"texture",	"ROCKRED1",		"ROCKRED3", "allowdecals"},
+		{"texture",	"SFALL1",		"SFALL4"},
+		{"texture",	"SLADRIP1",		"SLADRIP3", "allowdecals"},
+		{"texture",	"WFALL1",		"WFALL4"},
+	},
 
 	-- namespaces
 	namespaces =
 	{
 		["SP"] =
 		{
-			name = "spacials",
+			name = "specials",
 			lumps = {},
 		},
 		["DS"] =
@@ -80,10 +149,11 @@ local wad = class("wad",
 ---------------------------------------------------------
 -- Main Functions
 ---------------------------------------------------------
-function wad:init(path, acronym, base)
+function wad:init(path, acronym, base, pk3path)
 
 	self.base = base or self
 	self.acronym = acronym
+	self.pk3path = pk3path
 
 	self:printf(0, "------------------------------------------------------------------------------------------\n")
 	self:printf(0, "Loading Wad '%s'...", path)
@@ -136,20 +206,43 @@ function wad:init(path, acronym, base)
 	self:processTexturesX(2)
 	self:printf(1, "\tDone.\n")
 
+	self:printf(0, "Moving Zdoom Textures to Composites...")
+	self:moveZDoomTextures()
+
 	self:printf(0, "Filtering Duplicates...")
 	self:filterDuplicates()
 
-	self:printf(0, "Moving Flats to Textures...")
-	self:moveFlats()
+	self:printf(0, "Rename Flats...")
+	self:renameFlats()
 
-	self:printf(0, "Rename Textures...")
+	self:printf(0, "Rename Composites...")
 	self:renameTextures()
+
+	self:printf(0, "Building Animdefs...")
+	self:buildAnimdefs()
+
+	self:printf(0, "Processing Mapinfo...")
+	self:buildMapinfo()
 
 	self:printf(0, "Processing Maps...")
 	self:processMaps()
 
+	self:printf(0, "Extracting Flats...")
+	self:extractFlats()
+
+	self:printf(0, "Extracting Composites...")
+	self:extractTextures()
+
+	self:printf(0, "Extracting Maps...")
+	self:extractMaps()
+
+	self:printf(0, "Extracting Animdefs...")
+	self:extractAnimdefs()
+
+	self:printf(0, "Extracting Mapinfo...")
+	self:extractMapinfo()
 	self:printf(0, "Complete.\n")
-	--self:printTable(self.metadata)]]
+
 	collectgarbage()
 end
 
@@ -340,6 +433,80 @@ function wad:organizeMaps()
 	self:printf(1, "\tDone.\n")
 end
 
+function wad:buildPatches()
+
+	for p = 1, #self.patches do
+
+		self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
+		self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
+		self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
+		self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
+		self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
+		self.patches[p].columns = {}
+
+		for c = 1, self.patches[p].width do
+
+			self.patches[p].columns[c] = love.data.unpack("<L", self.patches[p].data, 9+((c-1)*4))
+
+			local topdelta = 0
+			local post = self.patches[p].columns[c]+1
+
+			while(topdelta ~= 0xFF) do
+
+				local topdelta_prev = topdelta
+
+				topdelta = love.data.unpack("<B", self.patches[p].data, post)
+				if(topdelta == 0xFF) then break end
+
+				-- tall patches
+				if(topdelta <= topdelta_prev) then
+					topdelta = topdelta+topdelta_prev
+				end
+
+				local length = love.data.unpack("<B", self.patches[p].data, post+1)
+				local data = self.patches[p].data:sub(post+3, post+3+length)
+
+				for pixel = 1, length do
+					local color = love.data.unpack("<B", data, pixel)+1
+					self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+				end
+
+				post = post+4+length
+			end
+		end
+
+		self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
+
+		self.patches[self.patches[p].name] = self.patches[p]
+	end
+	collectgarbage()
+	self:printf(1, "\tDone.\n")
+end
+
+function wad:buildFlats()
+
+	for f = 1, #self.flats do
+		self.flats[f].image = love.image.newImageData(64, 64)
+		self.flats[f].rows = {}
+
+		local pcount = 0
+		for y = 1, 64 do
+			for x = 1, 64 do
+				pcount = pcount + 1
+				local color = love.data.unpack("<B", self.flats[f].data, pcount)+1
+				self.flats[f].image:setPixel(x-1, y-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+			end
+		end
+
+		self.flats[f].png = self.flats[f].image:encode("png"):getString()
+		self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+	end
+
+	collectgarbage()
+	self:printf(1, "\tDone.\n")
+end
+
+
 function wad:processPalette()
 	-- find PLAYPAL
 	local paldata = ""
@@ -399,80 +566,6 @@ function wad:processPnames()
 	self:printf(1, "\tDone.\n")
 end
 
-function wad:buildPatches()
-
-	for p = 1, #self.patches do
-
-		self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
-		self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
-		self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
-		self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
-		self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
-		self.patches[p].columns = {}
-
-		for c = 1, self.patches[p].width do
-
-			self.patches[p].columns[c] = love.data.unpack("<L", self.patches[p].data, 9+((c-1)*4))
-
-			local topdelta = 0
-			local post = self.patches[p].columns[c]+1
-
-			while(topdelta ~= 0xFF) do
-
-				local topdelta_prev = topdelta
-
-				topdelta = love.data.unpack("<B", self.patches[p].data, post)
-				if(topdelta == 0xFF) then break end
-
-				-- tall patches
-				if(topdelta <= topdelta_prev) then
-					topdelta = topdelta+topdelta_prev
-				end
-
-				local length = love.data.unpack("<B", self.patches[p].data, post+1)
-				local data = self.patches[p].data:sub(post+3, post+3+length)
-
-				for pixel = 1, length do
-					local color = love.data.unpack("<B", data, pixel)+1
-					self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
-				end
-
-				post = post+4+length
-			end
-		end
-
-		self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
-
-		self.patches[self.patches[p].name] = self.patches[p]
-	end
-	collectgarbage()
-	self:printf(1, "\tDone.\n")
-end
-
-
-function wad:buildFlats()
-
-	for f = 1, #self.flats do
-		self.flats[f].image = love.image.newImageData(64, 64)
-		self.flats[f].rows = {}
-
-		local pcount = 0
-		for y = 1, 64 do
-			for x = 1, 64 do
-				pcount = pcount + 1
-				local color = love.data.unpack("<B", self.flats[f].data, pcount)+1
-				self.flats[f].image:setPixel(x-1, y-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
-			end
-		end
-
-		self.flats[f].image = love.graphics.newImage(self.flats[f].image)
-	end
-
-	collectgarbage()
-	self:printf(1, "\tDone.\n")
-end
-
-
 function wad:processTexturesX(num)
 	-- find TEXTUREx
 	local tdata = ""
@@ -488,10 +581,9 @@ function wad:processTexturesX(num)
 	if(tdata ~= "") then
 
 		-- header
-		local numtextures = love.data.unpack("<l", tdata)+#self.composites
-		self:printf(1, "\tFound '%d' textures.", numtextures)
+		local numtextures = love.data.unpack("<l", tdata)
 		local offsets = {}
-		for i = 5, numtextures*4, 4 do
+		for i = 5, (numtextures*4)-4, 4 do
 			offsets[#offsets+1] = love.data.unpack("<l", tdata, i)+1
 		end
 
@@ -537,6 +629,7 @@ function wad:processTexturesX(num)
 			self.composites[c].md5 = love.data.hash("md5", self.composites[c].png)
 
 		end
+	self:printf(1, "\tFound '%d' textures.", numtextures)
 	else
 		--self.composites = self.base.composites
 		self:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
@@ -544,31 +637,19 @@ function wad:processTexturesX(num)
 	collectgarbage()
 end
 
-function wad:moveFlats()
+function wad:moveZDoomTextures()
 	if(self.base ~= self) then
-		for f = 1, #self.flats do
-			self.composites[#self.composites+1] = self.flats[f]
+		for t = 1, #self.textures do
+			local index = #self.composites+1
+			self.composites[index] = self.textures[t]
+			self.composites[index].iszdoom = true
 		end
 		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot moving base wad flats.\n")
+		self:printf(1, "\tNot moving base wad zdoom textures.\n")
 	end
 	collectgarbage()
-end
-
-function wad:renameTextures()
-	if(self.base ~= self) then
-
-		for c = 1, #self.composites do
-			self.texturecount = self.texturecount + 1
-			self.composites[c].newname = string.format("%s%.4X", self.acronym, self.texturecount)
-		end
-		collectgarbage()
-		self:printf(1, "\tDone.\n")
-	else
-		self:printf(1, "\tNot renaming base wad textures.\n")
-	end
 end
 
 function wad:filterDuplicates()
@@ -580,8 +661,10 @@ function wad:filterDuplicates()
 			if(c ~= c2) then
 				if(self.composites[c].md5 == self.composites[c2].md5) then
 					count = count + 1
-					if(self.composites[c].dups[self.composites[c].name] == nil) then self.composites[c].dups[self.composites[c].name] = {} end
-					self.composites[c].dups[self.composites[c].name][#self.composites[c].dups[self.composites[c].name]+1] = self.composites[c2].name
+					if(self.composites[c].dups ~= nil) then
+						if(self.composites[c].dups[self.composites[c].name] == nil) then self.composites[c].dups[self.composites[c].name] = {} end
+						self.composites[c].dups[self.composites[c].name][#self.composites[c].dups[self.composites[c].name]+1] = self.composites[c2].name
+					end
 				end
 			end
 		end
@@ -591,11 +674,23 @@ function wad:filterDuplicates()
 	count = 0
 	-- filter dups from base wad
 	if(self.base ~= self) then
+
+		-- composites
 		for c = 1, #self.composites do
 			for c2 = 1, #self.base.composites do
 				if(self.composites[c].md5 == self.base.composites[c2].md5) then
 					count = count + 1
 					self.composites[c].isdoomdup = true
+				end
+			end
+		end
+
+		-- flats
+		for f = 1, #self.flats do
+			for f2 = 1, #self.base.flats do
+				if(self.flats[f].md5 == self.base.flats[f2].md5) then
+					count = count + 1
+					self.flats[f].isdoomdup = true
 				end
 			end
 		end
@@ -606,6 +701,133 @@ function wad:filterDuplicates()
 	self:printf(1, "\tDone.\n")
 end
 
+function wad:renameTextures()
+	if(self.base ~= self) then
+
+		for c = 1, #self.composites do
+			self.texturecount = self.texturecount + 1
+			self.composites[c].newname = string.format("%s%.4d", self.acronym, self.texturecount)
+		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot renaming base wad textures.\n")
+	end
+end
+
+function wad:renameFlats()
+	if(self.base ~= self) then
+
+		for f = 1, #self.flats do
+			self.texturecount = self.texturecount + 1
+			self.flats[f].newname = string.format("%s%.4d", self.acronym, self.texturecount)
+		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot renaming base wad flats.\n")
+	end
+end
+
+function wad:buildAnimdefs()
+	if(self.base ~= self) then
+
+		-- animations
+		self.animdefs.anims = {}
+		for c = 1, #self.composites do
+			for al = 1, #self.animlist do
+				if(not self.composites[c].isdoomdup) then
+					if(self.composites[c].name == self.animlist[al][2]) then
+						if(self.animlist[al][1] == "texture") then
+							local a = #self.animdefs.anims+1
+							self.animdefs.anims[a] = {}
+							self.animdefs.anims[a].text1 = self.composites[c].newname
+							self.animdefs.anims[a].typ = self.animlist[al][1]
+							self.animdefs.anims[a].decal = self.animlist[al][4]
+
+							for c2 = 1, #self.composites do
+								if(self.composites[c2].name == self.animlist[al][3]) then
+									self.animdefs.anims[a].text2 = self.composites[c2].newname
+									break
+								end
+							end
+							break
+						end
+					end
+				end
+			end
+		end
+
+		for f = 1, #self.flats do
+			for al = 1, #self.animlist do
+				if(not self.flats[f].isdoomdup) then
+					if(self.flats[f].name == self.animlist[al][2]) then
+						if(self.animlist[al][1] == "flat") then
+							local a = #self.animdefs.anims+1
+							self.animdefs.anims[a] = {}
+							self.animdefs.anims[a].text1 = self.flats[f].newname
+							self.animdefs.anims[a].typ = self.animlist[al][1]
+							self.animdefs.anims[a].decal = self.animlist[al][4]
+
+							for f2 = 1, #self.flats do
+								if(self.flats[f2].name == self.animlist[al][3]) then
+									self.animdefs.anims[a].text2 = self.flats[f2].newname
+									break
+								end
+							end
+							break
+						end
+					end
+				end
+			end
+		end
+		-- switches
+		self.animdefs.switches = {}
+
+		for c = 1, #self.composites do
+			for sl = 1, #self.switchlist do
+				if(self.composites[c].name == self.switchlist[sl][1]) then
+
+					local s = #self.animdefs.switches+1
+					self.animdefs.switches[s] = {}
+					self.animdefs.switches[s].text1 = self.composites[c].newname
+
+					for c2 = 1, #self.composites do
+						if(self.composites[c2].name == self.switchlist[sl][2]) then
+							self.animdefs.switches[s].text2 = self.composites[c2].newname
+						end
+					end
+					break
+				end
+			end
+		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot building animdefs for base wad.\n")
+	end
+end
+
+function wad:buildMapinfo()
+	if(self.base ~= self) then
+
+		for s = 1, #self.namespaces["SP"].lumps do
+			if(self.namespaces["SP"].lumps[s].name == "MAPINFO" or self.namespaces["SP"].lumps[s].name == "ZMAPINFO") then
+				self.mapinfo = self.namespaces["SP"].lumps[s].data
+				break
+			end
+		end
+
+		for c = 1, #self.composites do
+			self.mapinfo:gsub(self.composites[c].name, self.composites[c].newname)
+		end
+
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot building mapinfo for base wad\n")
+	end
+end
 
 function wad:processMaps()
 	if(self.base ~= self) then
@@ -634,8 +856,8 @@ function wad:processMaps()
 					self.maps[m].sectors[count] = {}
 					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
 					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)
-					self.maps[m].sectors[count].ceiling_texture = love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)
+					self.maps[m].sectors[count].floor_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4))
+					self.maps[m].sectors[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12))
 					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
@@ -649,12 +871,32 @@ function wad:processMaps()
 							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname end
 							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname end
 						end
+					end
+				end
 
+				for f = 1, #self.flats do
+					if not self.flats[f].isdoomdup then
 						for s = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[s].floor_texture == self.composites[c].name) then self.maps[m].sectors[s].floor_texture = self.composites[c].newname end
-							if(self.maps[m].sectors[s].ceiling_texture == self.composites[c].name) then self.maps[m].sectors[s].ceiling_texture = self.composites[c].newname end
+							if(self.maps[m].sectors[s].floor_texture == self.flats[f].name) then self.maps[m].sectors[s].floor_texture = self.flats[f].newname end
+							if(self.maps[m].sectors[s].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[s].ceiling_texture = self.flats[f].newname end
 						end
 					end
+				end
+
+				-- build raw sidedefs back
+				count = 0
+				self.maps[m].raw.sidedefs = ""
+				for s = 1, #self.maps[m].sidedefs do
+					count = count + 1
+					self.maps[m].raw.sidedefs = self.maps[m].raw.sidedefs .. love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector)
+				end
+
+				-- build raw sectors back
+				count = 0
+				self.maps[m].raw.sectors = ""
+				for s = 1, #self.maps[m].sectors do
+					count = count + 1
+					self.maps[m].raw.sectors = self.maps[m].raw.sectors .. love.data.pack("string", "<hhc8c8hHH", self.maps[m].sectors[s].floor_height, self.maps[m].sectors[s].ceiling_height, self.maps[m].sectors[s].floor_texture, self.maps[m].sectors[s].ceiling_texture, self.maps[m].sectors[s].light, self.maps[m].sectors[s].special, self.maps[m].sectors[s].tag)
 				end
 			else
 
@@ -667,10 +909,136 @@ function wad:processMaps()
 
 	self:printf(1, "\tDone.\n")
 end
-    function printEx(msg, num)
-        msg = msg
-        love.thread.getChannel('info'):push(msg)
-    end
+
+function wad:extractTextures()
+	if(self.base ~= self) then
+		for c = 1, #self.composites do
+			if(not self.composites[c].isdoomdup) then
+				local png, err = io.open(string.format("%s/TEXTURES/%s/%s.PNG", self.pk3path, self.acronym, self.composites[c].newname), "w+b")
+				if err then error("[ERROR] " .. err) end
+				png:write(self.composites[c].png)
+				png:close()
+			end
+		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad composites.\n")
+	end
+end
+
+function wad:extractFlats()
+	if(self.base ~= self) then
+		for f = 1, #self.flats do
+			if(not self.flats[f].isdoomdup) then
+				local png, err = io.open(string.format("%s/FLATS/%s/%s.PNG", self.pk3path, self.acronym, self.flats[f].newname), "w+b")
+				if err then error("[ERROR] " .. err) end
+				png:write(self.flats[f].png)
+				png:close()
+			end
+		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad flats.\n")
+	end
+end
+
+function wad:extractMaps()
+	if(self.base ~= self) then
+		for m = 1, #self.maps do
+			-- lumps
+			local order = {}
+			order[#order+1] = self.maps[m].raw.things
+			order[#order+1] = self.maps[m].raw.linedefs
+			order[#order+1] = self.maps[m].raw.sidedefs
+			order[#order+1] = self.maps[m].raw.vertexes
+			order[#order+1] = self.maps[m].raw.sectors
+			if(self.maps[m].raw.behavior) then order[#order+1] = self.maps[m].raw.behavior end
+			if(self.maps[m].raw.scripts) then order[#order+1] = self.maps[m].raw.scripts end
+
+			local pos = {}
+			local lumpchunk = ""
+			for o = 1, #order do
+				pos[o] = #lumpchunk
+				lumpchunk = lumpchunk .. order[o]
+			end
+
+			-- header
+			local header = love.data.pack("string", "<c4LL", "PWAD", #order+1, 12+#lumpchunk)
+
+			-- directory
+			local dir = love.data.pack("string", "<i4i4c8", 10, 10, "MAP01")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[1]+12, #order[1], "THINGS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "LINEDEFS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "SIDEDEFS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "VERTEXES")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "SECTORS")
+			if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "BEHAVIOR") end
+			if(self.maps[m].raw.script) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "SCRIPT") end
+
+			local wad, err = io.open(string.format("%s/MAPS/%s/%s.WAD", self.pk3path, self.acronym, self.maps[m].name), "w+b")
+			if err then error("[ERROR] " .. err) end
+			wad:write(header)
+			wad:write(lumpchunk)
+			wad:write(dir)
+			wad:close()
+		end
+	end
+end
+
+function wad:extractAnimdefs()
+	if(self.base ~= self) then
+
+		local anim = ""
+		for a = 1, #self.animdefs.anims do
+			anim = string.format("%s\n%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
+			if(self.animdefs.anims[a].decal) then
+				anim = string.format("%s %s", anim, self.animdefs.anims[a].decal)
+			end
+		end
+
+		local switch = ""
+		for s = 1, #self.animdefs.switches do
+			switch = string.format("%s\nswitch %s on pic %s tics 0", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
+		end
+		local file, err = io.open(string.format("%s/ANIMDEFS.%s.TXT", self.pk3path, self.acronym), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(anim)
+		file:write("\n")
+		file:write(switch)
+		file:close()
+
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad flats.\n")
+	end
+end
+
+function wad:extractMapinfo()
+	if(self.base ~= self) then
+
+		local file, err = io.open(string.format("%s/MAPINFO/%s.TXT", self.pk3path, self.acronym), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(self.mapinfo)
+		file:close()
+
+		file, err = io.open(string.format("%s/MAPINFO.TXT", self.pk3path), "r")
+		if err then error("[ERROR] " .. err) end
+		local mapinfo = file:read("*all")
+		file:close()
+
+		mapinfo = string.format('%s\ninclude "MAPINFO/%s.TXT"', mapinfo, self.acronym)
+		file, err = io.open(string.format("%s/MAPINFO.TXT", self.pk3path), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(mapinfo)
+		file:close()
+
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting mapinfo for base wad.\n")
+	end
+end
 
 ---------------------------------------------------------
 -- Helpers
@@ -741,6 +1109,35 @@ function wad:findTexture(data, texture, tbl, pos)
 	end
 	return tbl
 end
+
+function wad:insertGRAB(data, xoff, yoff)
+	local grAb = love.data.pack("data", ">Lc4llL", 8, "grAb", xoff, yoff, self:crc(data))
+	return data:sub(1, 37) .. grAb .. data:sub(38)
+end
+
+-- CRC code found: https://stackoverflow.com/questions/34120322/converting-a-c-checksum-function-to-lua
+function wad:crc(data)
+    sum = 65535
+    local d
+    for i = 1, #data do
+        d = string.byte(data, i)    -- get i-th element, like data[i] in C
+        sum = self:ByteCRC(sum, d)
+    end
+    return sum
+end
+
+function wad:ByteCRC(sum, data)
+    sum = bit.bxor(sum, data)
+    for i = 0, 7 do     -- lua for loop includes upper bound, so 7, not 8
+        if (bit.band(sum, 1) == 0) then
+            sum = bit.rshift(sum, 1)
+        else
+            sum = bit.bxor(bit.rshift(sum, 1),0xA001)  -- it is integer, no need for string func
+        end
+    end
+    return sum
+end
+
 
 return wad
 

@@ -1,0 +1,1 @@
+C:\Games\Doom\Engines\Zandronum\Zandronum.exe -file MAPS.zip

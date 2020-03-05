@@ -12,8 +12,8 @@ function love.conf(t)
 
     t.window.title = "LexExtract"       -- The window title (string)
     t.window.icon = nil                 -- Filepath to an image to use as the window's icon (string)
-    t.window.width = 800                -- The window width (number)
-    t.window.height = 600               -- The window height (number)
+    t.window.width = 10                -- The window width (number)
+    t.window.height = 10               -- The window height (number)
     t.window.borderless = false         -- Remove all border visuals from the window (boolean)
     t.window.resizable = false          -- Let the window be user-resizable (boolean)
     t.window.minwidth = 1               -- Minimum window width if the window is resizable (number)
@@ -30,11 +30,11 @@ function love.conf(t)
     t.window.x = nil                    -- The x-coordinate of the window's position in the specified display (number)
     t.window.y = nil                    -- The y-coordinate of the window's position in the specified display (number)
 
-    local window = true
-    t.modules.graphics = window         -- Enable the graphics module (boolean)
-    t.modules.window = window           -- Enable the window module (boolean)
-    t.modules.font = window             -- Enable the font module (boolean)
-    t.modules.image = window            -- Enable the image module (boolean)
+    local window = false
+    t.modules.graphics = true           -- Enable the graphics module (boolean)
+    t.modules.window = true           -- Enable the window module (boolean)
+    t.modules.font = true               -- Enable the font module (boolean)
+    t.modules.image = true              -- Enable the image module (boolean)
 
     t.modules.audio = false             -- Enable the audio module (boolean)
 
