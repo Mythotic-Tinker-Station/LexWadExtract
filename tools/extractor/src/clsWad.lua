@@ -274,7 +274,7 @@ function wad:checkMetadata()
 	name = self:removePadding(name)
 	local filedata = love.data.unpack(string.format("<c%d", size), self.raw, filepos)
 
-	if(name ~= "METADATA") then
+	if(name ~= "RNAMEDEF") then
 		error("Wad has not been Lexinized...Please run this wad through the slade lexinizer before extraction.")
 	else
 		for line in string.gmatch(filedata, "[^\n]+") do

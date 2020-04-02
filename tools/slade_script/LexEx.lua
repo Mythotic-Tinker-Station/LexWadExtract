@@ -22,7 +22,7 @@ local ignorelist = {"P1_START", "P2_START", "P3_START", "P4_START", "P5_START", 
 -- 	<acronyum><newname>
 -- 	ex: if acronym = DOOM
 --	CWILV00 will become DOOMLV01
-local graphicslist = 
+local graphicslist =
 {
 	{"CWILV00", "LV00"},
 	{"CWILV01", "LV01"},
@@ -64,14 +64,14 @@ local graphicslist =
 	{"BOSSBACK", "BOSS"},
 }
 
-local namespaces = 
+local namespaces =
 {
-	specials = 
+	specials =
 	{
 		ids = {"SP"},
 		-- this namespace was a late idea, so i retrofitted the code
 		-- to check for * to look for names instead of types
-		types = 
+		types =
 		{
 			"*ALTHUDCF",
 			"*ANIMATED",
@@ -132,8 +132,8 @@ local namespaces =
 		order = 1, -- for shits and giggles, lets organize the namespaces in specific order
 		rename = 0
 	},
-	
-	sounds = 
+
+	sounds =
 	{
 		ids = {"DS"},
 		types = {"snd_"},
@@ -144,8 +144,8 @@ local namespaces =
 		order = 2,
 		rename = 0
 	},
-	
-	music = 
+
+	music =
 	{
 		ids = {"MS"},
 		types = {"midi"},
@@ -156,7 +156,7 @@ local namespaces =
 		order = 3,
 		rename = 0
 	},
-	
+
 	graphics =
 	{
 		ids = {"GF"},
@@ -169,7 +169,7 @@ local namespaces =
 		rename = 2 -- each lump is renamed specificly
 	},
 
-	textures = 
+	textures =
 	{
 		ids = {"TX"},
 		types = {""},
@@ -178,10 +178,10 @@ local namespaces =
 		count = 0,
 		lumps = {},
 		order = 5,
-		rename = 1
+		rename = 0
 	},
-	
-	flats = 
+
+	flats =
 	{
 		ids = {"F", "FF"},
 		types = {""},
@@ -190,10 +190,10 @@ local namespaces =
 		count = 0,
 		lumps = {},
 		order = 6,
-		rename = 1
+		rename = 0
 	},
-	
-	patches = 
+
+	patches =
 	{
 		ids = {"P", "PP"},
 		types = {""},
@@ -202,10 +202,10 @@ local namespaces =
 		count = 0,
 		lumps = {},
 		order = 7,
-		rename = 1
+		rename = 0
 	},
-	
-	sprites = 
+
+	sprites =
 	{
 		ids = {"S", "SS"},
 		types = {""},
@@ -216,8 +216,8 @@ local namespaces =
 		order = 8,
 		rename = 0
 	},
-	
-	maps = 
+
+	maps =
 	{
 		ids = {"MM"},
 		types = {""},
@@ -233,11 +233,11 @@ local namespaces =
 function execute(arch)
 
 	App.logMessage("Start") -- since we have no os time functions, lets use the consoles timestamps to measure how long this takes
-	
+
 	SplashWindow.show("Slade will freeze, DONT PANIC!", true)
-	
+
 	archive = arch
-	
+
 	-- build up data table
 	findNamespaces()
 	verifyNamespaces()
@@ -247,9 +247,9 @@ function execute(arch)
 	--printTable(namespaces)
 	-- build wad
 	buildWad()
-	
+
 	SplashWindow.hide()
-	
+
 	App.logMessage("End")
 end
 
@@ -257,40 +257,40 @@ function findNamespaces()
 
 	-- for each lump
 	for i = 1, #archive.entries do
-	
+
 		splashbarHelper(i, 0, #archive.entries, "Finding existing namespaces...")
-		
+
 		-- if it's size 0 then it must be a marker right?
 		if(archive.entries[i].size == 0) then
-		
+
 			-- look for _
 			local stripIDpos = archive.entries[i].name:find("_")
-			
+
 			-- if the lump name has _
 			if(stripIDpos) then
-			
+
 				-- use it as a delimiter and split the name with it
 				local id = archive.entries[i].name:sub(1, stripIDpos-1)
 				local what = archive.entries[i].name:sub(stripIDpos+1)
-				
+
 				-- for each namespace
 				for k, v in pairs(namespaces) do
-				
+
 					-- for each id in each namespace
 					for _, v2 in ipairs(v.ids) do
-						
+
 						-- if the id matches
 						if(v2 == id) then
-						
+
 							-- if its a start marker
-							if(what == "START") then 
+							if(what == "START") then
 								namespaces[k].pos[1] = i
 							end
-							
+
 							-- if its an end marker
 							if(what == "END") then
 								namespaces[k].pos[2] = i
-								
+
 								-- if start marker was found
 								if(namespaces[k].pos[1] > -1) then
 									namespaces[k].count = (namespaces[k].pos[2]-namespaces[k].pos[1])-1
@@ -345,14 +345,14 @@ end
 function gatherMaps()
 	local index = 1
 	local lumpcount = #archive.entries
-	
+
 	-- for each entry
-	while(index <= lumpcount) do	
+	while(index <= lumpcount) do
 		splashbarHelper(index, 0, lumpcount, "Gathering maps...(Found: %d)", namespaces.maps.count)
-		
+
 		-- if we are not under any namespaces
 		if(countNamespaceLevel(index) == 0) then
-		
+
 			-- doom/hexen
 			if(archive.entries[index].name == "THINGS") then
 				local found_things 		= index
@@ -385,7 +385,7 @@ function gatherMaps()
 					end
 					countcall()
 				end
-				
+
 				if(found_lines and found_sides and found_vertexes and found_sectors) then
 					local mapindex = #namespaces.maps.lumps+1
 					namespaces.maps.found = true
@@ -405,25 +405,25 @@ function gatherMaps()
 					namespaces.maps.lumps[mapindex].behavior = archive.entries[found_behavior]
 					namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
 					namespaces.maps.lumps[mapindex].format = "DM"
-					
+
 					if(found_behavior) then
 						namespace.maps.lumps[mapindex].format = "HM"
 					end
-					
+
 					App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_things-1))
-					
+
 					index = index + map_lumpcount + 1
 				else
 					local mlumps = ""
-				
+
 					if(found_lines == false) then 	mlumps = mlumps .. "-LINEDEFS-" end
 					if(found_sides == false) then 	mlumps = mlumps .. "-SIDEDEFS-" end
 					if(found_vertexes == false) then  mlumps = mlumps .. "-VERTEXES-" end
 					if(found_sectors == false) then   mlumps = mlumps .. "-SECTORS-" end
-					
+
 					error(string.format("Map %s(entry number %d) is missing the following required lumps '%s'", archive.entries[found_things-1].name, found_things-2, mlumps), 1)
 				end
-				
+
 			-- udmf
 			elseif(archive.entries[index].name == "TEXTMAP") then
 				local found_textmap 	= index
@@ -434,7 +434,7 @@ function gatherMaps()
 				local found_scripts 	= false
 				local found_endmap		= false
 				local map_lumpcount 	= 1
-				
+
 				for i = 1, 5 do
 					if(index+i <= lumpcount) then
 						if(archive.entries[index+i].name == "TEXTMAP") 	then break end
@@ -447,7 +447,7 @@ function gatherMaps()
 					end
 					countcall()
 				end
-				
+
 				if(found_endmap) then
 					local mapindex = #namespaces.maps.lumps+1
 					namespaces.maps.found = true
@@ -462,9 +462,9 @@ function gatherMaps()
 					namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
 					namespaces.maps.lumps[mapindex].endmap = archive.entries[found_endmap]
 					namespaces.maps.lumps[mapindex].format = "UM"
-					
+
 					App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_textmap-1))
-					
+
 					index = index + map_lumpcount + 1
 				else
 					error(string.format("Map %s has no ENDMAP.", archive.entries[found_textmap-1].name), 0)
@@ -486,16 +486,16 @@ function gatherSpecialLumps()
 	-- for each lump
 	for i = 1, #archive.entries do
 		splashbarHelper(i, 0, #archive.entries, "Moving unmarked lumps to new namespaces...")
-		
+
 		-- check if we are not inside any namespaces
 		if(countNamespaceLevel(i) == 0) then
-		
+
 			-- for each namespace
 			for k, v in pairs(namespaces) do
-			
+
 				-- for each type
 				for _, v2 in ipairs(v.types) do
-				
+
 					-- if entry type matches namespace type
 					-- or if the namespace type starts with * and the entry name
 					-- matches the suffix after
@@ -520,7 +520,7 @@ function buildWad()
 
 	-- create new wad
 	newwad = Archives.create("wad")
-	
+
 	-- create a table so we can order our namespaces, because why not
 	local order = {}
 	for k, v in pairs(namespaces) do
@@ -531,48 +531,48 @@ function buildWad()
 
 		local k = order[i][1]
 		local v = order[i][2]
-		
+
 		-- ignore maps, maps require special treatment
 		if(k ~= "maps") then
-		
+
 			-- dont bother making a namespace if there is nothing in it
 			if(v.count > 0) then
-			
+
 				-- create start marker
 				newwad:createEntry(string.format("%s_START", v.ids[1]), -1)
-				
+
 				-- for each lump in namespace
 				for ii = 1, #v.lumps do
-				
+
 					splashbarHelper(ii, 0, #v.lumps, "Building new wad... Current namespace: %s", k)
-				
+
 					-- if lump exist?(i feel like there is a bug here if i need this check...)
 					if(v.lumps[ii]) then
-					
+
 						local ignore = false
-						
+
 						-- ignore unnecessary lumps
-						for d = 1, #ignorelist do 
+						for d = 1, #ignorelist do
 							if(v.lumps[ii].name == ignorelist[d]) then
 								ignore = true
 								break
 							end
 						end
-						
+
 						if(not ignore) then
-						
+
 							-- if set to rename as a texture with a number
 							if(v.rename == 1) then
 								local newname = string.format("%s%04d", acronym, texturenumber)
 								renamelist[#renamelist+1] = {v.ids[1], v.lumps[ii].name, newname}
 								newwad:createEntry(newname, -1):importData(v.lumps[ii].data)
 								texturenumber=texturenumber+1
-							
+
 							-- if set to rename specific lumps
 							elseif(v.rename == 2) then
 								local found = false
 								for g = 1, #graphicslist do
-								
+
 									-- if lump is in our graphics list
 									if(v.lumps[ii].name == graphicslist[g][1]) then
 										found = true
@@ -582,11 +582,11 @@ function buildWad()
 										break
 									end
 								end
-																
+
 								if(not found) then
 									newwad:createEntry(v.lumps[ii].name, -1):importData(v.lumps[ii].data)
 								end
-								
+
 							-- otherwise, copy original name
 							else
 								newwad:createEntry(v.lumps[ii].name, -1):importData(v.lumps[ii].data)
@@ -594,13 +594,13 @@ function buildWad()
 						end
 					end
 				end
-				
+
 				-- create end marker
 				newwad:createEntry(string.format("%s_END", v.ids[1]), -1)
 			end
 		end
 	end
-	
+
 	-- maps
 
 	newwad:createEntry(string.format("%s_START", namespaces.maps.ids[1]), -1)
@@ -608,7 +608,7 @@ function buildWad()
 		splashbarHelper(l, 0, #namespaces.maps.lumps, "Building new wad... Current namespace: maps")
 		newwad:createEntry(string.format("%s_START", namespaces.maps.lumps[l].format), -1)
 		newwad:createEntry(namespaces.maps.lumps[l].name.name, -1):importData(namespaces.maps.lumps[l].name.data)
-		
+
 		-- doom/hexen
 		if(namespaces.maps.lumps[l].format == "DM" or namespaces.maps.lumps[l].format == "HM") then
 			newwad:createEntry("THINGS", -1):importData(namespaces.maps.lumps[l].things.data)
@@ -624,7 +624,7 @@ function buildWad()
 			if(namespaces.maps.lumps[l].behavior) 	then newwad:createEntry("BEHAVIOR", -1):importData(namespaces.maps.lumps[l].behavior.data) end
 			if(namespaces.maps.lumps[l].scripts) 	then newwad:createEntry("SCRIPTS", -1):importData(namespaces.maps.lumps[l].scripts.data) end
 		end
-		
+
 		-- udmf
 		if(namespaces.maps.lumps[l].format == "UM") then
 			newwad:createEntry("TEXTMAP", -1):importData(namespaces.maps.lumps[l].textmap.data)
@@ -635,24 +635,24 @@ function buildWad()
 			if(namespaces.maps.lumps[l].scripts) 	then newwad:createEntry("SCRIPTS", -1):importData(namespaces.maps.lumps[l].scripts.data) end
 			newwad:createEntry("ENDMAP", -1):importData(namespaces.maps.lumps[l].endmap.data)
 		end
-		
+
 		newwad:createEntry(string.format("%s_END", namespaces.maps.lumps[l].format), -1)
 	end
 	newwad:createEntry(string.format("%s_END", namespaces.maps.ids[1]), -1)
-	
+
 	-- RNAMEDEF
 	splashbarHelper(0, 0, 0, "Building RNAMEDEF...")
 	local entry = newwad:createEntry("RNAMEDEF", 1)
-	
+
 	for index = 1, #renamelist do
 		-- slade seems to change this to a \, so let use that and hope no wads used this in a name
 		renamelist[index] = table.concat(renamelist[index], "^")
 	end
 	entry:importData(table.concat(renamelist, "\n"))
-	
+
 	splashbarHelper(0, 0, 0, "Saving wad...")
 	newwad:save(archive.filename:sub(1, -5) .. "_lex.wad")
-	
+
 	collectgarbage()
 end
 

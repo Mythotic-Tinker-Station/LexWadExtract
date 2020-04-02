@@ -13,16 +13,18 @@ function love.load(arg)
         require("mobdebug").start()
     end
 
-    class               = require("mod30log")
-    wad                 = require("clsWad")
+    class = require("mod30log")
+    wad = require("clsWad")
 
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
     local apppath = love.filesystem.getSourceBaseDirectory()
     local pk3path = apppath:sub(1, -16) .. "pk3"
 
-    doom2 = wad(apppath .. "/doom2.wad")
-    mapset = wad(apppath .. "/epic2.wad", "EPC2", doom2, pk3path)
+    doom2 = wad(apppath .. "/doom2_lex.wad")
+
+    -- change this line
+    mapset = wad(apppath .. "/epic2_lex.wad", "EPC2", doom2, pk3path)
 
 
 end

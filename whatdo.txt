@@ -1,0 +1,47 @@
+
+
+-------------------------------------------
+-- You only need to do steps 1 - 7 once
+-------------------------------------------
+1:	Copy /tools/slade_script/LexEx.lua to %appdata%/slade3/scripts/archive
+
+2:	Copy the doom2.wad to \tools\extractor\
+
+3:	Open the doom2.wad in \tools\extractor\ in slade
+
+4:	Go to Archive > Run Script > LexEx
+
+5:	You'll be prompted to provide an acronym, this can be ingored for the doom2 wad, leave it the default "DOOM"
+
+6:	This script takes a few minutes to complete, slade will freeze during this time, dont panic!
+
+7:	You will have a doom2_lex.wad in the same folder, you can delete the doom2.wad
+
+-------------------------------------------
+-- Repeat these steps for each mapset
+-------------------------------------------
+8:	Open the mapset you wanna convert in slade
+
+8:	Go to Archive > Run Script > LexEx
+
+9:	You'll be prompted to provide a 4 letter acronym, this acronym is important for renaming textures and the like
+
+10:	This script takes a few minutes to complete, slade will freeze during this time, dont panic!
+
+11:	You will have a wad with the same name with _lex appended in the same folder
+
+12:	Copy that wad to \tools\extractor\
+
+13:	Go to \tools\extractor\src and open the main.lua file
+
+14:	Change this line:
+		mapset = wad(apppath .. "/epic2_lex.wad", "EPC2", doom2, pk3path)
+
+		Change epic2_lex.wad to the wad file name you copied to \tools\extractor\
+		Change "EPC2" to a 4 letter acronym for the mapset
+
+15:	Click Run.Bat
+
+16:	Watch it do the thing.
+
+17:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest, that pk3 is our project folder
