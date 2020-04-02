@@ -234,6 +234,8 @@ function execute(arch)
 
 	App.logMessage("Start") -- since we have no os time functions, lets use the consoles timestamps to measure how long this takes
 
+	acronym = App.promptString("Acronym", "Please provide a 4 letter acronym for this mapset.", "DOOM"):sub(1, 4)
+
 	SplashWindow.show("Slade will freeze, DONT PANIC!", true)
 
 	archive = arch
@@ -539,8 +541,11 @@ function buildWad()
 			if(v.count > 0) then
 
 				-- create start marker
-				newwad:createEntry(string.format("%s_START", v.ids[1]), -1)
-
+				if(v.ids[2]) then
+					newwad:createEntry(string.format("%s_START", v.ids[2]), -1)
+				else
+					newwad:createEntry(string.format("%s_START", v.ids[1]), -1)
+				end
 				-- for each lump in namespace
 				for ii = 1, #v.lumps do
 
@@ -596,7 +601,11 @@ function buildWad()
 				end
 
 				-- create end marker
-				newwad:createEntry(string.format("%s_END", v.ids[1]), -1)
+				if(v.ids[2]) then
+					newwad:createEntry(string.format("%s_END", v.ids[2]), -1)
+				else
+					newwad:createEntry(string.format("%s_END", v.ids[1]), -1)
+				end
 			end
 		end
 	end
