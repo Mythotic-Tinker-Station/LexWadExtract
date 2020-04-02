@@ -385,7 +385,7 @@ function wad:organizeMaps()
 					self.maps[index] = {}
 					self.maps[index].pos = {l}
 					self.maps[index].format = namespace
-					self.maps[index].name = self.namespaces["MM"].lumps[l+1].name
+					self.maps[index].name = self.acronym .. self.namespaces["MM"].lumps[l+1].name:sub(-2)
 					self.maps[index].raw = {}
 				end
 			end
@@ -915,18 +915,22 @@ function wad:processMaps()
 				-- build raw sidedefs back
 				count = 0
 				self.maps[m].raw.sidedefs = ""
+				local t = {}
 				for s = 1, #self.maps[m].sidedefs do
 					count = count + 1
-					self.maps[m].raw.sidedefs = string.format("%s%s", self.maps[m].raw.sidedefs, love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector))
+					t[s] = love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector)
 				end
+				self.maps[m].raw.sidedefs = table.concat(t)
 
 				-- build raw sectors back
 				count = 0
 				self.maps[m].raw.sectors = ""
+				t = {}
 				for s = 1, #self.maps[m].sectors do
 					count = count + 1
-					self.maps[m].raw.sectors = string.format("%s%s", self.maps[m].raw.sectors, love.data.pack("string", "<hhc8c8hHH", self.maps[m].sectors[s].floor_height, self.maps[m].sectors[s].ceiling_height, self.maps[m].sectors[s].floor_texture, self.maps[m].sectors[s].ceiling_texture, self.maps[m].sectors[s].light, self.maps[m].sectors[s].special, self.maps[m].sectors[s].tag))
+					t[s] = love.data.pack("string", "<hhc8c8hHH", self.maps[m].sectors[s].floor_height, self.maps[m].sectors[s].ceiling_height, self.maps[m].sectors[s].floor_texture, self.maps[m].sectors[s].ceiling_texture, self.maps[m].sectors[s].light, self.maps[m].sectors[s].special, self.maps[m].sectors[s].tag)
 				end
+				self.maps[m].raw.sectors = table.concat(t)
 			else
 
 			end

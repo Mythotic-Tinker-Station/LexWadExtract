@@ -1,1 +1,1 @@
-C:\Games\Doom\Engines\Zandronum\Zandronum.exe -file MAPS.zip
+C:\Games\Doom\Engines\Zandronum\Zandronum.exe -file C:\GitHub\LexWadExtract\MAPS.zip
