@@ -818,10 +818,12 @@ function wad:buildMapinfo()
 			end
 		end
 
-		for c = 1, #self.composites do
-			self.mapinfo:gsub(self.composites[c].name, self.composites[c].newname)
+		if(self.mapinfo) then
+			for c = 1, #self.composites do
+				self.mapinfo:gsub(self.composites[c].name, self.composites[c].newname)
+			end
+			self:printf(1, "\tNo MAPINFO found.\n")
 		end
-
 		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
