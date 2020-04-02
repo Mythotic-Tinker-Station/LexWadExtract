@@ -135,7 +135,7 @@ local wad = class("wad",
 			name = "sprites",
 			lumps = {},
 		},
-		["MP"] =
+		["MM"] =
 		{
 			name = "maps",
 			lumps = {},
@@ -364,12 +364,12 @@ function wad:organizeMaps()
 		local index = 0
 
 		-- if any maps were found
-		if(#self.namespaces["MP"].lumps > 0) then
+		if(#self.namespaces["MM"].lumps > 0) then
 
 			-- for each lump in the maps namespace
-			for l = 1, #self.namespaces["MP"].lumps do
+			for l = 1, #self.namespaces["MM"].lumps do
 
-				local v = self.namespaces["MP"].lumps[l]
+				local v = self.namespaces["MM"].lumps[l]
 
 				-- end namespace
 				if(v.name == string.format("%s_END", namespace)) then
@@ -385,7 +385,7 @@ function wad:organizeMaps()
 					self.maps[index] = {}
 					self.maps[index].pos = {l}
 					self.maps[index].format = namespace
-					self.maps[index].name = self.namespaces["MP"].lumps[l+1].name
+					self.maps[index].name = self.namespaces["MM"].lumps[l+1].name
 					self.maps[index].raw = {}
 				end
 			end
@@ -393,22 +393,22 @@ function wad:organizeMaps()
 			-- structure map data
 			for m = 1, #self.maps do
 				for l = self.maps[m].pos[1], self.maps[m].pos[2] do
-					if(self.namespaces["MP"].lumps[l].name == "THINGS") then 	self.maps[m].raw.things 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "LINEDEFS") then 	self.maps[m].raw.linedefs 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "SIDEDEFS") then 	self.maps[m].raw.sidedefs 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "VERTEXES") then 	self.maps[m].raw.vertexes 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "SEGS") then 		self.maps[m].raw.segs 			= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "SSECTORS") then 	self.maps[m].raw.ssectors 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "NODES") then 	self.maps[m].raw.nodes 			= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "SECTORS") then 	self.maps[m].raw.sectors 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "REJECT") then 	self.maps[m].raw.reject 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "BLOCKMAP") then 	self.maps[m].raw.blockmap 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "BEHAVIOR") then 	self.maps[m].raw.behavior		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "SCRIPTS") then 	self.maps[m].raw.scripts 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "TEXTMAP") then 	self.maps[m].raw.textmap 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "ZNODES") then 	self.maps[m].raw.znodes 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "DIALOGUE") then 	self.maps[m].raw.dialogue 		= self.namespaces["MP"].lumps[l].data end
-					if(self.namespaces["MP"].lumps[l].name == "ENDMAP") then 	self.maps[m].raw.endmap 		= self.namespaces["MP"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "THINGS") then 	self.maps[m].raw.things 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "LINEDEFS") then 	self.maps[m].raw.linedefs 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "SIDEDEFS") then 	self.maps[m].raw.sidedefs 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "VERTEXES") then 	self.maps[m].raw.vertexes 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "SEGS") then 		self.maps[m].raw.segs 			= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "SSECTORS") then 	self.maps[m].raw.ssectors 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "NODES") then 	self.maps[m].raw.nodes 			= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "SECTORS") then 	self.maps[m].raw.sectors 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "REJECT") then 	self.maps[m].raw.reject 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "BLOCKMAP") then 	self.maps[m].raw.blockmap 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "BEHAVIOR") then 	self.maps[m].raw.behavior		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "SCRIPTS") then 	self.maps[m].raw.scripts 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "TEXTMAP") then 	self.maps[m].raw.textmap 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "ZNODES") then 	self.maps[m].raw.znodes 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "DIALOGUE") then 	self.maps[m].raw.dialogue 		= self.namespaces["MM"].lumps[l].data end
+					if(self.namespaces["MM"].lumps[l].name == "ENDMAP") then 	self.maps[m].raw.endmap 		= self.namespaces["MM"].lumps[l].data end
 				end
 
 				-- log stuff
@@ -859,6 +859,7 @@ end
 function wad:processMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
+			self:printf(2, "\tProcessing Map: %d", m)
 			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
 
 				-- sidedefs
@@ -897,6 +898,7 @@ function wad:processMaps()
 							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].newname end
 							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname end
 							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname end
+
 						end
 					end
 				end
@@ -915,7 +917,7 @@ function wad:processMaps()
 				self.maps[m].raw.sidedefs = ""
 				for s = 1, #self.maps[m].sidedefs do
 					count = count + 1
-					self.maps[m].raw.sidedefs = self.maps[m].raw.sidedefs .. love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector)
+					self.maps[m].raw.sidedefs = string.format("%s%s", self.maps[m].raw.sidedefs, love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector))
 				end
 
 				-- build raw sectors back
@@ -923,7 +925,7 @@ function wad:processMaps()
 				self.maps[m].raw.sectors = ""
 				for s = 1, #self.maps[m].sectors do
 					count = count + 1
-					self.maps[m].raw.sectors = self.maps[m].raw.sectors .. love.data.pack("string", "<hhc8c8hHH", self.maps[m].sectors[s].floor_height, self.maps[m].sectors[s].ceiling_height, self.maps[m].sectors[s].floor_texture, self.maps[m].sectors[s].ceiling_texture, self.maps[m].sectors[s].light, self.maps[m].sectors[s].special, self.maps[m].sectors[s].tag)
+					self.maps[m].raw.sectors = string.format("%s%s", self.maps[m].raw.sectors, love.data.pack("string", "<hhc8c8hHH", self.maps[m].sectors[s].floor_height, self.maps[m].sectors[s].ceiling_height, self.maps[m].sectors[s].floor_texture, self.maps[m].sectors[s].ceiling_texture, self.maps[m].sectors[s].light, self.maps[m].sectors[s].special, self.maps[m].sectors[s].tag))
 				end
 			else
 
@@ -973,8 +975,10 @@ end
 
 function wad:extractMaps()
 	if(self.base ~= self) then
+		print(#self.maps)
 		for m = 1, #self.maps do
 			-- lumps
+			print(m)
 			local order = {}
 			order[#order+1] = self.maps[m].raw.things
 			order[#order+1] = self.maps[m].raw.linedefs
