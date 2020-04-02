@@ -1,6 +1,4 @@
 // MAPINFO for Epic 2
-
-clearepisodes
 episode map01
 {
 	name = "Epic 2"

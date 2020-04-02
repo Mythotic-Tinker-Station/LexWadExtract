@@ -221,11 +221,11 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Building Animdefs...")
 	self:buildAnimdefs()
 
-	self:printf(0, "Processing Mapinfo...")
-	self:buildMapinfo()
-
 	self:printf(0, "Processing Maps...")
 	self:processMaps()
+
+	--self:printf(0, "Processing Mapinfo...")
+	--self:buildMapinfo()
 
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
@@ -239,8 +239,8 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Extracting Animdefs...")
 	self:extractAnimdefs()
 
-	self:printf(0, "Extracting Mapinfo...")
-	self:extractMapinfo()
+	--self:printf(0, "Extracting Mapinfo...")
+	--self:extractMapinfo()
 	self:printf(0, "Complete.\n")
 
 	collectgarbage()
@@ -813,17 +813,42 @@ function wad:buildMapinfo()
 
 		for s = 1, #self.namespaces["SP"].lumps do
 			if(self.namespaces["SP"].lumps[s].name == "MAPINFO" or self.namespaces["SP"].lumps[s].name == "ZMAPINFO") then
-				self.mapinfo = self.namespaces["SP"].lumps[s].data
+				local mapinfo = self.namespaces["SP"].lumps[s].data
 				break
 			end
 		end
 
-		if(self.mapinfo) then
-			for c = 1, #self.composites do
-				self.mapinfo:gsub(self.composites[c].name, self.composites[c].newname)
+		if(mapinfo) then
+
+		else
+
+			for m = 1, #self.maps do
+				if(m == 1) then
+					self.mapinfo = string.format(
+					[[
+					Episode %s
+					{
+						name = %s
+					}
+					]], self.maps[1].name, self.acronym)
+				end
+
+				self.mapinfo = self.mapinfo .. string.format(
+					[[
+					Map %s
+					{
+						titlepatch = "%s"
+						next = "%s"
+						secretnext = "%s"
+						sky1 = "SKY1"
+						cluster = 0
+						par = 0
+						music = "$MUSIC_RUNNIN"
+					}
+					]], self.mapinfo, self.maps[m].name, self.acronym .. self.maps[m].name:sub(-2), self.acronym .. self.maps[m].name:sub(-2))
 			end
-			self:printf(1, "\tNo MAPINFO found.\n")
 		end
+
 		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
