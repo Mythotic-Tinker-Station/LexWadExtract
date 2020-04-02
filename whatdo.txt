@@ -40,8 +40,10 @@
 		Change epic2_lex.wad to the wad file name you copied to \tools\extractor\
 		Change "EPC2" to a 4 letter acronym for the mapset
 
-15:	Click Run.Bat
+15:	in FLATS, MAPS, and TEXTURES folders, you need to make a folder with the acronym you're going to use in each
 
-16:	Watch it do the thing.
+16:	Click Run.Bat
 
-17:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest, that pk3 is our project folder
+17:	Watch it do the thing.
+
+18:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest, that pk3 is our project folder
