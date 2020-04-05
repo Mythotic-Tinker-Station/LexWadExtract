@@ -316,6 +316,7 @@ function wad:buildNamespaces()
 		-- end namespace
 		if(name == string.format("%s_END", namespace)) then
 			found = false
+			self:printf(1, "\tFound End of Namespace %s.", name)
 		end
 
 		-- in namespace
@@ -329,6 +330,7 @@ function wad:buildNamespaces()
 		if(name:sub(-6) == "_START" and not found) then
 			namespace = name:sub(1, 2)
 			found = true
+			self:printf(1, "\tFound Start of Namespace %s.", name)
 		end
 	end
 	self:printf(1, "\tDone.\n")
