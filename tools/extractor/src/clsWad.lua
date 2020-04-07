@@ -949,7 +949,7 @@ function wad:extractTextures()
 	if(self.base ~= self) then
 		for c = 1, #self.composites do
 			if(not self.composites[c].isdoomdup) then
-				local png, err = io.open(string.format("%s/TEXTURES/%s/%s.PNG", self.pk3path, self.acronym, self.composites[c].newname), "w+b")
+				local png, err = io.open(string.format("%s/TEXTURES/%s.PNG", self.pk3path, self.composites[c].newname), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.composites[c].png)
 				png:close()
@@ -966,7 +966,7 @@ function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
-				local png, err = io.open(string.format("%s/FLATS/%s/%s.PNG", self.pk3path, self.acronym, self.flats[f].newname), "w+b")
+				local png, err = io.open(string.format("%s/FLATS/%s.PNG", self.pk3path, self.flats[f].newname), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.flats[f].png)
 				png:close()
@@ -1014,7 +1014,7 @@ function wad:extractMaps()
 			if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "BEHAVIOR") end
 			if(self.maps[m].raw.script) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "SCRIPT") end
 
-			local wad, err = io.open(string.format("%s/MAPS/%s/%s.WAD", self.pk3path, self.acronym, self.maps[m].name), "w+b")
+			local wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
 			if err then error("[ERROR] " .. err) end
 			wad:write(header)
 			wad:write(lumpchunk)
