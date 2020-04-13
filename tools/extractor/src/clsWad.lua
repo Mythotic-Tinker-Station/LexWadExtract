@@ -585,7 +585,7 @@ function wad:processTexturesX(num)
 		-- header
 		local numtextures = love.data.unpack("<l", tdata)
 		local offsets = {}
-		for i = 5, (numtextures*4)-4, 4 do
+		for i = 5, (numtextures*4)+4, 4 do
 			offsets[#offsets+1] = love.data.unpack("<l", tdata, i)+1
 		end
 
@@ -608,6 +608,8 @@ function wad:processTexturesX(num)
 			self.composites[c].canvas = love.graphics.newCanvas(self.composites[c].width, self.composites[c].height)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
+
+			print(self.composites[c].name)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
