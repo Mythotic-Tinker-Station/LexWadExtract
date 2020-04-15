@@ -684,7 +684,8 @@ function wad:filterDuplicates()
 			for c2 = 1, #self.base.composites do
 				if(self.composites[c].md5 == self.base.composites[c2].md5) then
 					count = count + 1
-					self.composites[c].isdoomdup = self.composites[c2].name
+					self.composites[c].isdoomdup = true
+					self.composites[c].doomdup = self.composites[c2].name
 				end
 			end
 		end
@@ -694,7 +695,8 @@ function wad:filterDuplicates()
 			for f2 = 1, #self.base.flats do
 				if(self.flats[f].md5 == self.base.flats[f2].md5) then
 					count = count + 1
-					self.flats[f].isdoomdup = self.flats[f2].name
+					self.flats[f].isdoomdup = true
+					self.flats[f].doomdup = self.flats[f2].name
 				end
 			end
 		end
@@ -920,8 +922,8 @@ function wad:processMaps()
 						end
 					else
 						for s = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[s].floor_texture == self.flats[f].name) then self.maps[m].sectors[s].floor_texture = self.flats[f].isdoomdup end
-							if(self.maps[m].sectors[s].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[s].ceiling_texture = self.flats[f].isdoomdup end
+							if(self.maps[m].sectors[s].floor_texture == self.flats[f].name) then self.maps[m].sectors[s].floor_texture = self.flats[f].doomdup end
+							if(self.maps[m].sectors[s].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[s].ceiling_texture = self.flats[f].doomdup end
 						end
 					end
 				end
