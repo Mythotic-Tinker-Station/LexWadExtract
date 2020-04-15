@@ -684,7 +684,7 @@ function wad:filterDuplicates()
 			for c2 = 1, #self.base.composites do
 				if(self.composites[c].md5 == self.base.composites[c2].md5) then
 					count = count + 1
-					self.composites[c].isdoomdup = true
+					self.composites[c].isdoomdup = self.composites[c2].name
 				end
 			end
 		end
@@ -694,7 +694,7 @@ function wad:filterDuplicates()
 			for f2 = 1, #self.base.flats do
 				if(self.flats[f].md5 == self.base.flats[f2].md5) then
 					count = count + 1
-					self.flats[f].isdoomdup = true
+					self.flats[f].isdoomdup = self.flats[f2].name
 				end
 			end
 		end
@@ -902,7 +902,12 @@ function wad:processMaps()
 							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].newname end
 							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname end
 							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname end
-
+						end
+					else
+						for s = 1, #self.maps[m].sidedefs do
+							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].isdoomdup end
+							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].isdoomdup end
+							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].isdoomdup end
 						end
 					end
 				end
@@ -912,6 +917,11 @@ function wad:processMaps()
 						for s = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[s].floor_texture == self.flats[f].name) then self.maps[m].sectors[s].floor_texture = self.flats[f].newname end
 							if(self.maps[m].sectors[s].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[s].ceiling_texture = self.flats[f].newname end
+						end
+					else
+						for s = 1, #self.maps[m].sectors do
+							if(self.maps[m].sectors[s].floor_texture == self.flats[f].name) then self.maps[m].sectors[s].floor_texture = self.flats[f].isdoomdup end
+							if(self.maps[m].sectors[s].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[s].ceiling_texture = self.flats[f].isdoomdup end
 						end
 					end
 				end
