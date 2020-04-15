@@ -907,9 +907,9 @@ function wad:processMaps()
 						end
 					else
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].isdoomdup end
-							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].isdoomdup end
-							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].isdoomdup end
+							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].doomdup end
+							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].doomdup end
+							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].doomdup end
 						end
 					end
 				end
