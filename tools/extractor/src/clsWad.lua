@@ -685,7 +685,7 @@ function wad:filterDuplicates()
 				if(self.composites[c].md5 == self.base.composites[c2].md5) then
 					count = count + 1
 					self.composites[c].isdoomdup = true
-					self.composites[c].doomdup = self.composites[c2].name
+					self.composites[c].doomdup = self.base.composites[c2].name
 				end
 			end
 		end
@@ -696,7 +696,7 @@ function wad:filterDuplicates()
 				if(self.flats[f].md5 == self.base.flats[f2].md5) then
 					count = count + 1
 					self.flats[f].isdoomdup = true
-					self.flats[f].doomdup = self.flats[f2].name
+					self.flats[f].doomdup = self.base.flats[f2].name
 				end
 			end
 		end
