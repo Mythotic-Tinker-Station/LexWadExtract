@@ -159,8 +159,8 @@ local namespaces =
 
 	graphics =
 	{
-		ids = {"GF"},
-		types = {"gfx_"},
+		ids = {"GG"},
+		types = {""},
 		pos = {-1,-1},
 		found = false,
 		count = 0,
@@ -246,7 +246,7 @@ function execute(arch)
 	gatherNamespaceLumps()
 	gatherMaps()
 	gatherSpecialLumps()
-	--printTable(namespaces)
+
 	-- build wad
 	buildWad()
 
@@ -490,23 +490,14 @@ function gatherSpecialLumps()
 		splashbarHelper(i, 0, #archive.entries, "Moving unmarked lumps to new namespaces...")
 
 		-- check if we are not inside any namespaces
-		if(countNamespaceLevel(i) == 0) then
+		if(countNamespaceLevel(i) <= 0) then
 
-			-- for each namespace
-			for k, v in pairs(namespaces) do
-
-				-- for each type
-				for _, v2 in ipairs(v.types) do
-
-					-- if entry type matches namespace type
-					-- or if the namespace type starts with * and the entry name
-					-- matches the suffix after
-					if(archive.entries[i].type.id:sub(1, 4) == v2 or (v2:sub(1, 1) == "*" and archive.entries[i].name == v2:sub(2))) then
-						v.found = true
-						v.count = v.count + 1
-						v.lumps[#v.lumps+1] = archive.entries[i]
-					end
-					countcall()
+			-- for each type
+			for k, v in ipairs(namespaces.specials.types) do
+				if(archive.entries[i].name == v:sub(2)) then
+					namespaces.specials.count = namespaces.specials.count + 1
+					namespaces.specials.lumps[namespaces.specials.count] = archive.entries[i]
+					break
 				end
 				countcall()
 			end
@@ -701,5 +692,5 @@ end
 
 function countcall()
 	callcount=callcount+1
-	if(callcount > 100000) then error("Runaway detected.") end
+	if(callcount > 300000) then error("Runaway detected.") end
 end
