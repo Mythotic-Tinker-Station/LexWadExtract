@@ -88,6 +88,7 @@ local namespaces =
 			"*DEMO2",
 			"*DEMO3",
 			"*DMXGUS",
+			"*_DEUTEX_",
 			"*ENDOOM",
 			"*FONTDEFS",
 			"*FSGLOBAL",
@@ -123,7 +124,8 @@ local namespaces =
 			"*X11R6RGB",
 			"*XHAIRS",
 			"*XLAT",
-			"*ZMAPINFO"
+			"*ZMAPINFO",
+
 		},
 		pos = {-1,-1},
 		found = false,
@@ -284,21 +286,25 @@ function findNamespaces()
 						-- if the id matches
 						if(v2 == id) then
 
-							-- if its a start marker
-							if(what == "START") then
-								namespaces[k].pos[1] = i
-							end
-
-							-- if its an end marker
-							if(what == "END") then
-								namespaces[k].pos[2] = i
-
-								-- if start marker was found
-								if(namespaces[k].pos[1] > -1) then
-									namespaces[k].count = (namespaces[k].pos[2]-namespaces[k].pos[1])-1
-									namespaces[k].found = true
-									App.logMessage(string.format("Found namespace '%s' at {%d, %d} with %d lumps", k, namespaces[k].pos[1], namespaces[k].pos[2], namespaces[k].count))
+							if(not namespaces[k].found) then
+								-- if its a start marker
+								if(what == "START") then
+									namespaces[k].pos[1] = i
 								end
+
+								-- if its an end marker
+								if(what == "END") then
+									namespaces[k].pos[2] = i
+
+									-- if start marker was found
+									if(namespaces[k].pos[1] > -1) then
+										namespaces[k].count = (namespaces[k].pos[2]-namespaces[k].pos[1])-1
+										namespaces[k].found = true
+										App.logMessage(string.format("Found namespace '%s' at {%d, %d} with %d lumps", k, namespaces[k].pos[1], namespaces[k].pos[2], namespaces[k].count))
+									end
+								end
+							else
+								error("Found multiple " .. k .. " namespaces.")
 							end
 						end
 						countcall()
