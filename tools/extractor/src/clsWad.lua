@@ -92,6 +92,11 @@ local wad = class("wad",
 		{"texture",	"WFALL1",		"WFALL4"},
 	},
 
+	ignorelist =
+	{
+		"F_SKY1",
+	},
+
 	-- namespaces
 	namespaces =
 	{
@@ -338,14 +343,24 @@ function wad:buildNamespaces()
 end
 
 function wad:organizeNamespace(name)
-	-- are there any textures?
+	-- are there any lumps?
 	if(#self.namespaces[name].lumps > 0) then
 
-		-- for each lump in the textures namespace
+		-- for each lump in the namespace
 		for l = 1, #self.namespaces[name].lumps do
-			local v = self.namespaces[name].lumps[l]
-			local index = #self[self.namespaces[name].name]+1
-			self[self.namespaces[name].name][index] = v
+
+			local skip = false
+			for ignore = 1, #self.ignorelist do
+				if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
+					skip = true
+				end
+			end
+
+			if(not skip) then
+				local v = self.namespaces[name].lumps[l]
+				local index = #self[self.namespaces[name].name]+1
+				self[self.namespaces[name].name][index] = v
+			end
 		end
 		self:printf(1, "\tFound '%d' %s.", #self[self.namespaces[name].name], self.namespaces[name].name)
 	else
@@ -608,8 +623,6 @@ function wad:processTexturesX(num)
 			self.composites[c].canvas = love.graphics.newCanvas(self.composites[c].width, self.composites[c].height)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
-
-			print(self.composites[c].name)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
@@ -995,10 +1008,8 @@ end
 
 function wad:extractMaps()
 	if(self.base ~= self) then
-		print(#self.maps)
 		for m = 1, #self.maps do
 			-- lumps
-			print(m)
 			local order = {}
 			order[#order+1] = self.maps[m].raw.things
 			order[#order+1] = self.maps[m].raw.linedefs

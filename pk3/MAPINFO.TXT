@@ -1,4 +1,0 @@
-
-include "MAPINFO/EPC2.TXT"
-include "MAPINFO/EPC2.TXT"
-include "MAPINFO/AV__.TXT"
