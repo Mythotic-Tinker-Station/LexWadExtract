@@ -349,13 +349,14 @@ function wad:organizeNamespace(name)
 		-- for each lump in the namespace
 		for l = 1, #self.namespaces[name].lumps do
 
-			local skip = false
-			for ignore = 1, #self.ignorelist do
-				if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
-					skip = true
+			if(self.base ~= self) then
+				local skip = false
+				for ignore = 1, #self.ignorelist do
+					if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
+						skip = true
+					end
 				end
 			end
-
 			if(not skip) then
 				local v = self.namespaces[name].lumps[l]
 				local index = #self[self.namespaces[name].name]+1
