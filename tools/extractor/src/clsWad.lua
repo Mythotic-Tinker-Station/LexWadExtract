@@ -1016,7 +1016,12 @@ function wad:extractMaps()
 			order[#order+1] = self.maps[m].raw.linedefs
 			order[#order+1] = self.maps[m].raw.sidedefs
 			order[#order+1] = self.maps[m].raw.vertexes
+			order[#order+1] = self.maps[m].raw.segs
+			order[#order+1] = self.maps[m].raw.ssectors
+			order[#order+1] = self.maps[m].raw.nodes
 			order[#order+1] = self.maps[m].raw.sectors
+			order[#order+1] = self.maps[m].raw.reject
+			order[#order+1] = self.maps[m].raw.blockmap
 			if(self.maps[m].raw.behavior) then order[#order+1] = self.maps[m].raw.behavior end
 			if(self.maps[m].raw.scripts) then order[#order+1] = self.maps[m].raw.scripts end
 
@@ -1036,9 +1041,14 @@ function wad:extractMaps()
 			dir = dir .. love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "LINEDEFS")
 			dir = dir .. love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "SIDEDEFS")
 			dir = dir .. love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "VERTEXES")
-			dir = dir .. love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "SECTORS")
-			if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "BEHAVIOR") end
-			if(self.maps[m].raw.script) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "SCRIPT") end
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "SEGS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "SSECTORS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "NODES")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[8]+12, #order[8], "SECTORS")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[9]+12, #order[9], "REJECT")
+			dir = dir .. love.data.pack("string", "<i4i4c8", pos[10]+12, #order[10], "BLOCKMAP")
+			if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
+			if(self.maps[m].raw.script) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
 
 			local wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
 			if err then error("[ERROR] " .. err) end
