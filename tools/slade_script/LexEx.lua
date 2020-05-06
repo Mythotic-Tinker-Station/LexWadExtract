@@ -415,7 +415,7 @@ function gatherMaps()
 					namespaces.maps.lumps[mapindex].format = "DM"
 
 					if(found_behavior) then
-						namespace.maps.lumps[mapindex].format = "HM"
+						namespaces.maps.lumps[mapindex].format = "HM"
 					end
 
 					App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_things-1))
