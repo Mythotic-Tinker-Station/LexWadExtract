@@ -197,6 +197,12 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Processing Palette...")
 	self:processPalette()
 
+	self:printf(0, "Processing Boom Animations...")
+	self:processAnimated()
+
+	self:printf(0, "Processing Boom Switches...")
+	self:processSwitches()
+
 	self:printf(0, "Building Patches...")
 	self:buildPatches()
 
@@ -655,6 +661,103 @@ function wad:processTexturesX(num)
 	collectgarbage()
 end
 
+function wad:processAnimated()
+
+	-- find ANIMATED
+	local tdata = ""
+	local lumpname = "ANIMATED"
+	for l = 1, #self.namespaces["SP"].lumps do
+		if(self.namespaces["SP"].lumps[l].name == lumpname) then
+			tdata = self.namespaces["SP"].lumps[l].data
+			break;
+		end
+	end
+
+	-- if ANIMATED found
+	if(tdata ~= "") then
+
+		local t = love.data.unpack("<B", tdata)
+		local count = 0
+		while(t ~= 255) do
+
+			local last = self:removePadding(love.data.unpack("<c8", tdata, 2+count)):upper()
+			local first = self:removePadding(love.data.unpack("<c8", tdata, 11+count)):upper()
+			local speed = love.data.unpack("<L", tdata, 20+count)
+
+			local isdup = false
+			for d = 1, #self.animlist do
+				if(self.animlist[d][2] == first) then
+					if(self.animlist[d][3] == last) then
+						isdup = true
+					end
+				end
+			end
+
+			if(isdup == false) then
+				local index = #self.animlist+1
+				self.animlist[index] = {}
+				if(t == 0) then self.animlist[index][1] = "flat" end
+				if(t == 1) then self.animlist[index][1] = "texture" end
+
+				self.animlist[index][2] = first
+				self.animlist[index][3] = last
+
+			end
+
+			count = count + 23
+			t = love.data.unpack("<B", tdata, 1+count)
+		end
+	end
+end
+
+function wad:processSwitches()
+
+	-- find SWITCHES
+	local tdata = ""
+	local lumpname = "SWITCHES"
+	for l = 1, #self.namespaces["SP"].lumps do
+		if(self.namespaces["SP"].lumps[l].name == lumpname) then
+			tdata = self.namespaces["SP"].lumps[l].data
+			break;
+		end
+	end
+
+	-- if SWITCHES found
+	if(tdata ~= "") then
+
+		local t = 1
+		local count = 0
+		while(t ~= 0) do
+
+			local off = self:removePadding(love.data.unpack("<c8", tdata, 1+count)):upper()
+			local on = self:removePadding(love.data.unpack("<c8", tdata, 10+count)):upper()
+			t = love.data.unpack("<H", tdata, 19+count)
+
+
+			local isdup = false
+			for d = 1, #self.switchlist do
+				if(self.switchlist[d][1] == off) then
+					if(self.switchlist[d][2] == on) then
+						isdup = true
+					end
+				end
+			end
+			print(off, on, t, isdup)
+
+			if(isdup == false) then
+				local index = #self.switchlist+1
+				self.switchlist[index] = {}
+				self.switchlist[index][1] = off
+				self.switchlist[index][2] = on
+
+			end
+
+			count = count + 20
+		end
+	end
+end
+
+
 function wad:moveZDoomTextures()
 	if(self.base ~= self) then
 		for t = 1, #self.textures do
@@ -759,6 +862,7 @@ function wad:buildAnimdefs()
 				if(not self.composites[c].isdoomdup) then
 					if(self.composites[c].name == self.animlist[al][2]) then
 						if(self.animlist[al][1] == "texture") then
+
 							local a = #self.animdefs.anims+1
 							self.animdefs.anims[a] = {}
 							self.animdefs.anims[a].text1 = self.composites[c].newname
