@@ -229,7 +229,10 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Rename Composites...")
 	self:renameTextures()
 
-	self:printf(0, "Building Animdefs...")
+	self:printf(0, "Processing Animdefs...")
+	self:processAnimdefs()
+
+	self:printf(0, "Adding Doom/Boom animations to Animdefs...")
 	self:buildAnimdefs()
 
 	self:printf(0, "Processing Maps...")
@@ -852,6 +855,32 @@ function wad:renameFlats()
 	end
 end
 
+function wad:processAnimdefs()
+
+	-- find ANIMDEFS
+	local data = ""
+	local lumpname = "ANIMDEFS"
+	for l = 1, #self.namespaces["SP"].lumps do
+		if(self.namespaces["SP"].lumps[l].name == lumpname) then
+			data = self.namespaces["SP"].lumps[l].data
+			break;
+		end
+	end
+
+	-- if ANIMDEFS found
+	if(data ~= "") then
+		for c = 1, #self.composites do
+			data = data:gsub(self.composites[c].name, self.composites[c].newname)
+		end
+		for f = 1, #self.flats do
+			data = data:gsub(self.flats[f].name, self.flats[f].newname)
+		end
+	end
+
+	self.animdefs.original = data
+end
+
+
 function wad:buildAnimdefs()
 	if(self.base ~= self) then
 
@@ -1184,6 +1213,8 @@ function wad:extractAnimdefs()
 		file:write(anim)
 		file:write("\n")
 		file:write(switch)
+		file:write("\n\n")
+		file:write(self.animdefs.original)
 		file:close()
 
 		self:printf(1, "\tDone.\n")
