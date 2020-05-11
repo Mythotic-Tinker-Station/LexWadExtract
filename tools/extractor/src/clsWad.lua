@@ -1099,8 +1099,8 @@ function wad:processMaps()
 
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[s].floor_texture == self.composites[c].name) then self.maps[m].sectors[ss].floor_texture = self.composites[c].newname end
-							if(self.maps[m].sectors[s].ceiling_texture == self.composites[c].name) then self.maps[m].sectors[ss].ceiling_texture = self.composites[c].newname end
+							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then self.maps[m].sectors[ss].floor_texture = self.composites[c].newname end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then self.maps[m].sectors[ss].ceiling_texture = self.composites[c].newname end
 						end
 					else
 						-- walls
