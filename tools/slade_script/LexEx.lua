@@ -147,6 +147,42 @@ local namespaces =
 		rename = 0
 	},
 
+	sounds_wave =
+	{
+		ids = {"WS"},
+		types = {""},
+		pos = {-1,-1},
+		found = false,
+		count = 0,
+		lumps = {},
+		order = 3,
+		rename = 0
+	},
+
+	sounds_ogg =
+	{
+		ids = {"OS"},
+		types = {""},
+		pos = {-1,-1},
+		found = false,
+		count = 0,
+		lumps = {},
+		order = 4,
+		rename = 0
+	},
+
+	sounds_flac =
+	{
+		ids = {"CS"},
+		types = {""},
+		pos = {-1,-1},
+		found = false,
+		count = 0,
+		lumps = {},
+		order = 5,
+		rename = 0
+	},
+
 	music =
 	{
 		ids = {"MS"},
@@ -155,7 +191,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 3,
+		order = 6,
 		rename = 0
 	},
 
@@ -167,7 +203,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 4,
+		order = 7,
 		rename = 2 -- each lump is renamed specificly
 	},
 
@@ -179,7 +215,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 5,
+		order = 8,
 		rename = 0
 	},
 
@@ -191,7 +227,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 6,
+		order = 9,
 		rename = 0
 	},
 
@@ -203,7 +239,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 7,
+		order = 10,
 		rename = 0
 	},
 
@@ -215,7 +251,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 8,
+		order = 11,
 		rename = 0
 	},
 
@@ -227,7 +263,7 @@ local namespaces =
 		found = false,
 		count = 0,
 		lumps = {},
-		order = 9, -- ignored
+		order = 12, -- ignored
 		rename = 0 -- ignored
 	},
 }
@@ -247,7 +283,10 @@ function execute(arch)
 	verifyNamespaces()
 	gatherNamespaceLumps()
 	gatherMaps()
+	gatherSounds()
+	gatherMusic()
 	gatherSpecialLumps()
+
 
 	-- build wad
 	buildWad()
@@ -347,6 +386,58 @@ function gatherNamespaceLumps()
 		countcall()
 	end
 	collectgarbage()
+end
+
+-- gather all the sounds
+function gatherSounds()
+
+	local index = 1
+	local lumpcount = #archive.entries
+
+	-- for each entry
+	while(index <= lumpcount) do
+		splashbarHelper(index, 0, lumpcount, "Gathering sounds...(Found: %d)", namespaces.sounds.count)
+
+		if(archive.entries[index].type.id == "snd_doom") then
+			namespaces.sounds.lumps[#namespaces.sounds.lumps+1] = archive.entries[index]
+			namespaces.sounds.count = namespaces.sounds.count + 1
+		end
+
+		if(archive.entries[index].type.id == "snd_wav") then
+			namespaces.sounds_wave.lumps[#namespaces.sounds_wave.lumps+1] = archive.entries[index]
+			namespaces.sounds_wave.count = namespaces.sounds_wave.count + 1
+		end
+
+		if(archive.entries[index].type.id == "snd_ogg") then
+			namespaces.sounds_ogg.lumps[#namespaces.sounds_ogg.lumps+1] = archive.entries[index]
+			namespaces.sounds_ogg.count = namespaces.sounds_ogg.count + 1
+		end
+
+		if(archive.entries[index].type.id == "snd_flac") then
+			namespaces.sounds_flac.lumps[#namespaces.sounds_flac.lumps+1] = archive.entries[index]
+			namespaces.sounds_flac.count = namespaces.sounds_flac.count + 1
+		end
+
+		index = index + 1
+	end
+end
+
+-- gather all the music
+function gatherMusic()
+
+	local index = 1
+	local lumpcount = #archive.entries
+
+	-- for each entry
+	while(index <= lumpcount) do
+		splashbarHelper(index, 0, lumpcount, "Gathering music...(Found: %d)", namespaces.music.count)
+
+		if(archive.entries[index].type.id == "midi_mus") then
+			namespaces.music.lumps[#namespaces.music.lumps+1] = archive.entries[index]
+		end
+		namespaces.music.count = #namespaces.music.lumps
+		index = index + 1
+	end
 end
 
 -- gather all the maps
@@ -530,7 +621,7 @@ function buildWad()
 
 		local k = order[i][1]
 		local v = order[i][2]
-
+		App.logMessage(k .. ", " .. v.count)
 		-- ignore maps, maps require special treatment
 		if(k ~= "maps") then
 

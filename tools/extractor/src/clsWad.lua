@@ -4,6 +4,7 @@ local wad = class("wad",
 	-- class variables
 	verbose = 0,
 	texturecount = 0,
+	soundcount = 0,
 	acronym = "DOOM",
 	base = false,
 
@@ -17,7 +18,10 @@ local wad = class("wad",
 	flats = {},
 	patches = {},
 	graphics = {},
-	sounds = {},
+	doomsounds = {},
+	oggsounds = {},
+	wavesounds = {},
+	flacsounds = {},
 	songs = {},
 	maps = {},
 	dups = {},
@@ -107,7 +111,22 @@ local wad = class("wad",
 		},
 		["DS"] =
 		{
-			name = "sounds",
+			name = "doomsounds",
+			lumps = {},
+		},
+		["WS"] =
+		{
+			name = "wavesounds",
+			lumps = {},
+		},
+		["OS"] =
+		{
+			name = "oggsounds",
+			lumps = {},
+		},
+		["CS"] =
+		{
+			name = "flacsounds",
 			lumps = {},
 		},
 		["MS"] =
@@ -185,8 +204,17 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Organizing Graphics...")
 	self:organizeNamespace("GF")
 
-	self:printf(0, "Organizing Sounds...")
+	self:printf(0, "Organizing DMX Sounds...")
 	self:organizeNamespace("DS")
+
+	self:printf(0, "Organizing WAV Sounds...")
+	self:organizeNamespace("WS")
+
+	self:printf(0, "Organizing OGG Sounds...")
+	self:organizeNamespace("OS")
+
+	self:printf(0, "Organizing FLAC Sounds...")
+	self:organizeNamespace("CS")
 
 	self:printf(0, "Organizing Music...")
 	self:organizeNamespace("MS")
@@ -232,11 +260,14 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Rename Patches...")
 	self:renamePatches()
 
-	self:printf(0, "Processing ANIMDEFS...")
-	self.animdefs.original = self:processTextLump("ANIMDEFS")
+	self:printf(0, "Rename Sounds...")
+	self:renameSounds()
 
 	self:printf(0, "Processing TEXTURES...")
 	self.textures.original = self:processTextLump("TEXTURES")
+
+	self:printf(0, "Processing ANIMDEFS...")
+	self.animdefs.original = self:processTextLump("ANIMDEFS")
 
 	self:printf(0, "Processing ANIMDEFS for Doom/Boom...")
 	self:buildAnimdefs()
@@ -256,11 +287,17 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Extracting Maps...")
 	self:extractMaps()
 
+	self:printf(0, "Extracting Sounds...")
+	self:extractSounds()
+
 	self:printf(0, "Extracting ANIMDEFS...")
 	self:extractAnimdefs()
 
 	self:printf(0, "Extracting TEXTURES...")
 	self:extractTexturesLump()
+
+	self:printf(0, "Extracting SNDINFO...")
+	self:extractSNDINFO()
 
 	--self:printf(0, "Extracting Mapinfo...")
 	--self:extractMapinfo()
@@ -892,6 +929,40 @@ function wad:renameFlats()
 	end
 end
 
+
+function wad:renameSounds()
+	if(self.base ~= self) then
+
+		--DMX
+		for s = 1, #self.doomsounds do
+			self.soundcount = self.soundcount + 1
+			self.doomsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+		end
+
+		--WAV
+		for s = 1, #self.wavesounds do
+			self.soundcount = self.soundcount + 1
+			self.wavesounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+		end
+
+		--OGG
+		for s = 1, #self.oggsounds do
+			self.soundcount = self.soundcount + 1
+			self.oggsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+		end
+
+		--FLAC
+		for s = 1, #self.flacsounds do
+			self.soundcount = self.soundcount + 1
+			self.flacsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+		end
+
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	end
+	collectgarbage()
+end
+
 function wad:processTextLump(name)
 
 	-- find ANIMDEFS
@@ -1420,6 +1491,80 @@ function wad:extractAnimdefs()
 		file:write(self.animdefs.original)
 		file:close()
 
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad flats.\n")
+	end
+end
+
+function wad:extractSNDINFO()
+	if(self.base ~= self) then
+
+		local txt = ""
+		for s = 1, #self.doomsounds do
+			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.doomsounds[s].name, self.doomsounds[s].newname)
+		end
+
+		for s = 1, #self.wavesounds do
+			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.wavesounds[s].name, self.wavesounds[s].newname)
+		end
+
+		for s = 1, #self.oggsounds do
+			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.oggsounds[s].name, self.oggsounds[s].newname)
+		end
+
+		for s = 1, #self.flacsounds do
+			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.flacsounds[s].name, self.flacsounds[s].newname)
+		end
+
+		local file, err = io.open(string.format("%s/SNDINFO.%s.TXT", self.pk3path, self.acronym), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(txt)
+		--file:write(self.animdefs.original)
+		file:close()
+
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad flats.\n")
+	end
+end
+
+function wad:extractSounds()
+	if(self.base ~= self) then
+
+		--DMX
+		for s = 1, #self.doomsounds do
+			local snd, err = io.open(string.format("%s/SOUNDS/%s.DMX", self.pk3path, self.doomsounds[s].newname), "w+b")
+			if err then error("[ERROR] " .. err) end
+			snd:write(self.doomsounds[s].data)
+			snd:close()
+		end
+
+		--WAV
+		for s = 1, #self.wavesounds do
+			local snd, err = io.open(string.format("%s/SOUNDS/%s.WAV", self.pk3path, self.wavesounds[s].newname), "w+b")
+			if err then error("[ERROR] " .. err) end
+			snd:write(self.wavesounds[s].data)
+			snd:close()
+		end
+
+		--OGG
+		for s = 1, #self.oggsounds do
+			local snd, err = io.open(string.format("%s/SOUNDS/%s.OGG", self.pk3path, self.oggsounds[s].newname), "w+b")
+			if err then error("[ERROR] " .. err) end
+			snd:write(self.oggsounds[s].data)
+			snd:close()
+		end
+
+		--FLAC
+		for s = 1, #self.flacsounds do
+			local snd, err = io.open(string.format("%s/SOUNDS/%s.FLAC", self.pk3path, self.flacsounds[s].newname), "w+b")
+			if err then error("[ERROR] " .. err) end
+			snd:write(self.flacsounds[s].data)
+			snd:close()
+		end
+
+		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot extracting base wad flats.\n")
