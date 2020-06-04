@@ -26,10 +26,7 @@ function love.load(arg)
     -- change this line
     mapset = wad(apppath .. "/mayhem17_lex.wad", "MAYH", doom2, pk3path)
 
-
 end
-
-
 
 
 function love.update(dt)

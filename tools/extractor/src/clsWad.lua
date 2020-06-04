@@ -275,6 +275,9 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Processing Maps...")
 	self:processMaps()
 
+	self:printf(0, "Modifying Maps...")
+	self:processMaps()
+
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
 
@@ -1126,11 +1129,40 @@ function wad:processMaps()
 			self:printf(2, "\tProcessing Map: %d", m)
 
 			-- doom/hexen
-			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
+			if(self.maps[m].format == "DM") then
+
+				-- things
+				self.maps[m].things = {}
+				local count = 0
+				for s = 1, #self.maps[m].raw.things, 10 do
+					count = count + 1
+					self.maps[m].things[count] = {}
+					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s)
+					self.maps[m].things[count].y = love.data.unpack("<h", self.maps[m].raw.things, s+2)
+					self.maps[m].things[count].angle = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+4))
+					self.maps[m].things[count].typ = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+6))
+					self.maps[m].things[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+8))
+				end
+
+				-- linedefs
+				self.maps[m].linedefs = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.linedefs, 14 do
+					count = count + 1
+					self.maps[m].linedefs[count] = {}
+					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
+					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
+					self.maps[m].linedefs[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+4))
+					self.maps[m].linedefs[count].line_type = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+6))
+					self.maps[m].linedefs[count].sector_tag = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+8))
+					self.maps[m].linedefs[count].sidedef_right = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+10))
+					self.maps[m].linedefs[count].sidedef_left = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+12))
+
+				end
 
 				-- sidedefs
 				self.maps[m].sidedefs = {}
-				local count = 0
+				count = 0
 				for s = 1, #self.maps[m].raw.sidedefs, 30 do
 					count = count + 1
 					self.maps[m].sidedefs[count] = {}
@@ -1140,6 +1172,16 @@ function wad:processMaps()
 					self.maps[m].sidedefs[count].lower_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12))
 					self.maps[m].sidedefs[count].middle_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20))
 					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
+				end
+
+				-- vertexes
+				self.maps[m].vertexes = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.vertexes, 4 do
+					count = count + 1
+					self.maps[m].vertexes[count] = {}
+					self.maps[m].vertexes[count].x = love.data.unpack("<h", self.maps[m].raw.vertexes, s)
+					self.maps[m].vertexes[count].y = love.data.unpack("<h", self.maps[m].raw.vertexes, s+2)
 				end
 
 				-- sectors
@@ -1156,6 +1198,106 @@ function wad:processMaps()
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
 				end
+
+			--hexen
+			elseif(self.maps[m].format == "HM") then
+
+				-- things
+				self.maps[m].things = {}
+				local count = 0
+				for s = 1, #self.maps[m].raw.things, 20 do
+					count = count + 1
+					self.maps[m].things[count] = {}
+					self.maps[m].things[count].id = love.data.unpack("<H", self.maps[m].raw.things, s)
+					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s+2)
+					self.maps[m].things[count].y = self:removePadding(love.data.unpack("<h", self.maps[m].raw.things, s+4))
+					self.maps[m].things[count].z = self:removePadding(love.data.unpack("<h", self.maps[m].raw.things, s+6))
+					self.maps[m].things[count].angle = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+8))
+					self.maps[m].things[count].typ = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+10))
+					self.maps[m].things[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+12))
+					self.maps[m].things[count].special = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+14))
+					self.maps[m].things[count].a1 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+15))
+					self.maps[m].things[count].a2 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+16))
+					self.maps[m].things[count].a3 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+17))
+					self.maps[m].things[count].a4 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+18))
+					self.maps[m].things[count].a5 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+19))
+				end
+
+				-- linedefs
+				self.maps[m].linedefs = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.linedefs, 16 do
+					count = count + 1
+					self.maps[m].linedefs[count] = {}
+					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
+					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
+					self.maps[m].linedefs[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+4))
+					self.maps[m].linedefs[count].special = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+6))
+					self.maps[m].linedefs[count].a1 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+7))
+					self.maps[m].linedefs[count].a2 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+8))
+					self.maps[m].linedefs[count].a3 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+9))
+					self.maps[m].linedefs[count].a4 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+10))
+					self.maps[m].linedefs[count].a5 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+11))
+					self.maps[m].linedefs[count].right_sidedef = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+12))
+					self.maps[m].linedefs[count].left_sidedef = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+14))
+				end
+
+				-- sidedefs
+				self.maps[m].sidedefs = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.sidedefs, 30 do
+					count = count + 1
+					self.maps[m].sidedefs[count] = {}
+					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
+					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
+					self.maps[m].sidedefs[count].upper_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4))
+					self.maps[m].sidedefs[count].lower_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12))
+					self.maps[m].sidedefs[count].middle_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20))
+					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
+				end
+
+				-- vertexes
+				self.maps[m].vertexes = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.vertexes, 4 do
+					count = count + 1
+					self.maps[m].vertexes[count] = {}
+					self.maps[m].vertexes[count].x = love.data.unpack("<h", self.maps[m].raw.vertexes, s)
+					self.maps[m].vertexes[count].y = love.data.unpack("<h", self.maps[m].raw.vertexes, s+2)
+				end
+
+				-- sectors
+				self.maps[m].sectors = {}
+				count = 0
+				for s = 1, #self.maps[m].raw.sectors, 26 do
+					count = count + 1
+					self.maps[m].sectors[count] = {}
+					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
+					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
+					self.maps[m].sectors[count].floor_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4))
+					self.maps[m].sectors[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12))
+					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
+					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
+					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
+				end
+			end
+
+			collectgarbage()
+		end
+	else
+		self:printf(1, "\tNot processing base wad maps.")
+	end
+
+	self:printf(1, "\tDone.\n")
+end
+
+function wad:ModifyMaps()
+	if(self.base ~= self) then
+		for m = 1, #self.maps do
+			self:printf(2, "\tModifying Map: %d", m)
+
+			-- doom/hexen
+			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
 
 				-- find textures and rename
 				for c = 1, #self.composites do
@@ -1282,15 +1424,14 @@ function wad:processMaps()
 					self.maps[m].raw.textmap = self.maps[m].raw.textmap:gsub(self.patches[p].name, self.patches[p].newname)
 				end
 			end
-
-			collectgarbage()
 		end
 	else
-		self:printf(1, "\tNot processing base wad maps.")
+		self:printf(1, "\tNot modifying base wad maps.")
 	end
 
 	self:printf(1, "\tDone.\n")
 end
+
 
 function wad:extractTextures()
 	if(self.base ~= self) then
@@ -1371,8 +1512,15 @@ function wad:extractMaps()
 		for m = 1, #self.maps do
 
 			-- doom/hexen
-			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
+			if(self.maps[m].format == "DM") then
 
+
+
+
+
+
+
+--[[
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.things
@@ -1419,6 +1567,7 @@ function wad:extractMaps()
 				wad:write(lumpchunk)
 				wad:write(dir)
 				wad:close()
+]]
 
 			-- udmf
 			elseif(self.maps[m].format == "UM") then
