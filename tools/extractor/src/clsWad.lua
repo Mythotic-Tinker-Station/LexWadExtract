@@ -2,7 +2,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 1,
+	verbose = 2,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -276,7 +276,7 @@ function wad:init(path, acronym, base, pk3path)
 	self:processMaps()
 
 	self:printf(0, "Modifying Maps...")
-	self:processMaps()
+	self:ModifyMaps()
 
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
@@ -513,48 +513,65 @@ function wad:buildPatches()
 
 	for p = 1, #self.patches do
 
-		self:printf(2, "\t%s", self.patches[p].name)
-		self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
-		self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
-		self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
-		self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
-		self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
-		self.patches[p].columns = {}
+		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
+			self:printf(2, "\t%s", self.patches[p].name)
+			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
+			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
+			self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
+			self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
+			self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
+			self.patches[p].columns = {}
 
-		for c = 1, self.patches[p].width do
+			for c = 1, self.patches[p].width do
 
-			self.patches[p].columns[c] = love.data.unpack("<L", self.patches[p].data, 9+((c-1)*4))
+				self.patches[p].columns[c] = love.data.unpack("<L", self.patches[p].data, 9+((c-1)*4))
 
-			local topdelta = 0
-			local post = self.patches[p].columns[c]+1
+				local topdelta = 0
+				local post = self.patches[p].columns[c]+1
 
-			while(topdelta ~= 0xFF) do
+				while(topdelta ~= 0xFF) do
 
-				local topdelta_prev = topdelta
+					local topdelta_prev = topdelta
 
-				topdelta = love.data.unpack("<B", self.patches[p].data, post)
-				if(topdelta == 0xFF) then break end
+					topdelta = love.data.unpack("<B", self.patches[p].data, post)
+					if(topdelta == 0xFF) then break end
 
-				-- tall patches
-				if(topdelta <= topdelta_prev) then
-					topdelta = topdelta+topdelta_prev
+					-- tall patches
+					if(topdelta <= topdelta_prev) then
+						topdelta = topdelta+topdelta_prev
+					end
+
+					local length = love.data.unpack("<B", self.patches[p].data, post+1)
+					local data = self.patches[p].data:sub(post+3, post+3+length)
+
+					for pixel = 1, length do
+						local color = love.data.unpack("<B", data, pixel)+1
+						self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+					end
+
+					post = post+4+length
 				end
-
-				local length = love.data.unpack("<B", self.patches[p].data, post+1)
-				local data = self.patches[p].data:sub(post+3, post+3+length)
-
-				for pixel = 1, length do
-					local color = love.data.unpack("<B", data, pixel)+1
-					self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
-				end
-
-				post = post+4+length
 			end
-		end
 
-		self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
-		self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
-		self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
+			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
+			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
+			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
+		else
+
+			filedata = love.filesystem.newFileData(self.patches[p].data, "-")
+			self.patches[p].imagedata = love.image.newImageData(filedata)
+
+			self.patches[p].width = self.patches[p].imagedata:getWidth()
+			self.patches[p].height = self.patches[p].imagedata:getHeight()
+			self.patches[p].xoffset = 0
+			self.patches[p].yoffset = 0
+
+			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
+			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
+			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
+
+			self.patches[p].notdoompatch = true
+		end
 
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
@@ -565,20 +582,29 @@ end
 function wad:buildFlats()
 
 	for f = 1, #self.flats do
-		self.flats[f].image = love.image.newImageData(64, 64)
-		self.flats[f].rows = {}
+		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
+			self.flats[f].image = love.image.newImageData(64, 64)
+			self.flats[f].rows = {}
 
-		local pcount = 0
-		for y = 1, 64 do
-			for x = 1, 64 do
-				pcount = pcount + 1
-				local color = love.data.unpack("<B", self.flats[f].data, pcount)+1
-				self.flats[f].image:setPixel(x-1, y-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+			local pcount = 0
+			for y = 1, 64 do
+				for x = 1, 64 do
+					pcount = pcount + 1
+					local color = love.data.unpack("<B", self.flats[f].data, pcount)+1
+					self.flats[f].image:setPixel(x-1, y-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+				end
 			end
+
+			self.flats[f].png = self.flats[f].image:encode("png"):getString()
+			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+		else
+			self.flats[f].png = self.flats[f].data
+			self.flats[f].image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(self.flats[f].png)))
+			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+			self.flats[f].notdoomflat = true
 		end
 
-		self.flats[f].png = self.flats[f].image:encode("png"):getString()
-		self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+		self.flats[self.flats[f].name] = self.flats[f]
 	end
 
 	collectgarbage()
@@ -698,11 +724,23 @@ function wad:processTexturesX(num)
 					self.composites[c].patches[p].stepdir = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+6)
 					self.composites[c].patches[p].colormap = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+8)
 
+					-- patches
 					if(self.patches[self.composites[c].patches[p].patch] == nil) then
-						love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+						local notfound = true
+						if(self.base.patches[self.composites[c].patches[p].patch] ~= nil) then
+							love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.base.composites[c].patches[p].x, self.base.composites[c].patches[p].y)
+							notfound = false
+						end
+
+						-- flats
+						if(notfound) then
+							love.graphics.draw(self.flats[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+						end
 					else
 						love.graphics.draw(self.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
 					end
+
+
 				end
 			love.graphics.setCanvas()
 
@@ -1142,9 +1180,9 @@ function wad:processMaps()
 					self.maps[m].things[count] = {}
 					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s)
 					self.maps[m].things[count].y = love.data.unpack("<h", self.maps[m].raw.things, s+2)
-					self.maps[m].things[count].angle = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+4))
-					self.maps[m].things[count].typ = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+6))
-					self.maps[m].things[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+8))
+					self.maps[m].things[count].angle = love.data.unpack("<H", self.maps[m].raw.things, s+4)
+					self.maps[m].things[count].typ = love.data.unpack("<H", self.maps[m].raw.things, s+6)
+					self.maps[m].things[count].flags = love.data.unpack("<H", self.maps[m].raw.things, s+8)
 				end
 
 				-- linedefs
@@ -1155,11 +1193,11 @@ function wad:processMaps()
 					self.maps[m].linedefs[count] = {}
 					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
 					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
-					self.maps[m].linedefs[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+4))
-					self.maps[m].linedefs[count].line_type = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+6))
-					self.maps[m].linedefs[count].sector_tag = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+8))
-					self.maps[m].linedefs[count].sidedef_right = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+10))
-					self.maps[m].linedefs[count].sidedef_left = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+12))
+					self.maps[m].linedefs[count].flags = love.data.unpack("<H", self.maps[m].raw.linedefs, s+4)
+					self.maps[m].linedefs[count].line_type = love.data.unpack("<H", self.maps[m].raw.linedefs, s+6)
+					self.maps[m].linedefs[count].sector_tag = love.data.unpack("<H", self.maps[m].raw.linedefs, s+8)
+					self.maps[m].linedefs[count].sidedef_right =love.data.unpack("<H", self.maps[m].raw.linedefs, s+10)
+					self.maps[m].linedefs[count].sidedef_left = love.data.unpack("<H", self.maps[m].raw.linedefs, s+12)
 
 				end
 
@@ -1213,17 +1251,17 @@ function wad:processMaps()
 					self.maps[m].things[count] = {}
 					self.maps[m].things[count].id = love.data.unpack("<H", self.maps[m].raw.things, s)
 					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s+2)
-					self.maps[m].things[count].y = self:removePadding(love.data.unpack("<h", self.maps[m].raw.things, s+4))
-					self.maps[m].things[count].z = self:removePadding(love.data.unpack("<h", self.maps[m].raw.things, s+6))
-					self.maps[m].things[count].angle = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+8))
-					self.maps[m].things[count].typ = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+10))
-					self.maps[m].things[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.things, s+12))
-					self.maps[m].things[count].special = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+14))
-					self.maps[m].things[count].a1 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+15))
-					self.maps[m].things[count].a2 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+16))
-					self.maps[m].things[count].a3 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+17))
-					self.maps[m].things[count].a4 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+18))
-					self.maps[m].things[count].a5 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.things, s+19))
+					self.maps[m].things[count].y = love.data.unpack("<h", self.maps[m].raw.things, s+4)
+					self.maps[m].things[count].z = love.data.unpack("<h", self.maps[m].raw.things, s+6)
+					self.maps[m].things[count].angle = love.data.unpack("<H", self.maps[m].raw.things, s+8)
+					self.maps[m].things[count].typ = love.data.unpack("<H", self.maps[m].raw.things, s+10)
+					self.maps[m].things[count].flags = love.data.unpack("<H", self.maps[m].raw.things, s+12)
+					self.maps[m].things[count].special = love.data.unpack("<B", self.maps[m].raw.things, s+14)
+					self.maps[m].things[count].a1 = love.data.unpack("<B", self.maps[m].raw.things, s+15)
+					self.maps[m].things[count].a2 = love.data.unpack("<B", self.maps[m].raw.things, s+16)
+					self.maps[m].things[count].a3 = love.data.unpack("<B", self.maps[m].raw.things, s+17)
+					self.maps[m].things[count].a4 = love.data.unpack("<B", self.maps[m].raw.things, s+18)
+					self.maps[m].things[count].a5 = love.data.unpack("<B", self.maps[m].raw.things, s+19)
 				end
 
 				-- linedefs
@@ -1234,15 +1272,15 @@ function wad:processMaps()
 					self.maps[m].linedefs[count] = {}
 					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
 					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
-					self.maps[m].linedefs[count].flags = self:removePadding(love.data.unpack("<H", self.maps[m].raw.linedefs, s+4))
-					self.maps[m].linedefs[count].special = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+6))
-					self.maps[m].linedefs[count].a1 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+7))
-					self.maps[m].linedefs[count].a2 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+8))
-					self.maps[m].linedefs[count].a3 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+9))
-					self.maps[m].linedefs[count].a4 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+10))
-					self.maps[m].linedefs[count].a5 = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+11))
-					self.maps[m].linedefs[count].right_sidedef = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+12))
-					self.maps[m].linedefs[count].left_sidedef = self:removePadding(love.data.unpack("<B", self.maps[m].raw.linedefs, s+14))
+					self.maps[m].linedefs[count].flags = love.data.unpack("<H", self.maps[m].raw.linedefs, s+4)
+					self.maps[m].linedefs[count].special = love.data.unpack("<B", self.maps[m].raw.linedefs, s+6)
+					self.maps[m].linedefs[count].a1 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+7)
+					self.maps[m].linedefs[count].a2 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+8)
+					self.maps[m].linedefs[count].a3 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+9)
+					self.maps[m].linedefs[count].a4 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+10)
+					self.maps[m].linedefs[count].a5 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+11)
+					self.maps[m].linedefs[count].right_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+12)
+					self.maps[m].linedefs[count].left_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+14)
 				end
 
 				-- sidedefs
@@ -1481,24 +1519,12 @@ end
 
 function wad:extractPatches()
 	if(self.base ~= self) then
-		-- find TEXTURES
-		local data = ""
-		local lumpname = "TEXTURES"
-		for l = 1, #self.namespaces["SP"].lumps do
-			if(self.namespaces["SP"].lumps[l].name == lumpname) then
-				data = self.namespaces["SP"].lumps[l].data
-				break;
-			end
-		end
-
-		if(data ~= "") then
-			for p = 1, #self.patches do
-				if(not self.patches[p].isdoomdup) then
-					local png, err = io.open(string.format("%s/PATCHES/%s.PNG", self.pk3path, self.patches[p].newname), "w+b")
-					if err then error("[ERROR] " .. err) end
-					png:write(self.patches[p].png)
-					png:close()
-				end
+		for p = 1, #self.patches do
+			if(not self.patches[p].isdoomdup) then
+				local png, err = io.open(string.format("%s/PATCHES/%s.PNG", self.pk3path, self.patches[p].newname), "w+b")
+				if err then error("[ERROR] " .. err) end
+				png:write(self.patches[p].png)
+				png:close()
 			end
 		end
 
@@ -1517,13 +1543,6 @@ function wad:extractMaps()
 			-- doom/hexen
 			if(self.maps[m].format == "DM") then
 
-
-
-
-
-
-
---[[
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.things
@@ -1570,7 +1589,6 @@ function wad:extractMaps()
 				wad:write(lumpchunk)
 				wad:write(dir)
 				wad:close()
-]]
 
 			-- udmf
 			elseif(self.maps[m].format == "UM") then
@@ -1616,6 +1634,10 @@ function wad:extractMaps()
 				wad:close()
 			end
 		end
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad maps.\n")
 	end
 end
 
@@ -1860,6 +1882,22 @@ function wad:ByteCRC(sum, data)
     return sum
 end
 
+
+function wad:checkFormat(data, magic, offset, bigendian)
+	offset = offset or 1
+	bigendian = bigendian or false
+
+	local m
+	if(not bigendian) then
+		m = love.data.unpack(">c" .. #magic, data, offset)
+	else
+		m = love.data.unpack("<c" .. #magic, data, offset)
+	end
+
+	if(m == magic) then return true end
+
+	return false
+end
 
 return wad
 

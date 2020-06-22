@@ -24,7 +24,7 @@ function love.load(arg)
     doom2 = wad(apppath .. "/doom2_lex.wad")
 
     -- change this line
-    mapset = wad(apppath .. "/hc20_lex.wad", "HC20", doom2, pk3path)
+    mapset = wad(apppath .. "/chnworm_lex.wad", "WORM", doom2, pk3path)
 
 end
 
