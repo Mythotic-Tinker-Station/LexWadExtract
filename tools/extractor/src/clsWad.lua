@@ -2,7 +2,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 0,
+	verbose = 1,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -513,6 +513,7 @@ function wad:buildPatches()
 
 	for p = 1, #self.patches do
 
+		self:printf(2, "\t%s", self.patches[p].name)
 		self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 		self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
 		self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
@@ -684,6 +685,8 @@ function wad:processTexturesX(num)
 			self.composites[c].canvas = love.graphics.newCanvas(self.composites[c].width, self.composites[c].height)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
+
+			self:printf(2, "\t%s", self.composites[c].name)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
