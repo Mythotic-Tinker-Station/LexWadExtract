@@ -7,6 +7,7 @@ local wad = class("wad",
 	soundcount = 0,
 	acronym = "DOOM",
 	base = false,
+	extractpatches = false;
 
 	lumps = {},
 	header = {},
@@ -173,11 +174,12 @@ local wad = class("wad",
 ---------------------------------------------------------
 -- Main Functions
 ---------------------------------------------------------
-function wad:init(path, acronym, base, pk3path)
+function wad:init(path, acronym, patches, base, pk3path)
 
 	self.base = base or self
 	self.acronym = acronym
 	self.pk3path = pk3path
+	self.extractpatches = patches or false
 
 	self:printf(0, "------------------------------------------------------------------------------------------\n")
 	self:printf(0, "Loading Wad '%s'...", path)
@@ -284,9 +286,12 @@ function wad:init(path, acronym, base, pk3path)
 	self:printf(0, "Extracting Composites...")
 	self:extractTextures()
 
-	self:printf(0, "Extracting Patches...")
-	self:extractPatches()
-
+	if(self.extractpatches) then
+		self:printf(0, "Extracting Patches...")
+		self:extractPatches()
+	else
+		self:printf(0, "Skipping Patches...")
+	end
 	self:printf(0, "Extracting Maps...")
 	self:extractMaps()
 
