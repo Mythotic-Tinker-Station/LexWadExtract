@@ -14,11 +14,11 @@ function love.load(arg)
     local apppath = love.filesystem.getSourceBaseDirectory()
     local pk3path = apppath:sub(1, -16) .. "pk3"
 
-    -- gather base wad
+    -- Gather base wad
     doom2 = wad(apppath .. "/doom2_lex.wad")
 
     -- Filepath and acronym should be self explanitory
-    -- Change patches to true to extract patches
+    -- Change patches to true to extract patches(only necessary for zdoom mapsets that use patches as map textures directly)
     -- You shouldnt need to ever change base or pk3path
 
 
