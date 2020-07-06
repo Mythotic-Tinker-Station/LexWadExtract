@@ -2,7 +2,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 2,
+	verbose = 0,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -733,11 +733,7 @@ function wad:processTexturesX(num)
 					if(self.patches[self.composites[c].patches[p].patch] == nil) then
 						local notfound = true
 						if(self.base.patches[self.composites[c].patches[p].patch] ~= nil) then
-
-							print(self.base.patches[self.composites[c].patches[p].patch].image)
-							print(self.base.patches[self.composites[c].patches[p].patch].x)
-							print(self.base.patches[self.composites[c].patches[p].patch].y)
-							love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.base.composites[c].patches[p].x, self.base.composites[c].patches[p].y)
+							love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
 							notfound = false
 						end
 
