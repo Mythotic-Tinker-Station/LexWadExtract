@@ -733,6 +733,10 @@ function wad:processTexturesX(num)
 					if(self.patches[self.composites[c].patches[p].patch] == nil) then
 						local notfound = true
 						if(self.base.patches[self.composites[c].patches[p].patch] ~= nil) then
+
+							print(self.base.patches[self.composites[c].patches[p].patch].image)
+							print(self.base.patches[self.composites[c].patches[p].patch].x)
+							print(self.base.patches[self.composites[c].patches[p].patch].y)
 							love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.base.composites[c].patches[p].x, self.base.composites[c].patches[p].y)
 							notfound = false
 						end
