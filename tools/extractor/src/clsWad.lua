@@ -1174,7 +1174,7 @@ function wad:processMaps()
 		for m = 1, #self.maps do
 			self:printf(2, "\tProcessing Map: %d", m)
 
-			-- doom/hexen
+			-- doom
 			if(self.maps[m].format == "DM") then
 
 				-- things
@@ -1203,7 +1203,6 @@ function wad:processMaps()
 					self.maps[m].linedefs[count].sector_tag = love.data.unpack("<H", self.maps[m].raw.linedefs, s+8)
 					self.maps[m].linedefs[count].sidedef_right =love.data.unpack("<H", self.maps[m].raw.linedefs, s+10)
 					self.maps[m].linedefs[count].sidedef_left = love.data.unpack("<H", self.maps[m].raw.linedefs, s+12)
-
 				end
 
 				-- sidedefs
@@ -1377,6 +1376,7 @@ function wad:ModifyMaps()
 					end
 				end
 
+				-- find flats and rename
 				for f = 1, #self.flats do
 					if not self.flats[f].isdoomdup then
 
@@ -1407,6 +1407,7 @@ function wad:ModifyMaps()
 					end
 				end
 
+				-- find ptches and rename
 				for p = 1, #self.patches do
 					if not self.patches[p].isdoomdup then
 
@@ -1436,7 +1437,6 @@ function wad:ModifyMaps()
 						end
 					end
 				end
-
 
 				-- build raw sidedefs back
 				count = 0
@@ -1478,6 +1478,37 @@ function wad:ModifyMaps()
 	self:printf(1, "\tDone.\n")
 end
 
+function wad:ConvertMaps()
+	if(self.base ~= self) then
+		for m = 1, #self.maps do
+			self:printf(2, "\tConverting Map: %d", m)
+
+			-- doom map > hexen
+			if(self.maps[m].format == "DM") then
+
+				-- add hexen's additional properties
+
+				-- things
+				for t = 1, #self.maps[m].things do
+					self.maps[m].things[t].id = 0
+					self.maps[m].things[t].z = z
+					self.maps[m].things[t].special = 0
+					self.maps[m].things[t].a1 = 0
+					self.maps[m].things[t].a2 = 0
+					self.maps[m].things[t].a3 = 0
+					self.maps[m].things[t].a4 = 0
+					self.maps[m].things[t].a5 = self.maps[m].things[t].typ
+				end
+
+				--linedefs
+				for l = 1, #self.maps[m].linedefs do
+
+
+				end
+			end
+		end
+	end
+end
 
 function wad:extractTextures()
 	if(self.base ~= self) then

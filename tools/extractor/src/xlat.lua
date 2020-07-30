@@ -1,539 +1,836 @@
+local ENUM =
+{
+	INIT_GRAVITY						= 0,
+	INIT_COLOR							= 1,
+	INIT_DAMAGE							= 2,
+	INIT_TRANSFERSKY 					= 255,
+
+	CEILWAIT							= 150,
+	VDOORWAIT							= 150,
+	PLATWAIT							= 105,
+
+	C_SLOW								= 8,
+	C_NORMAL							= 16,
+	C_FAST								= 32,
+	C_TURBO								= 64,
+
+	F_SLOW								= 8,
+	F_NORMAL							= 16,
+	F_FAST								= 32,
+	F_TURBO								= 64,
+
+	D_SLOW								= 16,
+	D_NORMAL							= 32,
+	D_FAST								= 64,
+	D_TURBO								= 128,
+
+	ST_SLOW								= 2,
+	ST_NORMAL							= 4,
+	ST_FAST								= 16,
+	ST_TURBO							= 32,
+
+	P_SLOW								= 8,
+	P_NORMAL							= 16,
+	P_FAST								= 32,
+	P_TURBO								= 64,
+
+	ELEVATORSPEED						= 32,
+	DORATE								= 4,
+
+	WALK								= 0,
+	REP									= 1,
+	USE									= 2,
+	MONWALK								= 4,
+	SHOOT								= 6,
+	MONST								= 16,
+	FIRSTSIDE							= 32,
+
+	NOKEY								= 0,
+	RCARD								= 1,
+	BCARD								= 2,
+	YCARD								= 3,
+	RSKULL								= 4,
+	BSKULL								= 5,
+	YSKULL								= 6,
+	ANYKEY								= 100,
+	ALLKEYS								= 101,
+	CARDISSKULL							= 128,
+
+	LIGHT_PHASED 						= 1,
+	LIGHTSEQUENCESTART 					= 2,
+	LIGHTSEQUENCESPECIAL1 				= 3,
+	LIGHTSEQUENCESPECIAL2 				= 4,
+	STAIRS_SPECIAL1 					= 26,
+	STAIRS_SPECIAL2 					= 27,
+	WIND_EAST_WEAK						= 40,
+	WIND_EAST_MEDIUM					= 41,
+	WIND_EAST_STRONG					= 42,
+	WIND_NORTH_WEAK						= 43,
+	WIND_NORTH_MEDIUM					= 44,
+	WIND_NORTH_STRONG					= 45,
+	WIND_SOUTH_WEAK						= 46,
+	WIND_SOUTH_MEDIUM					= 47,
+	WIND_SOUTH_STRONG					= 48,
+	WIND_WEST_WEAK						= 49,
+	WIND_WEST_MEDIUM					= 50,
+	WIND_WEST_STRONG					= 51,
+	DLIGHT_FLICKER 						= 65,
+	DLIGHT_STROBEFAST 					= 66,
+	DLIGHT_STROBESLOW 					= 67,
+	DLIGHT_STROBE_HURT 					= 68,
+	DDAMAGE_HELLSLIME 					= 69,
+	DDAMAGE_NUKAGE 						= 71,
+	DLIGHT_GLOW 						= 72,
+	DSECTOR_DOORCLOSEIN30 				= 74,
+	DDAMAGE_END 						= 75,
+	DLIGHT_STROBESLOWSYNC 				= 76,
+	DLIGHT_STROBEFASTSYNC 				= 77,
+	DSECTOR_DOORRAISEIN5MINS 			= 78,
+	DFRICTION_LOW 						= 79,
+	DDAMAGE_SUPERHELLSLIME 				= 80,
+	DLIGHT_FIREFLICKER 					= 81,
+	DDAMAGE_LAVAWIMPY 					= 82,
+	DDAMAGE_LAVAHEFTY 					= 83,
+	DSCROLL_EASTLAVADAMAGE 				= 84,
+	HDAMAGE_SLUDGE 						= 85,
+	SECTOR_OUTSIDE 						= 87,
+	SLIGHT_STROBE_HURT 					= 104,
+	SDAMAGE_HELLSLIME 					= 105,
+	DAMAGE_INSTANTDEATH 				= 115,
+	SDAMAGE_SUPERHELLSLIME 				= 116,
+	SCROLL_STRIFECURRENT 				= 118,
+	SECTOR_HIDDEN 						= 195,
+	SECTOR_HEAL 						= 196,
+	LIGHT_OUTDOORLIGHTNING 				= 197,
+	LIGHT_INDOORLIGHTNING1 				= 198,
+	LIGHT_INDOORLIGHTNING2 				= 199,
+	SKY2 								= 200,
+	SCROLL_NORTH_SLOW 					= 201,
+	SCROLL_NORTH_MEDIUM					= 202,
+	SCROLL_NORTH_FAST					= 203,
+	SCROLL_EAST_SLOW					= 204,
+	SCROLL_EAST_MEDIUM					= 205,
+	SCROLL_EAST_FAST					= 206,
+	SCROLL_SOUTH_SLOW					= 207,
+	SCROLL_SOUTH_MEDIUM					= 208,
+	SCROLL_SOUTH_FAST					= 209,
+	SCROLL_WEST_SLOW					= 210,
+	SCROLL_WEST_MEDIUM					= 211,
+	SCROLL_WEST_FAST					= 212,
+	SCROLL_NORTHWEST_SLOW				= 213,
+	SCROLL_NORTHWEST_MEDIUM				= 214,
+	SCROLL_NORTHWEST_FAST				= 215,
+	SCROLL_NORTHEAST_SLOW				= 216,
+	SCROLL_NORTHEAST_MEDIUM				= 217,
+	SCROLL_NORTHEAST_FAST				= 218,
+	SCROLL_SOUTHEAST_SLOW				= 219,
+	SCROLL_SOUTHEAST_MEDIUM				= 220,
+	SCROLL_SOUTHEAST_FAST				= 221,
+	SCROLL_SOUTHWEST_SLOW				= 222,
+	SCROLL_SOUTHWEST_MEDIUM				= 223,
+	SCROLL_SOUTHWEST_FAST				= 224,
+	CARRY_EAST5							= 225,
+	CARRY_EAST10						= 226,
+	CARRY_EAST25						= 227,
+	CARRY_EAST30						= 228,
+	CARRY_EAST35						= 229,
+	CARRY_NORTH5						= 230,
+	CARRY_NORTH10						= 231,
+	CARRY_NORTH25						= 232,
+	CARRY_NORTH30						= 233,
+	CARRY_NORTH35						= 234,
+	CARRY_SOUTH5						= 235,
+	CARRY_SOUTH10						= 236,
+	CARRY_SOUTH25						= 237,
+	CARRY_SOUTH30						= 238,
+	CARRY_SOUTH35						= 239,
+	CARRY_WEST5							= 240,
+	CARRY_WEST10						= 241,
+	CARRY_WEST25						= 242,
+	CARRY_WEST30						= 243,
+	CARRY_WEST35						= 244,
+
+	DAMAGE_MASK 						= 0X0300,
+	SECRET_MASK 						= 0X0400,
+	FRICTION_MASK 						= 0X0800,
+	PUSH_MASK 							= 0X1000,
+
+	ML_BLOCKING							= 0X00000001,
+	ML_BLOCKMONSTERS					= 0X00000002,
+	ML_TWOSIDED							= 0X00000004,
+	ML_DONTPEGTOP						= 0X00000008,
+	ML_DONTPEGBOTTOM					= 0X00000010,
+	ML_SECRET							= 0X00000020,
+	ML_SOUNDBLOCK						= 0X00000040,
+	ML_DONTDRAW 						= 0X00000080,
+	ML_MAPPED							= 0X00000100,
+	ML_MONSTERSCANACTIVATE				= 0X00002000,
+	ML_BLOCK_PLAYERS					= 0X00004000,
+	ML_BLOCKEVERYTHING					= 0X00008000,
+	ML_ZONEBOUNDARY						= 0X00010000,
+	ML_RAILING							= 0X00020000,
+	ML_BLOCK_FLOATERS					= 0X00040000,
+	ML_CLIP_MIDTEX						= 0X00080000,
+	ML_WRAP_MIDTEX						= 0X00100000,
+	ML_3DMIDTEX							= 0X00200000,
+	ML_CHECKSWITCHRANGE					= 0X00400000,
+	ML_FIRSTSIDEONLY					= 0X00800000,
+	ML_BLOCKPROJECTILELE				= 0X01000000,
+	ML_BLOCKUSE							= 0X02000000,
+	ML_PASSTHROUGH						= -1,
+	ML_TRANSLUCENT						= -2,
+	ML_TRANSPARENT						= -3,
+
+	POLYOBJ_STARTLINE 					= 1,
+	POLYOBJ_ROTATELEFT 					= 2,
+	POLYOBJ_ROTATERIGHT 				= 3,
+	POLYOBJ_MOVE 						= 4,
+	POLYOBJ_EXPLICITLINE 				= 5,
+	POLYOBJ_MOVETIMES8 					= 6,
+	POLYOBJ_DOORSWING 					= 7,
+	POLYOBJ_DOORSLIDE 					= 8,
+	LINE_HORIZON 						= 9,
+	DOOR_CLOSE 							= 10,
+	DOOR_OPEN 							= 11,
+	DOOR_RAISE 							= 12,
+	DOOR_LOCKEDRAISE 					= 13,
+	DOOR_ANIMATED 						= 14,
+	AUTOSAVE 							= 15,
+	TRANSFER_WALLLIGHT 					= 16,
+	THING_RAISE 						= 17,
+	STARTCONVERSATION 					= 18,
+	THING_STOP 							= 19,
+	FLOOR_LOWERBYVALUE 					= 20,
+	FLOOR_LOWERTOLOWEST 				= 21,
+	FLOOR_LOWERTONEAREST 				= 22,
+	FLOOR_RAISEBYVALUE 					= 23,
+	FLOOR_RAISETOHIGHEST 				= 24,
+	FLOOR_RAISETONEAREST 				= 25,
+	STAIRS_BUILDDOWN 					= 26,
+	STAIRS_BUILDUP 						= 27,
+	FLOOR_RAISEANDCRUSH 				= 28,
+	PILLAR_BUILD 						= 29,
+	PILLAR_OPEN 						= 30,
+	STAIRS_BUILDDOWNSYNC 				= 31,
+	STAIRS_BUILDUPSYNC 					= 32,
+	FORCEFIELD 							= 33,
+	CLEARFORCEFIELD 					= 34,
+	FLOOR_RAISEBYVALUETIMES8 			= 35,
+	FLOOR_LOWERBYVALUETIMES8 			= 36,
+	FLOOR_MOVETOVALUE 					= 37,
+	CEILING_WAGGLE 						= 38,
+	TELEPORT_ZOMBIECHANGER 				= 39,
+	CEILING_LOWERBYVALUE 				= 40,
+	CEILING_RAISEBYVALUE 				= 41,
+	CEILING_CRUSHANDRAISE 				= 42,
+	CEILING_LOWERANDCRUSH 				= 43,
+	CEILING_CRUSHSTOP 					= 44,
+	CEILING_CRUSHRAISEANDSTAY 			= 45,
+	FLOOR_CRUSHSTOP 					= 46,
+	CEILING_MOVETOVALUE 				= 47,
+	SECTOR_ATTACH3DMIDTEX 				= 48,
+	GLASSBREAK 							= 49,
+	EXTRAFLOOR_LIGHTONLY 				= 50,
+	SECTOR_SETLINK 						= 51,
+	SCROLL_WALL 						= 52,
+	LINE_SETTEXTUREOFFSET 				= 53,
+	SECTOR_CHANGEFLAGS 					= 54,
+	LINE_SETBLOCKING 					= 55,
+	LINE_SETTEXTURESCALE 				= 56,
+	SECTOR_SETPORTAL 					= 57,
+	SECTOR_COPYSCROLLER 				= 58,
+	POLYOBJ_OR_MOVETOSPOT 				= 59,
+	PLAT_PERPETUALRAISE 				= 60,
+	PLAT_STOP 							= 61,
+	PLAT_DOWNWAITUPSTAY 				= 62,
+	PLAT_DOWNBYVALUE 					= 63,
+	PLAT_UPWAITDOWNSTAY 				= 64,
+	PLAT_UPBYVALUE 						= 65,
+	FLOOR_LOWERINSTANT 					= 66,
+	FLOOR_RAISEINSTANT 					= 67,
+	FLOOR_MOVETOVALUETIMES8 			= 68,
+	CEILING_MOVETOVALUETIMES8 			= 69,
+	TELEPORT 							= 70,
+	TELEPORT_NOFOG 						= 71,
+	THRUSTTHING 						= 72,
+	DAMAGETHING 						= 73,
+	TELEPORT_NEWMAP 					= 74,
+	TELEPORT_ENDGAME 					= 75,
+	TELEPORTOTHER 						= 76,
+	TELEPORTGROUP 						= 77,
+	TELEPORTINSECTOR 					= 78,
+	THING_SETCONVERSATION 				= 79,
+	ACS_EXECUTE 						= 80,
+	ACS_SUSPEND 						= 81,
+	ACS_TERMINATE 						= 82,
+	ACS_LOCKEDEXECUTE 					= 83,
+	ACS_EXECUTEWITHRESULT 				= 84,
+	ACS_LOCKEDEXECUTEDOOR 				= 85,
+	POLYOBJ_MOVETOSPOT 					= 86,
+	POLYOBJ_STOP 						= 87,
+	POLYOBJ_MOVETO 						= 88,
+	POLYOBJ_OR_MOVETO 					= 89,
+	POLYOBJ_OR_ROTATELEFT 				= 90,
+	POLYOBJ_OR_ROTATERIGHT 				= 91,
+	POLYOBJ_OR_MOVE 					= 92,
+	POLYOBJ_OR_MOVETIMES8 				= 93,
+	PILLAR_BUILDANDCRUSH 				= 94,
+	FLOORANDCEILING_LOWERBYVALUE 		= 95,
+	FLOORANDCEILING_RAISEBYVALUE 		= 96,
+	CEILING_LOWERANDCRUSHDIST 			= 97,
+	SECTOR_SETTRANSLUCENT 				= 98,
+	FLOOR_RAISEANDCRUSHDOOM 			= 99,
+	SCROLL_TEXTURE_LEFT 				= 100,
+	SCROLL_TEXTURE_RIGHT 				= 101,
+	SCROLL_TEXTURE_UP 					= 102,
+	SCROLL_TEXTURE_DOWN 				= 103,
+	CEILING_CRUSHANDRAISESILENTDIST 	= 104,
+	DOOR_WAITRAISE 						= 105,
+	DOOR_WAITCLOSE 						= 106,
+	LINE_SETPORTALTARGET 				= 107,
+	LIGHT_FORCELIGHTNING 				= 109,
+	LIGHT_RAISEBYVALUE 					= 110,
+	LIGHT_LOWERBYVALUE 					= 111,
+	LIGHT_CHANGETOVALUE 				= 112,
+	LIGHT_FADE 							= 113,
+	LIGHT_GLOW 							= 114,
+	LIGHT_FLICKER 						= 115,
+	LIGHT_STROBE 						= 116,
+	LIGHT_STOP 							= 117,
+	PLANE_COPY 							= 118,
+	THING_DAMAGE 						= 119,
+	RADIUS_QUAKE 						= 120,
+	LINE_SETIDENTIFICATION 				= 121,
+	THING_MOVE 							= 125,
+	THING_SETSPECIAL 					= 127,
+	THRUSTTHINGZ 						= 128,
+	USEPUZZLEITEM 						= 129,
+	THING_ACTIVATE 						= 130,
+	THING_DEACTIVATE 					= 131,
+	THING_REMOVE 						= 132,
+	THING_DESTROY 						= 133,
+	THING_PROJECTILE 					= 134,
+	THING_SPAWN 						= 135,
+	THING_PROJECTILEGRAVITY 			= 136,
+	THING_SPAWNNOFOG 					= 137,
+	FLOOR_WAGGLE 						= 138,
+	THING_SPAWNFACING 					= 139,
+	SECTOR_CHANGESOUND 					= 140,
+	PLAYER_SETTEAM 						= 145,
+	TEAM_SCORE 							= 152,
+	TEAM_GIVEPOINTS 					= 153,
+	TELEPORT_NOSTOP 					= 154,
+	LINE_SETPORTAL 						= 156,
+	SETGLOBALFOGPARAMETER 				= 157,
+	FS_EXECUTE 							= 158,
+	SECTOR_SETPLANEREFCTION 			= 159,
+	SECTOR_SET3DFLOOR 					= 160,
+	SECTOR_SETCONTENTS 					= 161,
+	CEILING_CRUSHANDRAISEDIST 			= 168,
+	GENERIC_CRUSHER2 					= 169,
+	SECTOR_SETCEILINGSCALE2 			= 170,
+	SECTOR_SETFLOORSCALE2 				= 171,
+	PLAT_UPNEARESTWAITDOWNSTAY 			= 172,
+	NOISEART 							= 173,
+	SENDTOCOMMUNICATOR 					= 174,
+	THING_PROJECTILEINTERCEPT 			= 175,
+	THING_CHANGETID 					= 176,
+	THING_HATE 							= 177,
+	THING_PROJECTILEAIMED 				= 178,
+	CHANGESKILL 						= 179,
+	THING_SETTRANSLATION 				= 180,
+	PLANE_ALIGN 						= 181,
+	LINE_MIRROR 						= 182,
+	LINE_ALIGNCEILING 					= 183,
+	LINE_ALIGNFLOOR 					= 184,
+	SECTOR_SETROTATION 					= 185,
+	SECTOR_SETCEILINGPANNING 			= 186,
+	SECTOR_SETFLOORPANNING 				= 187,
+	SECTOR_SETCEILINGSCALE 				= 188,
+	SECTOR_SETFLOORSCALE 				= 189,
+	STATIC_INIT 						= 190,
+	SETPLAYERPROPERTY 					= 191,
+	CEILING_LOWERTOHIGHESTFLOOR 		= 192,
+	CEILING_LOWERINSTANT 				= 193,
+	CEILING_RAISEINSTANT 				= 194,
+	CEILING_CRUSHRAISEANDSTAYA 			= 195,
+	CEILING_CRUSHANDRAISEA 				= 196,
+	CEILING_CRUSHANDRAISESILENTA 		= 197,
+	CEILING_RAISEBYVALUETIMES8 			= 198,
+	CEILING_LOWERBYVALUETIMES8 			= 199,
+	GENERIC_FLOOR 						= 200,
+	GENERIC_CEILING 					= 201,
+	GENERIC_DOOR 						= 202,
+	GENERIC_LIFT 						= 203,
+	GENERIC_STAIRS 						= 204,
+	GENERIC_CRUSHER 					= 205,
+	PLAT_DOWNWAITUPSTAYLIP 				= 206,
+	PLAT_PERPETUALRAISELIP 				= 207,
+	TRANSLUCENTLINE 					= 208,
+	TRANSFER_HEIGHTS 					= 209,
+	TRANSFER_FLOORLIGHT 				= 210,
+	TRANSFER_CEILINGLIGHT 				= 211,
+	SECTOR_SETCOLOR 					= 212,
+	SECTOR_SETFADE 						= 213,
+	SECTOR_SETDAMAGE 					= 214,
+	TELEPORT_LINE 						= 215,
+	SECTOR_SETGRAVITY 					= 216,
+	STAIRS_BUILDUPDOOM 					= 217,
+	SECTOR_SETWIND 						= 218,
+	SECTOR_SETFRICTION 					= 219,
+	SECTOR_SETCURRENT 					= 220,
+	SCROLL_TEXTURE_BOTH 				= 221,
+	SCROLL_TEXTURE_MODEL 				= 222,
+	SCROLL_FLOOR 						= 223,
+	SCROLL_CEILING 						= 224,
+	SCROLL_TEXTURE_OFFSETS 				= 225,
+	ACS_EXECUTEALWAYS 					= 226,
+	POINTPUSH_SETFORCE 					= 227,
+	PLAT_RAISEANDSTAYTX0 				= 228,
+	THING_SETGOAL 						= 229,
+	PLAT_UPBYVALUESTAYTX 				= 230,
+	PLAT_TOGGLECEILING 					= 231,
+	LIGHT_STROBEDOOM 					= 232,
+	LIGHT_MINNEIGHBOR 					= 233,
+	LIGHT_MAXNEIGHBOR 					= 234,
+	FLOOR_TRANSFERTRIGGER 				= 235,
+	FLOOR_TRANSFERNUMERIC 				= 236,
+	CHANGECAMERA 						= 237,
+	FLOOR_RAISETOLOWESTCEILING 			= 238,
+	FLOOR_RAISEBYVALUETXTY 				= 239,
+	FLOOR_RAISEBYTEXTURE 				= 240,
+	FLOOR_LOWERTOLOWESTTXTY 			= 241,
+	FLOOR_LOWERTOHIGHEST 				= 242,
+	EXIT_NORMAL 						= 243,
+	EXIT_SECRET 						= 244,
+	EVATOR_RAISETONEAREST 				= 245,
+	EVATOR_MOVETOFLOOR 					= 246,
+	EVATOR_LOWERTONEAREST 				= 247,
+	HEALTHING 							= 248,
+	DOOR_CLOSEWAITOPEN 					= 249,
+	FLOOR_DONUT 						= 250,
+	FLOORANDCEILING_LOWERRAISE 			= 251,
+	CEILING_RAISETONEAREST 				= 252,
+	CEILING_LOWERTOLOWEST 				= 253,
+	CEILING_LOWERTOFLOOR 				= 254,
+	CEILING_CRUSHRAISEANDSTAYSILA 		= 255,
+	FLOOR_LOWERTOHIGHESTEE 				= 256,
+	FLOOR_RAISETOLOWEST 				= 257,
+	FLOOR_LOWERTOLOWESTCEILING 			= 258,
+	FLOOR_RAISETOCEILING 				= 259,
+	FLOOR_TOCEILINGINSTANT 				= 260,
+	FLOOR_LOWERBYTEXTURE 				= 261,
+	CEILING_RAISETOHIGHEST 				= 262,
+	CEILING_TOHIGHESTINSTANT 			= 263,
+	CEILING_LOWERTONEAREST 				= 264,
+	CEILING_RAISETOLOWEST 				= 265,
+	CEILING_RAISETOHIGHESTFLOOR 		= 266,
+	CEILING_TOFLOORINSTANT 				= 267,
+	CEILING_RAISEBYTEXTURE 				= 268,
+	CEILING_LOWERBYTEXTURE 				= 269,
+	STAIRS_BUILDDOWNDOOM 				= 270,
+	STAIRS_BUILDUPDOOMSYNC 				= 271,
+	STAIRS_BUILDDOWNDOOMSYNC 			= 272,
+	STAIRS_BUILDUPDOOMCRUSH 			= 273,
+	DOOR_ANIMATEDCLOSE 					= 274,
+	FLOOR_STOP 							= 275,
+	CEILING_STOP 						= 276,
+	SECTOR_SETFLOORGLOW 				= 277,
+	SECTOR_SETCEILINGGLOW 				= 278,
+	FLOOR_MOVETOVALUEANDCRUSH 			= 279,
+	CEILING_MOVETOVALUEANDCRUSH 		= 280,
+}
+
 local xlat =
 {
-include "xlat/defines.i"
-
-  [1] = {{"USE,MONST,REP,		Door_Raise (0, D_SLOW, VDOORWAIT, tag)
-  [2] = {{"WALK,				Door_Open (tag, D_SLOW)
-  [3] = {{"WALK,				Door_Close (tag, D_SLOW)
-  [4] = {{"WALK,MONST,			Door_Raise (tag, D_SLOW, VDOORWAIT)
-  [5] = {{"WALK,				Floor_RaiseToLowestCeiling (tag, F_SLOW)
-  [6] = {{"WALK,				Ceiling_CrushAndRaiseA (tag, C_NORMAL, C_NORMAL, 10)
-  [7] = {{"USE,				Stairs_BuildUpDoom (tag, ST_SLOW, 8)
-  [8] = {{"WALK,				Stairs_BuildUpDoom (tag, ST_SLOW, 8)
-  [9] = {{"USE,				Floor_Donut (tag, DORATE, DORATE)
- [10] = {{"WALK,MONST,			Plat_DownWaitUpStayLip (tag, P_FAST, PLATWAIT, 0)
- [11] = {{"USE,				Exit_Normal (0)
- [12] = {{"WALK,				Light_MaxNeighbor (tag)
- [13] = {{"WALK,				Light_ChangeToValue (tag, 255)
- [14] = {{"USE,				Plat_UpByValueStayTx (tag, P_SLOW/2, 4)
- [15] = {{"USE,				Plat_UpByValueStayTx (tag, P_SLOW/2, 3)
- [16] = {{"WALK,				Door_CloseWaitOpen (tag, D_SLOW, 240)
- [17] = {{"WALK,				Light_StrobeDoom (tag, 5, 35)
- [18] = {{"USE,				Floor_RaiseToNearest (tag, F_SLOW)
- [19] = {{"WALK,				Floor_LowerToHighest (tag, F_SLOW, 128)
- [20] = {{"USE,				Plat_RaiseAndStayTx0 (tag, P_SLOW/2)
- [21] = {{"USE,				Plat_DownWaitUpStayLip (tag, P_FAST, PLATWAIT)
- [22] = {{"WALK,				Plat_RaiseAndStayTx0 (tag, P_SLOW/2)
- [23] = {{"USE,				Floor_LowerToLowest (tag, F_SLOW)
- [24] = {{"SHOOT,				Floor_RaiseToLowestCeiling (tag, F_SLOW)
- [25] = {{"WALK,				Ceiling_CrushAndRaiseA (tag, C_SLOW, C_SLOW, 10)
- [26] = {{"USE,REP,			Door_LockedRaise (0, D_SLOW, VDOORWAIT, BCard , CardIsSkull, tag)
- [27] = {{"USE,REP,			Door_LockedRaise (0, D_SLOW, VDOORWAIT, YCard , CardIsSkull, tag)
- [28] = {{"USE,REP,			Door_LockedRaise (0, D_SLOW, VDOORWAIT, RCard , CardIsSkull, tag)
- [29] = {{"USE,				Door_Raise (tag, D_SLOW, VDOORWAIT)
- [30] = {{"WALK,				Floor_RaiseByTexture (tag, F_SLOW)
- [31] = {{"USE,				Door_Open (0, D_SLOW, tag)
- [32] = {{"USE,MONST,			Door_LockedRaise (0, D_SLOW, 0, BCard , CardIsSkull, tag)
- [33] = {{"USE,MONST,			Door_LockedRaise (0, D_SLOW, 0, RCard , CardIsSkull, tag)
- [34] = {{"USE,MONST,			Door_LockedRaise (0, D_SLOW, 0, YCard , CardIsSkull, tag)
- [35] = {{"WALK,				Light_ChangeToValue (tag, 35)
- [36] = {{"WALK,				Floor_LowerToHighest (tag, F_FAST, 136)
- [37] = {{"WALK,				Floor_LowerToLowestTxTy (tag, F_SLOW)
- [38] = {{"WALK,				Floor_LowerToLowest (tag, F_SLOW)
- [39] = {{"WALK,MONST,			Teleport (0, tag)
- [40] = {{"WALK,				Generic_Ceiling (tag, C_SLOW, 0, 1, 8)
- [41] = {{"USE,				Ceiling_LowerToFloor (tag, C_SLOW)
- [42] = {{"USE,REP,			Door_Close (tag, D_SLOW)
- [43] = {{"USE,REP,			Ceiling_LowerToFloor (tag, C_SLOW)
- [44] = {{"WALK,				Ceiling_LowerAndCrush (tag, C_SLOW, 0, 2)
- [45] = {{"USE,REP,			Floor_LowerToHighest (tag, F_SLOW, 128)
- [46] = {{"SHOOT,REP,MONST,	Door_Open (tag, D_SLOW)
- [47] = {{"SHOOT,				Plat_RaiseAndStayTx0 (tag, P_SLOW/2)
- [48] = {{"0,					Scroll_Texture_Left (SCROLL_UNIT)
- [49] = {{"USE,				Ceiling_CrushAndRaiseDist (tag, 8, C_SLOW, 10)
- [50] = {{"USE,				Door_Close (tag, D_SLOW)
- [51] = {{"USE,				Exit_Secret (0)
- [52] = {{"WALK,				Exit_Normal (0)
- [53] = {{"WALK,				Plat_PerpetualRaiseLip (tag, P_SLOW, PLATWAIT, 0)
- [54] = {{"WALK,				Plat_Stop (tag)
- [55] = {{"USE,				Floor_RaiseAndCrushDoom (tag, F_SLOW, 10, 2)
- [56] = {{"WALK,				Floor_RaiseAndCrushDoom (tag, F_SLOW, 10, 2)
- [57] = {{"WALK,				Ceiling_CrushStop (tag)
- [58] = {{"WALK,				Floor_RaiseByValue (tag, F_SLOW, 24)
- [59] = {{"WALK,				Floor_RaiseByValueTxTy (tag, F_SLOW, 24)
- [60] = {{"USE,REP,			Floor_LowerToLowest (tag, F_SLOW)
- [61] = {{"USE,REP,			Door_Open (tag, D_SLOW)
- [62] = {{"USE,REP,			Plat_DownWaitUpStayLip (tag, P_FAST, PLATWAIT, 0)
- [63] = {{"USE,REP,			Door_Raise (tag, D_SLOW, VDOORWAIT)
- [64] = {{"USE,REP,			Floor_RaiseToLowestCeiling (tag, F_SLOW)
- [65] = {{"USE,REP,			Floor_RaiseAndCrushDoom (tag, F_SLOW, 10, 2)
- [66] = {{"USE,REP,			Plat_UpByValueStayTx (tag, P_SLOW/2, 3)
- [67] = {{"USE,REP,			Plat_UpByValueStayTx (tag, P_SLOW/2, 4)
- [68] = {{"USE,REP,			Plat_RaiseAndStayTx0 (tag, P_SLOW/2)
- [69] = {{"USE,REP,			Floor_RaiseToNearest (tag, F_SLOW)
- [70] = {{"USE,REP,			Floor_LowerToHighest (tag, F_FAST, 136)
- [71] = {{"USE,				Floor_LowerToHighest (tag, F_FAST, 136)
- [72] = {{"WALK,REP,			Ceiling_LowerAndCrush (tag, C_SLOW, 0, 2)
- [73] = {{"WALK,REP,			Ceiling_CrushAndRaiseA (tag, C_SLOW, C_SLOW, 10)
- [74] = {{"WALK,REP,			Ceiling_CrushStop (tag)
- [75] = {{"WALK,REP,			Door_Close (tag, D_SLOW)
- [76] = {{"WALK,REP,			Door_CloseWaitOpen (tag, D_SLOW, 240)
- [77] = {{"WALK,REP,			Ceiling_CrushAndRaiseA (tag, C_NORMAL, C_NORMAL, 10)
- [78] = {{"USE,REP,			Floor_TransferNumeric (tag)			// <- BOOM special
- [79] = {{"WALK,REP,			Light_ChangeToValue (tag, 35)
- [80] = {{"WALK,REP,			Light_MaxNeighbor (tag)
- [81] = {{"WALK,REP,			Light_ChangeToValue (tag, 255)
- [82] = {{"WALK,REP,			Floor_LowerToLowest (tag, F_SLOW)
- [83] = {{"WALK,REP,			Floor_LowerToHighest (tag, F_SLOW, 128)
- [84] = {{"WALK,REP,			Floor_LowerToLowestTxTy (tag, F_SLOW)
- [85] = {{"0,					Scroll_Texture_Right (SCROLL_UNIT) // <- BOOM special
- [86] = {{"WALK,REP,			Door_Open (tag, D_SLOW)
- [87] = {{"WALK,REP,			Plat_PerpetualRaiseLip (tag, P_SLOW, PLATWAIT, 0)
- [88] = {{"WALK,REP,MONST,		Plat_DownWaitUpStayLip (tag, P_FAST, PLATWAIT, 0)
- [89] = {{"WALK,REP,			Plat_Stop (tag)
- [90] = {{"WALK,REP,			Door_Raise (tag, D_SLOW, VDOORWAIT)
- [91] = {{"WALK,REP,			Floor_RaiseToLowestCeiling (tag, F_SLOW)
- [92] = {{"WALK,REP,			Floor_RaiseByValue (tag, F_SLOW, 24)
- [93] = {{"WALK,REP,			Floor_RaiseByValueTxTy (tag, F_SLOW, 24)
- [94] = {{"WALK,REP,			Floor_RaiseAndCrushDoom (tag, F_SLOW, 10, 2)
- [95] = {{"WALK,REP,			Plat_RaiseAndStayTx0 (tag, P_SLOW/2)
- [96] = {{"WALK,REP,			Floor_RaiseByTexture (tag, F_SLOW)
- [97] = {{"WALK,REP,MONST,		Teleport (0, tag)
- [98] = {{"WALK,REP,			Floor_LowerToHighest (tag, F_FAST, 136)
- [99] = {{"USE,REP,			Door_LockedRaise (tag, D_FAST, 0, BCard , CardIsSkull)
-[100] = {{"WALK,				Stairs_BuildUpDoom (tag, ST_TURBO, 16, 0, 0)
-[101] = {{"USE,				Floor_RaiseToLowestCeiling (tag, F_SLOW)
-[102] = {{"USE,				Floor_LowerToHighest (tag, F_SLOW, 128)
-[103] = {{"USE,				Door_Open (tag, D_SLOW)
-[104] = {{"WALK,				Light_MinNeighbor (tag)
-[105] = {{"WALK,REP,			Door_Raise (tag, D_FAST, VDOORWAIT)
-[106] = {{"WALK,REP,			Door_Open (tag, D_FAST)
-[107] = {{"WALK,REP,			Door_Close (tag, D_FAST)
-[108] = {{"WALK,				Door_Raise (tag, D_FAST, VDOORWAIT)
-[109] = {{"WALK,				Door_Open (tag, D_FAST)
-[110] = {{"WALK,				Door_Close (tag, D_FAST)
-[111] = {{"USE,				Door_Raise (tag, D_FAST, VDOORWAIT)
-[112] = {{"USE,				Door_Open (tag, D_FAST)
-[113] = {{"USE,				Door_Close (tag, D_FAST)
-[114] = {{"USE,REP,			Door_Raise (tag, D_FAST, VDOORWAIT)
-[115] = {{"USE,REP,			Door_Open (tag, D_FAST)
-[116] = {{"USE,REP,			Door_Close (tag, D_FAST)
-[117] = {{"USE,REP,			Door_Raise (0, D_FAST, VDOORWAIT, tag)
-[118] = {{"USE,				Door_Open (0, D_FAST, tag)
-[119] = {{"WALK,				Floor_RaiseToNearest (tag, F_SLOW)
-[120] = {{"WALK,REP,			Plat_DownWaitUpStayLip (tag, P_TURBO, PLATWAIT, 0)
-[121] = {{"WALK,				Plat_DownWaitUpStayLip (tag, P_TURBO, PLATWAIT, 0)
-[122] = {{"USE,				Plat_DownWaitUpStayLip (tag, P_TURBO, PLATWAIT, 0)
-[123] = {{"USE,REP,			Plat_DownWaitUpStayLip (tag, P_TURBO, PLATWAIT, 0)
-[124] = {{"WALK,				Exit_Secret (0)
-[125] = {{"MONWALK,			Teleport (0, tag)
-[126] = {{"MONWALK,REP,		Teleport (0, tag)
-[127] = {{"USE,				Stairs_BuildUpDoom (tag, ST_TURBO, 16, 0, 0)
-[128] = {{"WALK,REP,			Floor_RaiseToNearest (tag, F_SLOW)
-[129] = {{"WALK,REP,			Floor_RaiseToNearest (tag, F_FAST)
-[130] = {{"WALK,				Floor_RaiseToNearest (tag, F_FAST)
-[131] = {{"USE,				Floor_RaiseToNearest (tag, F_FAST)
-[132] = {{"USE,REP,			Floor_RaiseToNearest (tag, F_FAST)
-[133] = {{"USE,				Door_LockedRaise (tag, D_FAST, 0, BCard , CardIsSkull)
-[134] = {{"USE,REP,			Door_LockedRaise (tag, D_FAST, 0, RCard , CardIsSkull)
-[135] = {{"USE,				Door_LockedRaise (tag, D_FAST, 0, RCard , CardIsSkull)
-[136] = {{"USE,REP,			Door_LockedRaise (tag, D_FAST, 0, YCard , CardIsSkull)
-[137] = {{"USE,				Door_LockedRaise (tag, D_FAST, 0, YCard , CardIsSkull)
-[138] = {{"USE,REP,			Light_ChangeToValue (tag, 255)
-[139] = {{"USE,REP,			Light_ChangeToValue (tag, 35)
-[140] = {{"USE,				Floor_RaiseByValueTimes8 (tag, F_SLOW, 64)
-[141] = {{"WALK,				Ceiling_CrushAndRaiseSilentA (tag, C_SLOW, C_SLOW, 10)
-[142] = {{"WALK,				Floor_RaiseByValueTimes8 (tag, F_SLOW, 64)
-[143] = {{"WALK,				Plat_UpByValueStayTx (tag, P_SLOW/2, 3)
-[144] = {{"WALK,				Plat_UpByValueStayTx (tag, P_SLOW/2, 4)
-[145] = {{"WALK,				Ceiling_LowerToFloor (tag, C_SLOW)
-[146] = {{"WALK,				Floor_Donut (tag, DORATE, DORATE)
-[147] = {{"WALK,REP,			Floor_RaiseByValueTimes8 (tag, F_SLOW, 64)
-[148] = {{"WALK,REP,			Plat_UpByValueStayTx (tag, P_SLOW/2, 3)
-[149] = {{"WALK,REP,			Plat_UpByValueStayTx (tag, P_SLOW/2, 4)
-[150] = {{"WALK,REP,			Ceiling_CrushAndRaiseSilentA (tag, C_SLOW, C_SLOW, 10)
-[151] = {{"WALK,REP,			FloorAndCeiling_LowerRaise (tag, F_SLOW, C_SLOW)
-[152] = {{"WALK,REP,			Ceiling_LowerToFloor (tag, C_SLOW)
-[153] = {{"WALK,				Floor_TransferTrigger (tag)
-[154] = {{"WALK,REP,			Floor_TransferTrigger (tag)
-[155] = {{"WALK,REP,			Floor_Donut (tag, DORATE, DORATE)
-[156] = {{"WALK,REP,			Light_StrobeDoom (tag, 5, 35)
-[157] = {{"WALK,REP,			Light_MinNeighbor (tag)
-[158] = {{"USE,				Floor_RaiseByTexture (tag, F_SLOW)
-[159] = {{"USE,				Floor_LowerToLowestTxTy (tag, F_SLOW)
-[160] = {{"USE,				Floor_RaiseByValueTxTy (tag, F_SLOW, 24)
-[161] = {{"USE,				Floor_RaiseByValue (tag, F_SLOW, 24)
-[162] = {{"USE,				Plat_PerpetualRaiseLip (tag, P_SLOW, PLATWAIT, 0)
-[163] = {{"USE,				Plat_Stop (tag)
-[164] = {{"USE,				Ceiling_CrushAndRaiseA (tag, C_NORMAL, C_NORMAL, 10)
-[165] = {{"USE,				Ceiling_CrushAndRaiseSilentA (tag, C_SLOW, C_SLOW, 10)
-[166] = {{"USE,				FloorAndCeiling_LowerRaise (tag, F_SLOW, C_SLOW, 1998)
-[167] = {{"USE,				Ceiling_LowerAndCrush (tag, C_SLOW, 0, 2)
-[168] = {{"USE,				Ceiling_CrushStop (tag)
-[169] = {{"USE,				Light_MaxNeighbor (tag)
-[170] = {{"USE,				Light_ChangeToValue (tag, 35)
-[171] = {{"USE,				Light_ChangeToValue (tag, 255)
-[172] = {{"USE,				Light_StrobeDoom (tag, 5, 35)
-[173] = {{"USE,				Light_MinNeighbor (tag)
-[174] = {{"USE,MONST,			Teleport (0, tag)
-[175] = {{"USE,				Door_CloseWaitOpen (tag, D_SLOW, 240)
-[176] = {{"USE,REP,			Floor_RaiseByTexture (tag, F_SLOW)
-[177] = {{"USE,REP,			Floor_LowerToLowestTxTy (tag, F_SLOW)
-[178] = {{"USE,REP,			Floor_RaiseByValueTimes8 (tag, F_SLOW, 64)
-[179] = {{"USE,REP,			Floor_RaiseByValueTxTy (tag, F_SLOW, 24)
-[180] = {{"USE,REP,			Floor_RaiseByValue (tag, F_SLOW, 24)
-[181] = {{"USE,REP,			Plat_PerpetualRaiseLip (tag, P_SLOW, PLATWAIT, 0)
-[182] = {{"USE,REP,			Plat_Stop (tag)
-[183] = {{"USE,REP,			Ceiling_CrushAndRaiseA (tag, C_NORMAL, C_NORMAL, 10)
-[184] = {{"USE,REP,			Ceiling_CrushAndRaiseA (tag, C_SLOW, C_SLOW, 10)
-[185] = {{"USE,REP,			Ceiling_CrushAndRaiseSilentA (tag, C_SLOW, C_SLOW, 10)
-[186] = {{"USE,REP,			FloorAndCeiling_LowerRaise (tag, F_SLOW, C_SLOW, 1998)
-[187] = {{"USE,REP,			Ceiling_LowerAndCrush (tag, C_SLOW, 0, 2)
-[188] = {{"USE,REP,			Ceiling_CrushStop (tag)
-[189] = {{"USE,				Floor_TransferTrigger (tag)
-[190] = {{"USE,REP,			Floor_TransferTrigger (tag)
-[191] = {{"USE,REP,			Floor_Donut (tag, DORATE, DORATE)
-[192] = {{"USE,REP,			Light_MaxNeighbor (tag)
-[193] = {{"USE,REP,			Light_StrobeDoom (tag, 5, 35)
-[194] = {{"USE,REP,			Light_MinNeighbor (tag)
-[195] = {{"USE,REP,MONST,		Teleport (0, tag)
-[196] = {{"USE,REP,			Door_CloseWaitOpen (tag, D_SLOW, 240)
-[197] = {{"SHOOT,				Exit_Normal (0)
-[198] = {{"SHOOT,				Exit_Secret (0)
-[199] = {{"WALK,				Ceiling_LowerToLowest (tag, C_SLOW)
-[200] = {{"WALK,				Ceiling_LowerToHighestFloor (tag, C_SLOW)
-[201] = {{"WALK,REP,			Ceiling_LowerToLowest (tag, C_SLOW)
-[202] = {{"WALK,REP,			Ceiling_LowerToHighestFloor (tag, C_SLOW)
-[203] = {{"USE,				Ceiling_LowerToLowest (tag, C_SLOW)
-[204] = {{"USE,				Ceiling_LowerToHighestFloor (tag, C_SLOW)
-[205] = {{"USE,REP,			Ceiling_LowerToLowest (tag, C_SLOW)
-[206] = {{"USE,REP,			Ceiling_LowerToHighestFloor (tag, C_SLOW)
-[207] = {{"WALK,MONST,			Teleport_NoFog (0, 0, tag, 1)
-[208] = {{"WALK,REP,MONST,		Teleport_NoFog (0, 0, tag, 1)
-[209] = {{"USE,MONST,			Teleport_NoFog (0, 0, tag, 1)
-[210] = {{"USE,REP,MONST,		Teleport_NoFog (0, 0, tag, 1)
-[211] = {{"USE,REP,			Plat_ToggleCeiling (tag)
-[212] = {{"WALK,REP,			Plat_ToggleCeiling (tag)
-[213] = {{"0,					Transfer_FloorLight (tag)
-[214] = {{"0,					Scroll_Ceiling (tag, 6, 0, 0, 0)
-[215] = {{"0,					Scroll_Floor (tag, 6, 0, 0, 0)
-[216] = {{"0,					Scroll_Floor (tag, 6, 1, 0, 0)
-[217] = {{"0,					Scroll_Floor (tag, 6, 2, 0, 0)
-[218] = {{"0,					Scroll_Texture_Model (lineid, 2)
-[219] = {{"WALK,				Floor_LowerToNearest (tag, F_SLOW)
-[220] = {{"WALK,REP,			Floor_LowerToNearest (tag, F_SLOW)
-[221] = {{"USE,				Floor_LowerToNearest (tag, F_SLOW)
-[222] = {{"USE,REP,			Floor_LowerToNearest (tag, F_SLOW)
-[223] = {{"0,					Sector_SetFriction (tag, 0)
-[224] = {{"0,					Sector_SetWind (tag, 0, 0, 1)
-[225] = {{"0,					Sector_SetCurrent (tag, 0, 0, 1)
-[226] = {{"0,					PointPush_SetForce (tag, 0, 0, 1)
-[227] = {{"WALK,				Elevator_RaiseToNearest (tag, ELEVATORSPEED)
-[228] = {{"WALK,REP,			Elevator_RaiseToNearest (tag, ELEVATORSPEED)
-[229] = {{"USE,				Elevator_RaiseToNearest (tag, ELEVATORSPEED)
-[230] = {{"USE,REP,			Elevator_RaiseToNearest (tag, ELEVATORSPEED)
-[231] = {{"WALK,				Elevator_LowerToNearest (tag, ELEVATORSPEED)
-[232] = {{"WALK,REP,			Elevator_LowerToNearest (tag, ELEVATORSPEED)
-[233] = {{"USE,				Elevator_LowerToNearest (tag, ELEVATORSPEED)
-[234] = {{"USE,REP,			Elevator_LowerToNearest (tag, ELEVATORSPEED)
-[235] = {{"WALK,				Elevator_MoveToFloor (tag, ELEVATORSPEED)
-[236] = {{"WALK,REP,			Elevator_MoveToFloor (tag, ELEVATORSPEED)
-[237] = {{"USE,				Elevator_MoveToFloor (tag, ELEVATORSPEED)
-[238] = {{"USE,REP,			Elevator_MoveToFloor (tag, ELEVATORSPEED)
-[239] = {{"WALK,				Floor_TransferNumeric (tag)
-[240] = {{"WALK,REP,			Floor_TransferNumeric (tag)
-[241] = {{"USE,				Floor_TransferNumeric (tag)
-[242] = {{"0,					Transfer_Heights (tag)
-[243] = {{"WALK,MONST,			Teleport_Line (tag, tag, 0)
-[244] = {{"WALK,REP,MONST,		Teleport_Line (tag, tag, 0)
-[245] = {{"0,					Scroll_Ceiling (tag, 5, 0, 0, 0)
-[246] = {{"0,					Scroll_Floor (tag, 5, 0, 0, 0)
-[247] = {{"0,					Scroll_Floor (tag, 5, 1, 0, 0)
-[248] = {{"0,					Scroll_Floor (tag, 5, 2, 0, 0)
-[249] = {{"0,					Scroll_Texture_Model (lineid, 1)
-[250] = {{"0,					Scroll_Ceiling (tag, 4, 0, 0, 0)
-[251] = {{"0,					Scroll_Floor (tag, 4, 0, 0, 0)
-[252] = {{"0,					Scroll_Floor (tag, 4, 1, 0, 0)
-[253] = {{"0,					Scroll_Floor (tag, 4, 2, 0, 0)
-[254] = {{"0,					Scroll_Texture_Model (lineid, 0)
-[255] = {{"0,					Scroll_Texture_Offsets ()
-[256] = {{"WALK,REP,			Stairs_BuildUpDoom (tag, ST_SLOW, 8, 0, 0)
-[257] = {{"WALK,REP,			Stairs_BuildUpDoom (tag, ST_TURBO, 16, 0, 0)
-[258] = {{"USE,REP,			Stairs_BuildUpDoom (tag, ST_SLOW, 8, 0, 0)
-[259] = {{"USE,REP,			Stairs_BuildUpDoom (tag, ST_TURBO, 16, 0, 0)
-[260] = {{"0,					TranslucentLine (lineid, 128)	// Changed to better reflect the BOOM default
-[261] = {{"0,					Transfer_CeilingLight (tag)
-[262] = {{"WALK,MONST,			Teleport_Line (tag, tag, 1)
-[263] = {{"WALK,REP,MONST,		Teleport_Line (tag, tag, 1)
-[264] = {{"MONWALK,			Teleport_Line (tag, tag, 1)
-[265] = {{"MONWALK,REP,		Teleport_Line (tag, tag, 1)
-[266] = {{"MONWALK,			Teleport_Line (tag, tag, 0)
-[267] = {{"MONWALK,REP,		Teleport_Line (tag, tag, 0)
-[268] = {{"MONWALK,			Teleport_NoFog (0, 0, tag, 1)
-[269] = {{"MONWALK,REP,		Teleport_NoFog (0, 0, tag, 1)
-[270] = {{"WALK,REP,			FS_Execute(tag)
-[271] = {{"0,					Static_Init (tag, Init_TransferSky, 0)
-[272] = {{"0,					Static_Init (tag, Init_TransferSky, 1)
-[273] = {{"WALK,REP,			FS_Execute(tag, 1)
-[274] = {{"WALK,				FS_Execute(tag)
-[275] = {{"WALK,				FS_Execute(tag, 1)
-[276] = {{"USE,REP,			FS_Execute(tag)
-[277] = {{"USE,				FS_Execute(tag)
-[278] = {{"SHOOT,REP,			FS_Execute(tag)
-[279] = {{"SHOOT,				FS_Execute(tag)
-[280] = {{"0,					Transfer_Heights (tag, 12)
-[281] = {{"0,					Sector_Set3DFloor(tag, 1, 0, 255)
-[282] = {{"0,					Static_Init(tag, 1)
-[284] = {{"0,					TranslucentLine (lineid, 128, 0)
-[285] = {{"0,					TranslucentLine (lineid, 192, 0)
-[286] = {{"0,					TranslucentLine (lineid,  48, 0)
-[287] = {{"0,					TranslucentLine (lineid, 128, 1)
-[288] = {{"0,    				TranslucentLine(lineid, 255, 0)
-[289] = {{"0,     				Sector_Set3DFloor(tag, 1, 1, 255)
-[300] = {{"0,     				Sector_Set3DFloor(tag, 1, 1, 127)
-[301] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 127)
-[302] = {{"0,     				Sector_Set3DFloor(tag, 3, 6, 127)
-[303] = {{"0,     				Sector_Set3DFloor(tag, 3)
-[304] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 255)
-[305] = {{"0,     				Sector_Set3DFloor(tag, 3, 2)
-[306] = {{"0,     				Sector_Set3DFloor(tag, 1)
-[332] = {{"0,					Sector_Set3DFloor(tag, 4)
-[333] = {{"0,					Static_Init (tag, Init_Gravity)
-[334] = {{"0,					Static_Init (tag, Init_Color)
-[335] = {{"0,					Static_Init (tag, Init_Damage)
-[336] = {{"0,					Line_Mirror ()
-[337] = {{"0,					Line_Horizon ()
-[338] = {{"WALK,				Floor_Waggle (tag, 24, 32, 0, 0)
-[339] = {{"WALK,				Floor_Waggle (tag, 12, 32, 0, 0)
-[340] = {{"0,					Plane_Align (1, 0)	// Slope front floor
-[341] = {{"0,					Plane_Align (0, 1)	// Slope front ceiling
-[342] = {{"0,					Plane_Align (1, 1)	// Slope front floor and ceiling
-[343] = {{"0,					Plane_Align (2, 0)	// Slope back floor
-[344] = {{"0,					Plane_Align (0, 2)	// Slope back ceiling
-[345] = {{"0,					Plane_Align (2, 2)	// Slope back floor and ceiling
-[346] = {{"0,					Plane_Align (2, 1)	// Slope b.f. and f.c.
-[347] = {{"0,					Plane_Align (1, 2)	// Slope f.f. and b.c.
-[348] = {{"WALK,				Autosave ()
-[349] = {{"USE,				Autosave ()
-[350] = {{"0,					Transfer_Heights (tag, 2)	// Just fake the floor
-[351] = {{"0,					Transfer_Heights (tag, 6)	// Just fake the floor and clip it too
-[352] = {{"0,					Sector_CopyScroller(tag, 1)	// copy ceiling scroller
-[353] = {{"0,					Sector_CopyScroller(tag, 2)	// copy floor scroller
-[354] = {{"0,					Sector_CopyScroller(tag, 6)	// copy carrying floor scroller
-[400] = {{"0,     				Sector_Set3DFloor(tag, 1, 0, 255)
-[401] = {{"0,     				Sector_Set3DFloor(tag, 1, 16, 255)
-[402] = {{"0,     				Sector_Set3DFloor(tag, 1, 32, 255)
-[403] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 255)
-[404] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 204)
-[405] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 153)
-[406] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 102)
-[407] = {{"0,     				Sector_Set3DFloor(tag, 2, 2, 51)
-[408] = {{"0,     				Sector_Set3DFloor(tag, 2, 2)
-[413] = {{"0,     				Sector_Set3DFloor(tag, 1, 8, 255)
-[414] = {{"0,     				Sector_Set3DFloor(tag, 1, 8, 204)
-[415] = {{"0,     				Sector_Set3DFloor(tag, 1, 8, 153)
-[416] = {{"0,     				Sector_Set3DFloor(tag, 1, 8, 102)
-[417] = {{"0,     				Sector_Set3DFloor(tag, 1, 8, 51)
-[409] = {{"0,					TranslucentLine (lineid, 204)	// 80% translucent
-[410] = {{"0,					TranslucentLine (lineid, 153)	// 60% translucent
-[411] = {{"0,					TranslucentLine (lineid, 101)	// 40% translucent
-[412] = {{"0,					TranslucentLine (lineid, 50)	// 20% translucent
-[422] = {{"0,					Scroll_Texture_Right (SCROLL_UNIT)
-[423] = {{"0,					Scroll_Texture_Up (SCROLL_UNIT)
-[424] = {{"0,					Scroll_Texture_Down (SCROLL_UNIT)
-[425] = {{"0,					Scroll_Texture_Both (0, SCROLL_UNIT, 0, 0, SCROLL_UNIT)
-[426] = {{"0,					Scroll_Texture_Both (0, SCROLL_UNIT, 0, SCROLL_UNIT, 0)
-[427] = {{"0,					Scroll_Texture_Both (0, 0, SCROLL_UNIT, 0, SCROLL_UNIT)
-[428] = {{"0,					Scroll_Texture_Both (0, 0, SCROLL_UNIT, SCROLL_UNIT, 0)
-[434] = {{"USE,					Floor_RaiseByValue (tag, F_SLOW, 2)
-[435] = {{"USE,REP,				Floor_RaiseByValue (tag, F_SLOW, 2)
-[436] = {{"WALK,				Floor_RaiseByValue (tag, F_SLOW, 2)
-[437] = {{"WALK,REP,			Floor_RaiseByValue (tag, F_SLOW, 2)
-[438] = {{"SHOOT,				Floor_RaiseByValue (tag, F_SLOW, 2)
-[439] = {{"SHOOT,REP,			Floor_RaiseByValue (tag, F_SLOW, 2)
-
-/****** BOOM generalized linetypes ******
- *
- * The general structure for a BOOM generalized translator is
- *
- *  [ZDoom Line Special] (first line type for this, last line type for this)
- *  {
- *     one or more stores
- *  }
- *
- * Stores have the form:
- *
- *  <destination> <op> <value>
- *
- * <destination> can be arg2, arg3, arg4, arg5, or flags. Arg1 will always
- *    be set to the line's tag, so it cannot be specified in a store.
- *
- * <op> can be ,= or =. If it is =, then <value> is simply stored in
- *    <destination>. If it is ,=, then <value> is logically or'ed with
- *    whatever is already in <destination>.
- *
- * <value> can be either a simple number, which will always be stored in
- *    <destination> based on <op>, or it can be a list of numbers chosen
- *    by using a bitmask. When using a list, this form is used:
- *
- *       mask [choices]
- *
- *    There can be at most 15 choices in a list. (If you need more, use
- *    more than one list.) Each choice is separated from the other choices
- *    by a comma. Each individual choice has the form:
- *
- *       <selector> : <value>
- *
- *    When ZDoom processes one of these lists, the linetype is logically
- *    and'ed with the mask. It then searches the list for a selector that
- *    matches the result of this operation. If it finds one, the selector's
- *    corresponding value is used as the value for <op> to store into
- *    <destination>.
- */
-
-
-// Generalized crusher (tag, dnspeed, upspeed, silent, damage)
-[Generic_Crusher] (0x2f80, 0x2fff)
-{
-	flags ,= 0x0020 [0x0020 : MONST]
-	arg2 = 0x0018  [0x0000 : C_SLOW,
-			0x0008 : C_NORMAL,
-			0x0010 : C_FAST,
-			0x0018 : C_TURBO]
-	arg3 = 0x0018  [0x0000 : C_SLOW,
-			0x0008 : C_NORMAL,
-			0x0010 : C_FAST,
-			0x0018 : C_TURBO]
-	arg4 = 0x0040  [0x0040 : 1]
-	arg5 = 10
+  -- doom id	--activators	--hexen id							-- a1			--a2			-- a3					--a3			--a5				--a6
+  [1] = 		{{2, 16, 1	},	{ENUM.DOOR_RAISE, 					0,				ENUM.D_SLOW,		ENUM.VDOORWAIT,		"TAG",										}},
+  [2] = 		{{0			},	{ENUM.DOOR_OPEN, 					"TAG", 			ENUM.D_SLOW,																		}},
+  [3] = 		{{0			},	{ENUM.DOOR_CLOSE,					"TAG", 			ENUM.D_SLOW,																		}},
+  [4] = 		{{0, 16		},	{ENUM.DOOR_RAISE, 					"TAG", 			ENUM.D_SLOW, 		ENUM.VDOORWAIT,													}},
+  [5] = 		{{0			},	{ENUM.FLOOR_RAISETOLOWESTCEILING, 	"TAG", 			ENUM.F_SLOW,																		}},
+  [6] = 		{{0			},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG", 			ENUM.C_NORMAL, 		ENUM.C_NORMAL, 		10,											}},
+  [7] = 		{{2			},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG", 			ENUM.ST_SLOW,		8,																}},
+  [8] = 		{{0			},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG", 			ENUM.ST_SLOW,		8,																}},
+  [9] = 		{{2			},	{ENUM.FLOOR_DONUT, 					"TAG", 			ENUM.DORATE,		ENUM.DORATE,													}},
+ [10] = 		{{0, 16		},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG", 			ENUM.P_FAST,		ENUM.PLATWAIT, 		0,											}},
+ [11] = 		{{2			},	{ENUM.EXIT_NORMAL, 					0,																									}},
+ [12] = 		{{0			},	{ENUM.LIGHT_MAXNEIGHBOR, 			"TAG"																								}},
+ [13] = 		{{0			},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			255,																				}},
+ [14] = 		{{2			},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2, 							4,											}},
+ [15] = 		{{2			},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2,							3,											}},
+ [16] = 		{{0			},	{ENUM.DOOR_CLOSEWAITOPEN, 			"TAG",			ENUM.D_SLOW,							240,										}},
+ [17] = 		{{0			},	{ENUM.LIGHT_STROBEDOOM,				"TAG",			5, 										35,											}},
+ [18] = 		{{2			},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_SLOW,																		}},
+ [19] = 		{{0			},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_SLOW,							128,										}},
+ [20] = 		{{2			},	{ENUM.PLAT_RAISEANDSTAYTX0, 		"TAG",			ENUM.P_SLOW/2,																		}},
+ [21] = 		{{2			},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_FAST,							ENUM.PLATWAIT,								}},
+ [22] = 		{{0			},	{ENUM.PLAT_RAISEANDSTAYTX0, 		"TAG",			ENUM.P_SLOW/2,																		}},
+ [23] = 		{{2			},	{ENUM.FLOOR_LOWERTOLOWEST, 			"TAG",			ENUM.F_SLOW,																		}},
+ [24] = 		{{6			},	{ENUM.FLOOR_RAISETOLOWESTCEILING, 	"TAG",			ENUM.F_SLOW,																		}},
+ [25] = 		{{0			},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_SLOW, 		ENUM.C_SLOW, 		10,											}},
+ [26] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		ENUM.VDOORWAIT,		ENUM.BCARD,		ENUM.CARDISSKULL, 	"TAG",	}},
+ [27] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		ENUM.VDOORWAIT,		ENUM.YCARD,		ENUM.CARDISSKULL, 	"TAG",	}},
+ [28] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		ENUM.VDOORWAIT,		ENUM.RCARD,		ENUM.CARDISSKULL, 	"TAG",	}},
+ [29] = 		{{2			},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_SLOW,		ENUM.VDOORWAIT													}},
+ [30] = 		{{0			},	{ENUM.FLOOR_RAISEBYTEXTURE, 		"TAG",			ENUM.F_SLOW,																		}},
+ [31] = 		{{2			},	{ENUM.DOOR_OPEN, 					0,				ENUM.D_SLOW,		"TAG"															}},
+ [32] = 		{{2, 16		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		0,					ENUM.BCARD,		ENUM.CARDISSKULL,	"TAG",	}},
+ [33] = 		{{2, 16		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		0,					ENUM.RCARD,		ENUM.CARDISSKULL,	"TAG",	}},
+ [34] = 		{{2, 16		},	{ENUM.DOOR_LOCKEDRAISE, 			0,				ENUM.D_SLOW,		0,					ENUM.YCARD,		ENUM.CARDISSKULL,	"TAG",	}},
+ [35] = 		{{0			},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			35,																					}},
+ [36] = 		{{0			},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_FAST,		136,															}},
+ [37] = 		{{0			},	{ENUM.FLOOR_LOWERTOLOWESTTXTY,		"TAG",			ENUM.F_SLOW,																		}},
+ [38] = 		{{0			},	{ENUM.FLOOR_LOWERTOLOWEST, 			"TAG",			ENUM.F_SLOW,																		}},
+ [39] = 		{{0, 16		},	{ENUM.TELEPORT,						0,				"TAG",																				}},
+ [40] = 		{{0			},	{ENUM.GENERIC_CEILING, 				"TAG",			ENUM.C_SLOW,		0,					1,			8,								}},
+ [41] = 		{{2			},	{ENUM.CEILING_LOWERTOFLOOR, 		"TAG",			ENUM.C_SLOW,																		}},
+ [42] = 		{{2, 1		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_SLOW,																		}},
+ [43] = 		{{2, 1		},	{ENUM.CEILING_LOWERTOFLOOR, 		"TAG",			ENUM.C_SLOW,																		}},
+ [44] = 		{{0			},	{ENUM.CEILING_LOWERANDCRUSH, 		"TAG",			ENUM.C_SLOW,		0,					2,											}},
+ [45] = 		{{2, 1		},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_SLOW,		128,															}},
+ [46] = 		{{6, 1, 16	},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_SLOW,																		}},
+ [47] = 		{{6			},	{ENUM.PLAT_RAISEANDSTAYTX0, 		"TAG",			ENUM.P_SLOW/2,																		}},
+ [48] = 		{{0			},	{ENUM.SCROLL_TEXTURE_LEFT, 			ENUM.SCROLL_UNIT,																					}},
+ [49] = 		{{2			},	{ENUM.CEILING_CRUSHANDRAISEDIST, 	"TAG",			8,					ENUM.C_SLOW,		10,											}},
+ [50] = 		{{2			},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_SLOW,																		}},
+ [51] = 		{{2			},	{ENUM.EXIT_SECRET, 					0,																									}},
+ [52] = 		{{0			},	{ENUM.EXIT_NORMAL, 					0,																									}},
+ [53] = 		{{0			},	{ENUM.PLAT_PERPETUALRAISELIP, 		"TAG",			ENUM.P_SLOW,		ENUM.PLATWAIT,		0,											}},
+ [54] = 		{{0			},	{ENUM.PLAT_STOP, 					"TAG",																								}},
+ [55] = 		{{2			},	{ENUM.FLOOR_RAISEANDCRUSHDOOM,		"TAG",			ENUM.F_SLOW,		10,					2,											}},
+ [56] = 		{{0			},	{ENUM.FLOOR_RAISEANDCRUSHDOOM, 		"TAG",			ENUM.F_SLOW,		10,					2,											}},
+ [57] = 		{{0			},	{ENUM.CEILING_CRUSHSTOP, 			"TAG",																								}},
+ [58] = 		{{0			},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,		24,																}},
+ [59] = 		{{0			},	{ENUM.FLOOR_RAISEBYVALUETXTY, 		"TAG",			ENUM.F_SLOW,		24,																}},
+ [60] = 		{{2, 1		},	{ENUM.FLOOR_LOWERTOLOWEST, 			"TAG",			ENUM.F_SLOW,																		}},
+ [61] = 		{{2, 1		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_SLOW,																		}},
+ [62] = 		{{2, 1		},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_FAST,		ENUM.PLATWAIT,		0,											}},
+ [63] = 		{{2, 1		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_SLOW,		ENUM.VDOORWAIT,													}},
+ [64] = 		{{2, 1		},	{ENUM.FLOOR_RAISETOLOWESTCEILING, 	"TAG",			ENUM.F_SLOW,																		}},
+ [65] = 		{{2, 1		},	{ENUM.FLOOR_RAISEANDCRUSHDOOM, 		"TAG",			ENUM.F_SLOW,		10,					2,											}},
+ [66] = 		{{2, 1		},	{ENUM.PLAT_UPBYVALUESTAYTX,			"TAG",			ENUM.P_SLOW/2,							3,											}},
+ [67] = 		{{2, 1		},	{ENUM.PLAT_UPBYVALUESTAYTX,			"TAG",			ENUM.P_SLOW/2,							4,											}},
+ [68] = 		{{2, 1		},	{ENUM.PLAT_RAISEANDSTAYTX0,			"TAG",			ENUM.P_SLOW/2,																		}},
+ [69] = 		{{2, 1		},	{ENUM.FLOOR_RAISETONEAREST,			"TAG",			ENUM.F_SLOW,																		}},
+ [70] = 		{{2, 1		},	{ENUM.FLOOR_LOWERTOHIGHEST,			"TAG",			ENUM.F_FAST,		136,															}},
+ [71] = 		{{2			},	{ENUM.FLOOR_LOWERTOHIGHEST,			"TAG",			ENUM.F_FAST,		136,															}},
+ [72] = 		{{0, 1		},	{ENUM.CEILING_LOWERANDCRUSH, 		"TAG",			ENUM.C_SLOW,		0,					2,											}},
+ [73] = 		{{0, 1		},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,											}},
+ [74] = 		{{0, 1		},	{ENUM.CEILING_CRUSHSTOP, 			"TAG",																								}},
+ [75] = 		{{0, 1		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_SLOW,																		}},
+ [76] = 		{{0, 1		},	{ENUM.DOOR_CLOSEWAITOPEN,			"TAG",			ENUM.D_SLOW,		240,															}},
+ [77] = 		{{0, 1		},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_NORMAL,		ENUM.C_NORMAL,		10,											}},
+ [78] = 		{{2, 1		},	{ENUM.FLOOR_TRANSFERNUMERIC, 		"TAG",																								}},
+ [79] = 		{{0, 1		},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			35,																					}},
+ [80] = 		{{0, 1		},	{ENUM.LIGHT_MAXNEIGHBOR, 			"TAG",																								}},
+ [81] = 		{{0, 1		},	{ENUM.LIGHT_CHANGETOVALUE,			"TAG",			255,																				}},
+ [82] = 		{{0, 1		},	{ENUM.FLOOR_LOWERTOLOWEST, 			"TAG",			ENUM.F_SLOW,																		}},
+ [83] = 		{{0, 1		},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_SLOW,		128,															}},
+ [84] = 		{{0, 1		},	{ENUM.FLOOR_LOWERTOLOWESTTXTY, 		"TAG",			ENUM.F_SLOW,																		}},
+ [85] = 		{{0			},	{ENUM.SCROLL_TEXTURE_RIGHT, 		ENUM.SCROLL_UNIT,																					}},
+ [86] = 		{{0, 1		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_SLOW,																		}},
+ [87] = 		{{0, 1		},	{ENUM.PLAT_PERPETUALRAISELIP, 		"TAG",			ENUM.P_SLOW,		ENUM.PLATWAIT,		0,											}},
+ [88] = 		{{0, 1,	16	},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_FAST,		ENUM.PLATWAIT,		0,											}},
+ [89] = 		{{0, 1		},	{ENUM.PLAT_STOP, 					"TAG",																								}},
+ [90] = 		{{0, 1		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_SLOW,		ENUM.VDOORWAIT,													}},
+ [91] = 		{{0, 1		},	{ENUM.FLOOR_RAISETOLOWESTCEILING, 	"TAG",			ENUM.F_SLOW,																		}},
+ [92] = 		{{0, 1		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,		24,																}},
+ [93] = 		{{0, 1		},	{ENUM.FLOOR_RAISEBYVALUETXTY, 		"TAG",			ENUM.F_SLOW,		24,																}},
+ [94] = 		{{0, 1		},	{ENUM.FLOOR_RAISEANDCRUSHDOOM, 		"TAG",			ENUM.F_SLOW,		10,					2,                                     		}},
+ [95] = 		{{0, 1		},	{ENUM.PLAT_RAISEANDSTAYTX0, 		"TAG",			ENUM.P_SLOW/2,                                                                 		}},
+ [96] = 		{{0, 1		},	{ENUM.FLOOR_RAISEBYTEXTURE, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+ [97] = 		{{0, 1,	16	},	{ENUM.TELEPORT, 					0,				"TAG",                                                                         		}},
+ [98] = 		{{0, 1		},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_FAST,		136,                                                       		}},
+ [99] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE, 			"TAG",			ENUM.D_FAST,		0,					ENUM.BCARD,		ENUM.CARDISSKULL,      		}},
+[100] = 		{{0,		},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_TURBO,		16,					0,				0,                     		}},
+[101] = 		{{2,		},	{ENUM.FLOOR_RAISETOLOWESTCEILING, 	"TAG",			ENUM.F_SLOW,                                                                   		}},
+[102] = 		{{2,		},	{ENUM.FLOOR_LOWERTOHIGHEST, 		"TAG",			ENUM.F_SLOW,		128,                                                       		}},
+[103] = 		{{2,		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_SLOW,                                                                   		}},
+[104] = 		{{0,		},	{ENUM.LIGHT_MINNEIGHBOR, 			"TAG",                                                                                         		}},
+[105] = 		{{0, 1		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_FAST,		ENUM.VDOORWAIT,                                            		}},
+[106] = 		{{0, 1		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[107] = 		{{0, 1		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[108] = 		{{0,		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_FAST,		ENUM.VDOORWAIT,                                            		}},
+[109] = 		{{0,		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[110] = 		{{0,		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[111] = 		{{2,		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_FAST,		ENUM.VDOORWAIT,                                            		}},
+[112] = 		{{2,		},	{ENUM.DOOR_OPEN, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[113] = 		{{2,		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[114] = 		{{2, 1		},	{ENUM.DOOR_RAISE, 					"TAG",			ENUM.D_FAST,		ENUM.VDOORWAIT,                                            		}},
+[115] = 		{{2, 1		},	{ENUM.DOOR_OPEN,					"TAG",			ENUM.D_FAST,                                                                   		}},
+[116] = 		{{2, 1		},	{ENUM.DOOR_CLOSE, 					"TAG",			ENUM.D_FAST,                                                                   		}},
+[117] = 		{{2, 1		},	{ENUM.DOOR_RAISE, 					0,				ENUM.D_FAST,		ENUM.VDOORWAIT,		"TAG",                                 		}},
+[118] = 		{{2			},	{ENUM.DOOR_OPEN, 					0,				ENUM.D_FAST,		"TAG",                                                     		}},
+[119] = 		{{0			},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[120] = 		{{0, 1		},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_TURBO,		ENUM.PLATWAIT,		0,                                     		}},
+[121] = 		{{0			},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_TURBO,		ENUM.PLATWAIT,		0,                                     		}},
+[122] = 		{{2			},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_TURBO,		ENUM.PLATWAIT,		0,                                     		}},
+[123] = 		{{2, 1		},	{ENUM.PLAT_DOWNWAITUPSTAYLIP, 		"TAG",			ENUM.P_TURBO,		ENUM.PLATWAIT,		0,                                     		}},
+[124] = 		{{0			},	{ENUM.EXIT_SECRET, 					0,																						            }},
+[125] = 		{{4			},	{ENUM.TELEPORT, 					0,				"TAG",                                                                         		}},
+[126] = 		{{4, 1		},	{ENUM.TELEPORT, 					0,				"TAG",                                                                         		}},
+[127] = 		{{2			},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_TURBO,		16,					0,				0,                     		}},
+[128] = 		{{0, 1		},	{ENUM.FLOOR_RAISETONEAREST,			"TAG",			ENUM.F_SLOW,                                                                   		}},
+[129] = 		{{0, 1		},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_FAST,                                                                   		}},
+[130] = 		{{0			},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_FAST,                                                                   		}},
+[131] = 		{{2			},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_FAST,                                                                   		}},
+[132] = 		{{2, 1		},	{ENUM.FLOOR_RAISETONEAREST, 		"TAG",			ENUM.F_FAST,                                                                   		}},
+[133] = 		{{2			},	{ENUM.DOOR_LOCKEDRAISE,				"TAG",			ENUM.D_FAST,		0,					ENUM.BCARD,		ENUM.CARDISSKULL,      		}},
+[134] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE,				"TAG",			ENUM.D_FAST,		0,					ENUM.RCARD,		ENUM.CARDISSKULL,      		}},
+[135] = 		{{2			},	{ENUM.DOOR_LOCKEDRAISE,				"TAG",			ENUM.D_FAST,		0,					ENUM.RCARD,		ENUM.CARDISSKULL,      		}},
+[136] = 		{{2, 1		},	{ENUM.DOOR_LOCKEDRAISE,				"TAG",			ENUM.D_FAST,		0,					ENUM.YCARD,		ENUM.CARDISSKULL,      		}},
+[137] = 		{{2			},	{ENUM.DOOR_LOCKEDRAISE,				"TAG",			ENUM.D_FAST,		0,					ENUM.YCARD,		ENUM.CARDISSKULL,      		}},
+[138] = 		{{2, 1		},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			255,                                                                           		}},
+[139] = 		{{2, 1		},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			35,                                                                            		}},
+[140] = 		{{2			},	{ENUM.FLOOR_RAISEBYVALUETIMES8, 	"TAG",			ENUM.F_SLOW,		64,                                                        		}},
+[141] = 		{{0			},	{ENUM.CEILING_CRUSHANDRAISESILENTA, "TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,                                    		}},
+[142] = 		{{0			},	{ENUM.FLOOR_RAISEBYVALUETIMES8, 	"TAG",			ENUM.F_SLOW,		64,                                                        		}},
+[143] = 		{{0			},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2,		3,                                                         		}},
+[144] = 		{{0			},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2,		4,                                                         		}},
+[145] = 		{{0			},	{ENUM.CEILING_LOWERTOFLOOR, 		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[146] = 		{{0			},	{ENUM.FLOOR_DONUT, 					"TAG",			ENUM.DORATE,		ENUM.DORATE,                                               		}},
+[147] = 		{{0, 1		},	{ENUM.FLOOR_RAISEBYVALUETIMES8,		"TAG",			ENUM.F_SLOW,		64,                                                        		}},
+[148] = 		{{0, 1		},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2,		3,                                                         		}},
+[149] = 		{{0, 1		},	{ENUM.PLAT_UPBYVALUESTAYTX, 		"TAG",			ENUM.P_SLOW/2,		4,                                                         		}},
+[150] = 		{{0, 1		},	{ENUM.CEILING_CRUSHANDRAISESILENTA, "TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,                                    		}},
+[151] = 		{{0, 1		},	{ENUM.FLOORANDCEILING_LOWERRAISE, 	"TAG",			ENUM.F_SLOW,		ENUM.C_SLOW,                                               		}},
+[152] = 		{{0, 1		},	{ENUM.CEILING_LOWERTOFLOOR, 		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[153] = 		{{0			},	{ENUM.FLOOR_TRANSFERTRIGGER,		"TAG",                                                                                         		}},
+[154] = 		{{0, 1		},	{ENUM.FLOOR_TRANSFERTRIGGER, 		"TAG",                                                                                         		}},
+[155] = 		{{0, 1		},	{ENUM.FLOOR_DONUT, 					"TAG",			ENUM.DORATE,		ENUM.DORATE,                                               		}},
+[156] = 		{{0, 1		},	{ENUM.LIGHT_STROBEDOOM, 			"TAG",			5,					35,                                                        		}},
+[157] = 		{{0, 1		},	{ENUM.LIGHT_MINNEIGHBOR, 			"TAG",                                                                                         		}},
+[158] = 		{{2,		},	{ENUM.FLOOR_RAISEBYTEXTURE, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[159] = 		{{2,		},	{ENUM.FLOOR_LOWERTOLOWESTTXTY,		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[160] = 		{{2,		},	{ENUM.FLOOR_RAISEBYVALUETXTY, 		"TAG",			ENUM.F_SLOW,		24,                                                        		}},
+[161] = 		{{2,		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,		24,                                                        		}},
+[162] = 		{{2,		},	{ENUM.PLAT_PERPETUALRAISELIP, 		"TAG",			ENUM.P_SLOW,		ENUM.PLATWAIT,		0,                                     		}},
+[163] = 		{{2,		},	{ENUM.PLAT_STOP, 					"TAG",                                                                                         		}},
+[164] = 		{{2,		},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_NORMAL,		ENUM.C_NORMAL,		10,                                    		}},
+[165] = 		{{2,		},	{ENUM.CEILING_CRUSHANDRAISESILENTA, "TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,                                    		}},
+[166] = 		{{2,		},	{ENUM.FLOORANDCEILING_LOWERRAISE, 	"TAG",			ENUM.F_SLOW,		ENUM.C_SLOW,		1998,                                  		}},
+[167] = 		{{2,		},	{ENUM.CEILING_LOWERANDCRUSH, 		"TAG",			ENUM.C_SLOW,		0,					2,                                     		}},
+[168] = 		{{2,		},	{ENUM.CEILING_CRUSHSTOP, 			"TAG",                                                                                         		}},
+[169] = 		{{2,		},	{ENUM.LIGHT_MAXNEIGHBOR, 			"TAG",                                                                                         		}},
+[170] = 		{{2,		},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			35,                                                                            		}},
+[171] = 		{{2,		},	{ENUM.LIGHT_CHANGETOVALUE, 			"TAG",			255,                                                                           		}},
+[172] = 		{{2,		},	{ENUM.LIGHT_STROBEDOOM, 			"TAG",			5,					35,                                                        		}},
+[173] = 		{{2,		},	{ENUM.LIGHT_MINNEIGHBOR, 			"TAG",                                                                                         		}},
+[174] = 		{{2, 16		},	{ENUM.TELEPORT, 					0,				"TAG",                                                                         		}},
+[175] = 		{{2			},	{ENUM.DOOR_CLOSEWAITOPEN, 			"TAG",			ENUM.D_SLOW,		240,                                                       		}},
+[176] = 		{{2, 1		},	{ENUM.FLOOR_RAISEBYTEXTURE, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[177] = 		{{2, 1		},	{ENUM.FLOOR_LOWERTOLOWESTTXTY, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[178] = 		{{2, 1		},	{ENUM.FLOOR_RAISEBYVALUETIMES8, 	"TAG",			ENUM.F_SLOW,		64,                                                        		}},
+[179] = 		{{2, 1		},	{ENUM.FLOOR_RAISEBYVALUETXTY, 		"TAG",			ENUM.F_SLOW,		24,                                                        		}},
+[180] = 		{{2, 1		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,		24,                                                        		}},
+[181] = 		{{2, 1		},	{ENUM.PLAT_PERPETUALRAISELIP, 		"TAG",			ENUM.P_SLOW,		ENUM.PLATWAIT,		0,                                     		}},
+[182] = 		{{2, 1		},	{ENUM.PLAT_STOP, 					"TAG",                                                                                         		}},
+[183] = 		{{2, 1		},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_NORMAL,		ENUM.C_NORMAL,		10,                                    		}},
+[184] = 		{{2, 1		},	{ENUM.CEILING_CRUSHANDRAISEA, 		"TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,                                    		}},
+[185] = 		{{2, 1		},	{ENUM.CEILING_CRUSHANDRAISESILENTA, "TAG",			ENUM.C_SLOW,		ENUM.C_SLOW,		10,                                    		}},
+[186] = 		{{2, 1		},	{ENUM.FLOORANDCEILING_LOWERRAISE, 	"TAG",			ENUM.F_SLOW,		ENUM.C_SLOW,		1998,                                  		}},
+[187] = 		{{2, 1		},	{ENUM.CEILING_LOWERANDCRUSH, 		"TAG",			ENUM.C_SLOW,		0,					2,                                     		}},
+[188] = 		{{2, 1		},	{ENUM.CEILING_CRUSHSTOP, 			"TAG",                                                                                         		}},
+[189] = 		{{2,		},	{ENUM.FLOOR_TRANSFERTRIGGER, 		"TAG",                                                                                         		}},
+[190] = 		{{2, 1		},	{ENUM.FLOOR_TRANSFERTRIGGER, 		"TAG",                                                                                         		}},
+[191] = 		{{2, 1		},	{ENUM.FLOOR_DONUT, 					"TAG",			ENUM.DORATE,		ENUM.DORATE,                                               		}},
+[192] = 		{{2, 1		},	{ENUM.LIGHT_MAXNEIGHBOR, 			"TAG",                                                                                         		}},
+[193] = 		{{2, 1		},	{ENUM.LIGHT_STROBEDOOM, 			"TAG",			5,					35,                                                        		}},
+[194] = 		{{2, 1		},	{ENUM.LIGHT_MINNEIGHBOR, 			"TAG",                                                                                         		}},
+[195] = 		{{2, 1,	16	},	{ENUM.TELEPORT, 					0,				"TAG",                                                                         		}},
+[196] = 		{{2, 1		},	{ENUM.DOOR_CLOSEWAITOPEN, 			"TAG",			ENUM.D_SLOW,		240,                                                       		}},
+[197] = 		{{6			},	{ENUM.EXIT_NORMAL, 					0,                                                                                             		}},
+[198] = 		{{6			},	{ENUM.EXIT_SECRET, 					0,                                                                                             		}},
+[199] = 		{{0			},	{ENUM.CEILING_LOWERTOLOWEST,		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[200] = 		{{0			},	{ENUM.CEILING_LOWERTOHIGHESTFLOOR, 	"TAG",			ENUM.C_SLOW,                                                                   		}},
+[201] = 		{{0, 1		},	{ENUM.CEILING_LOWERTOLOWEST, 		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[202] = 		{{0, 1		},	{ENUM.CEILING_LOWERTOHIGHESTFLOOR, 	"TAG",			ENUM.C_SLOW,                                                                   		}},
+[203] = 		{{2			},	{ENUM.CEILING_LOWERTOLOWEST,		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[204] = 		{{2			},	{ENUM.CEILING_LOWERTOHIGHESTFLOOR, 	"TAG",			ENUM.C_SLOW,                                                                   		}},
+[205] = 		{{2, 1		},	{ENUM.CEILING_LOWERTOLOWEST, 		"TAG",			ENUM.C_SLOW,                                                                   		}},
+[206] = 		{{2, 1		},	{ENUM.CEILING_LOWERTOHIGHESTFLOOR, 	"TAG",			ENUM.C_SLOW,                                                                   		}},
+[207] = 		{{0, 16		},	{ENUM.TELEPORT_NOFOG, 				"0",			0,					"TAG",				1,                                     		}},
+[208] = 		{{0, 1,	16	},	{ENUM.TELEPORT_NOFOG, 				"0",			0,					"TAG",				1,                                     		}},
+[209] = 		{{2, 16		},	{ENUM.TELEPORT_NOFOG, 				"0",			0,					"TAG",				1,                                     		}},
+[210] = 		{{2, 1,	16	},	{ENUM.TELEPORT_NOFOG, 				"0",			0,					"TAG",				1,                                     		}},
+[211] = 		{{2, 1		},	{ENUM.PLAT_TOGGLECEILING,			"TAG",                                                                                         		}},
+[212] = 		{{0, 1		},	{ENUM.PLAT_TOGGLECEILING, 			"TAG",                                                                                         		}},
+[213] = 		{{0			},	{ENUM.TRANSFER_FLOORLIGHT, 			"TAG",                                                                                         		}},
+[214] = 		{{0			},	{ENUM.SCROLL_CEILING, 				"TAG",			6,					0,					0,				0,                     		}},
+[215] = 		{{0			},	{ENUM.SCROLL_FLOOR, 				"TAG",			6,					0,					0,				0,                     		}},
+[216] = 		{{0			},	{ENUM.SCROLL_FLOOR, 				"TAG",			6,					1,					0,				0,                     		}},
+[217] = 		{{0			},	{ENUM.SCROLL_FLOOR, 				"TAG",			6,					2,					0,				0,                     		}},
+[218] = 		{{0			},	{ENUM.SCROLL_TEXTURE_MODEL, 		"LINEID",		2,                                                                             		}},
+[219] = 		{{0			},	{ENUM.FLOOR_LOWERTONEAREST, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[220] = 		{{0, 1		},	{ENUM.FLOOR_LOWERTONEAREST, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[221] = 		{{2			},	{ENUM.FLOOR_LOWERTONEAREST, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[222] = 		{{2, 1		},	{ENUM.FLOOR_LOWERTONEAREST, 		"TAG",			ENUM.F_SLOW,                                                                   		}},
+[223] = 		{{0			},	{ENUM.SECTOR_SETFRICTION,			"TAG",			0,                                                                             		}},
+[224] = 		{{0			},	{ENUM.SECTOR_SETWIND, 				"TAG",			0,					0,					1,                                     		}},
+[225] = 		{{0			},	{ENUM.SECTOR_SETCURRENT, 			"TAG",			0,					0,					1,                                     		}},
+[226] = 		{{0			},	{ENUM.POINTPUSH_SETFORCE, 			"TAG",			0,					0,					1,                                     		}},
+[227] = 		{{0			},	{ENUM.ELEVATOR_RAISETONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[228] = 		{{0, 1		},	{ENUM.ELEVATOR_RAISETONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[229] = 		{{2			},	{ENUM.ELEVATOR_RAISETONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[230] = 		{{2, 1		},	{ENUM.ELEVATOR_RAISETONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[231] = 		{{0			},	{ENUM.ELEVATOR_LOWERTONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[232] = 		{{0, 1		},	{ENUM.ELEVATOR_LOWERTONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[233] = 		{{2			},	{ENUM.ELEVATOR_LOWERTONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[234] = 		{{2, 1		},	{ENUM.ELEVATOR_LOWERTONEAREST,		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[235] = 		{{0			},	{ENUM.ELEVATOR_MOVETOFLOOR, 		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[236] = 		{{0, 1		},	{ENUM.ELEVATOR_MOVETOFLOOR, 		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[237] = 		{{2			},	{ENUM.ELEVATOR_MOVETOFLOOR, 		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[238] = 		{{2, 1		},	{ENUM.ELEVATOR_MOVETOFLOOR, 		"TAG",			ENUM.ELEVATORSPEED,                                                            		}},
+[239] = 		{{0			},	{ENUM.FLOOR_TRANSFERNUMERIC, 		"TAG",                                                                                         		}},
+[240] = 		{{0, 1		},	{ENUM.FLOOR_TRANSFERNUMERIC, 		"TAG",                                                                                         		}},
+[241] = 		{{2			},	{ENUM.FLOOR_TRANSFERNUMERIC, 		"TAG",                                                                                         		}},
+[242] = 		{{0			},	{ENUM.TRANSFER_HEIGHTS, 			"TAG",                                                                                         		}},
+[243] = 		{{0, 16		},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				0,                                                         		}},
+[244] = 		{{0, 1,	16	},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				0,                                                         		}},
+[245] = 		{{0			},	{ENUM.SCROLL_CEILING, 				"TAG",			5,					0,					0,				0,                     		}},
+[246] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			5,					0,					0,				0,                     		}},
+[247] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			5,					1,					0,				0,                     		}},
+[248] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			5,					2,					0,				0,                     		}},
+[249] = 		{{0			},	{ENUM.SCROLL_TEXTURE_MODEL, 		"LINEID",		1,                                                                             		}},
+[250] = 		{{0			},	{ENUM.SCROLL_CEILING, 				"TAG",			4,					0,					0,				0,                     		}},
+[251] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			4,					0,					0,				0,                     		}},
+[252] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			4,					1,					0,				0,                     		}},
+[253] = 		{{0			},	{ENUM.SCROLL_FLOOR,					"TAG",			4,					2,					0,				0,                     		}},
+[254] = 		{{0			},	{ENUM.SCROLL_TEXTURE_MODEL, 		"LINEID",		0,                                                                             		}},
+[255] = 		{{0			},	{ENUM.SCROLL_TEXTURE_OFFSETS,                                                                                                      		}},
+[256] = 		{{0, 1		},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_SLOW,		8,					0,				0,                     		}},
+[257] = 		{{0, 1		},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_TURBO,		16,					0,				0,                     		}},
+[258] = 		{{2, 1		},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_SLOW,		8,					0,				0,                     		}},
+[259] = 		{{2, 1		},	{ENUM.STAIRS_BUILDUPDOOM, 			"TAG",			ENUM.ST_TURBO,		16,					0,				0,                     		}},
+[260] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		128,                                                                           		}},
+[261] = 		{{0			},	{ENUM.TRANSFER_CEILINGLIGHT, 		"TAG",                                                                                         		}},
+[262] = 		{{0, 16		},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				1,                                                         		}},
+[263] = 		{{0, 1,	16	},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				1,                                                         		}},
+[264] = 		{{4			},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				1,                                                         		}},
+[265] = 		{{4, 1		},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				1,                                                         		}},
+[266] = 		{{4			},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				0,                                                         		}},
+[267] = 		{{4, 1		},	{ENUM.TELEPORT_LINE, 				"TAG",			"TAG",				0,                                                         		}},
+[268] = 		{{4			},	{ENUM.TELEPORT_NOFOG, 				0,				0,					"TAG",				1,                                     		}},
+[269] = 		{{4, 1		},	{ENUM.TELEPORT_NOFOG, 				0,				0,					"TAG",				1,                                     		}},
+[270] = 		{{0, 1		},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[271] = 		{{0			},	{ENUM.STATIC_INIT, 					"TAG",			ENUM.INIT_TRANSFERSKY,					0,                                     		}},
+[272] = 		{{0			},	{ENUM.STATIC_INIT, 					"TAG",			ENUM.INIT_TRANSFERSKY,					1,                                     		}},
+[273] = 		{{0, 1		},	{ENUM.FS_EXECUTE,					"TAG",			1,                                                                             		}},
+[274] = 		{{0			},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[275] = 		{{0			},	{ENUM.FS_EXECUTE,					"TAG",			1,                                                                             		}},
+[276] = 		{{2, 1		},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[277] = 		{{2			},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[278] = 		{{6, 1		},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[279] = 		{{6			},	{ENUM.FS_EXECUTE,					"TAG",                                                                                         		}},
+[280] = 		{{0			},	{ENUM.TRANSFER_HEIGHTS, 			"TAG",			12,                                                                           	 	}},
+[281] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			0,			255,                                                   		}},
+[282] = 		{{0			},	{ENUM.STATIC_INIT,					"TAG",			1,                                                                             		}},
+[284] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		128,		0,                                                                 		}},
+[285] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		192,		0,                                                                 		}},
+[286] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		 48,		0,                                                                 		}},
+[287] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		128,		1,                                                                 		}},
+[288] = 		{{0			},	{ENUM.TRANSLUCENTLINE,				"LINEID",		255,		0,                                                                 		}},
+[289] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			1,			255,                                                   		}},
+[300] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			1,			127,                                                   		}},
+[301] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			127,                                                   		}},
+[302] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			3,			6,			127,                                                   		}},
+[303] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			3,                                                                             		}},
+[304] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			255,                                                   		}},
+[305] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			3,			2,                                                                 		}},
+[306] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,                                                                             		}},
+[332] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			4,                                                                             		}},
+[333] = 		{{0			},	{ENUM.STATIC_INIT, 					"TAG",			ENUM.INIT_GRAVITY,                                                             		}},
+[334] = 		{{0			},	{ENUM.STATIC_INIT, 					"TAG",			ENUM.INIT_COLOR,                                                               		}},
+[335] = 		{{0			},	{ENUM.STATIC_INIT, 					"TAG",			ENUM.INIT_DAMAGE,                                                              		}},
+[336] = 		{{0			},	{ENUM.LINE_MIRROR,                                                                                             							}},
+[337] = 		{{0			},	{ENUM.LINE_HORIZON,                                                                                       								}},
+[338] = 		{{0			},	{ENUM.FLOOR_WAGGLE,					"TAG",			24,			32,			0,				0,                                     		}},
+[339] = 		{{0			},	{ENUM.FLOOR_WAGGLE,					"TAG",			12,			32,			0,				0,                                     		}},
+[340] = 		{{0			},	{ENUM.PLANE_ALIGN,					1,				0,                                                                             		}},
+[341] = 		{{0			},	{ENUM.PLANE_ALIGN,					0,				1,                                                                             		}},
+[342] = 		{{0			},	{ENUM.PLANE_ALIGN,					1,				1,                                                                             		}},
+[343] = 		{{0			},	{ENUM.PLANE_ALIGN,					2,				0,                                                                             		}},
+[344] = 		{{0			},	{ENUM.PLANE_ALIGN,					0,				2,                                                                             		}},
+[345] = 		{{0			},	{ENUM.PLANE_ALIGN,					2,				2,                                                                             		}},
+[346] = 		{{0			},	{ENUM.PLANE_ALIGN,					2,				1,                                                                             		}},
+[347] = 		{{0			},	{ENUM.PLANE_ALIGN,					1,				2,                                                                             		}},
+[348] = 		{{0			},	{ENUM.AUTOSAVE,                                                                                            								}},
+[349] = 		{{2			},	{ENUM.AUTOSAVE,                                                                                          								}},
+[350] = 		{{0			},	{ENUM.TRANSFER_HEIGHTS, 			"TAG",			2,                                                                             		}},
+[351] = 		{{0			},	{ENUM.TRANSFER_HEIGHTS, 			"TAG",			6,                                                                             		}},
+[352] = 		{{0			},	{ENUM.SECTOR_COPYSCROLLER,			"TAG",			1,                                                                             		}},
+[353] = 		{{0			},	{ENUM.SECTOR_COPYSCROLLER,			"TAG",			2,                                                                             		}},
+[354] = 		{{0			},	{ENUM.SECTOR_COPYSCROLLER,			"TAG",			6,                                                                             		}},
+[400] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			0,			255,                                                   		}},
+[401] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			16,			255,                                                   		}},
+[402] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			32,			255,                                                   		}},
+[403] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			255,                                                   		}},
+[404] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			204,                                                   		}},
+[405] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			153,                                                   		}},
+[406] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			102,                                                   		}},
+[407] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,			51,                                                    		}},
+[408] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			2,			2,                                                                 		}},
+[413] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			8,			255,                                                   		}},
+[414] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			8,			204,                                                   		}},
+[415] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			8,			153,                                                   		}},
+[416] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			8,			102,                                                   		}},
+[417] = 		{{0			},	{ENUM.SECTOR_SET3DFLOOR,			"TAG",			1,			8,			51,                                                    		}},
+[409] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		204,                                                                           		}},
+[410] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		153,                                                                           		}},
+[411] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		101,                                                                           		}},
+[412] = 		{{0			},	{ENUM.TRANSLUCENTLINE, 				"LINEID",		50,                                                                            		}},
+[422] = 		{{0			},	{ENUM.SCROLL_TEXTURE_RIGHT, 		ENUM.SCROLL_UNIT,                                                                              		}},
+[423] = 		{{0			},	{ENUM.SCROLL_TEXTURE_UP, 			ENUM.SCROLL_UNIT,                                                                              		}},
+[424] = 		{{0			},	{ENUM.SCROLL_TEXTURE_DOWN, 			ENUM.SCROLL_UNIT,                                                                              		}},
+[425] = 		{{0			},	{ENUM.SCROLL_TEXTURE_BOTH, 			0,				ENUM.SCROLL_UNIT,0,			0,				ENUM.SCROLL_UNIT,                  		}},
+[426] = 		{{0			},	{ENUM.SCROLL_TEXTURE_BOTH, 			0,				ENUM.SCROLL_UNIT,0,			ENUM.SCROLL_UNIT,	0,                             		}},
+[427] = 		{{0			},	{ENUM.SCROLL_TEXTURE_BOTH, 			0,				0,			ENUM.SCROLL_UNIT,0,				ENUM.SCROLL_UNIT,                  		}},
+[428] = 		{{0			},	{ENUM.SCROLL_TEXTURE_BOTH, 			0,				0,			ENUM.SCROLL_UNIT,				ENUM.SCROLL_UNIT,	0,             		}},
+[434] = 		{{2			},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
+[435] = 		{{2, 1		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
+[436] = 		{{0			},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
+[437] = 		{{0, 1		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
+[438] = 		{{6			},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
+[439] = 		{{6, 1		},	{ENUM.FLOOR_RAISEBYVALUE, 			"TAG",			ENUM.F_SLOW,2,                                                         				}},
 }
 
-// Generalized stairs (tag, speed, step, dir/igntxt, reset)
-[Generic_Stairs] (0x3000, 0x33ff)
-{
-	flags ,= 0x0020 [0x0020 : MONST]
-	arg2 = 0x0018  [0x0000 : ST_SLOW,
-			0x0008 : ST_NORMAL,
-			0x0010 : ST_FAST,
-			0x0018 : ST_TURBO]
-	arg3 = 0x00c0  [0x0000 : 4,
-			0x0040 : 8,
-			0x0080 : 16,
-			0x00c0 : 24]
-	arg4 = 0x0300  [0x0100 : 1,
-			0x0200 : 2,
-			0x0300 : 3]
-}
+function xlat:convert(doomid, tag)
 
-// Generalized lift (tag, speed, delay, target, height)
-[Generic_Lift] (0x3400, 0x37ff)
-{
-	flags ,= 0x0020 [0x0020 : MONST]
-	arg2 = 0x0018  [0x0000 : P_SLOW*2,
-			0x0008 : P_NORMAL*2,
-			0x0010 : P_FAST*2,
-			0x0018 : P_TURBO*2]
-	arg3 = 0x00c0  [0x0000 : 8,
-			0x0040 : 24,
-			0x0080 : 40,
-			0x00c0 : 80]
-	arg4 = 0x0300  [0x0000 : 1,
-			0x0100 : 2,
-			0x0200 : 3,
-			0x0300 : 4]
-}
+	local result = {}
+	result.activation 	= self:flags(self[doomid][1])
+	result.special 		= self[doomid][2][1]
+	result.a1 			= self[doomid][2][2]
+	result.a2 			= self[doomid][2][3]
+	result.a3 			= self[doomid][2][4]
+	result.a4 			= self[doomid][2][5]
+	result.a5 			= self[doomid][2][6]
+	result.a6 			= self[doomid][2][7]
 
-// Generalized locked door (tag, speed, kind, delay, lock)
-[Generic_Door] (0x3800, 0x3bff)
-{
-	arg2 = 0x0018  [0x0000 : D_SLOW,
-			0x0008 : D_NORMAL,
-			0x0010 : D_FAST,
-			0x0018 : D_TURBO]
-	arg3 = 0x0020  [0x0020 : 1]
-	arg4 = 0x0020  [0 : 34]
-	arg5 = 0x01c0  [0x0000 : AnyKey,
-			0x0040 : RCard,
-			0x0080 : BCard,
-			0x00c0 : YCard,
-			0x0100 : RSkull,
-			0x0140 : BSkull,
-			0x0180 : YSkull,
-			0x01c0 : AllKeys]
-	arg5 ,= 0x0200 [0x0200 : CardIsSkull]
-}
+	for k, v in pairs(result) do
+		if(result[k] == "TAG") then
+			result[k] == tag
+		end
+		if(result[k] == "LINEID") then
+			result[k] == tag
+		end
+	end
 
-// Generalized door (tag, speed, kind, delay, lock)
-[Generic_Door] (0x3c00, 0x3fff)
-{
-	flags ,= 0x0080 [0x0080 : MONST]
-	arg2 = 0x0018  [0x0000 : D_SLOW,
-			0x0008 : D_NORMAL,
-			0x0010 : D_FAST,
-			0x0018 : D_TURBO]
-	arg3 = 0x0060  [0x0000 : 64,
-			0x0020 : 65,
-			0x0040 : 66,
-			0x0060 : 67]
-	arg4 = 0x0300  [0x0000 : 8,
-			0x0100 : 34,
-			0x0200 : 69,
-			0x0300 : 240]
-}
+	return result
 
-// Generalized ceiling (tag, speed, height, target, change/model/direct/crush)
-[Generic_Ceiling] (0x4000, 0x5fff)
-{
-	flags ,= 0x0c20 [0x0020 : MONST]
-	arg2 = 0x0018 [0x0000 : F_SLOW,
-			0x0008 : F_NORMAL,
-			0x0010 : F_FAST,
-			0x0018 : F_TURBO]
-	arg3 = 0x0380 [0x0300 : 24,
-			0x0380 : 32]
-	arg4 = 0x0380 [0x0000 : 1,
-			0x0080 : 2,
-			0x0100 : 3,
-			0x0180 : 4,
-			0x0200 : 5,
-			0x0280 : 6]
-	arg5 = 0x0c00 [0x0000 : 0,
-			0x0400 : 1,
-			0x0800 : 2,
-			0x0c00 : 3]
-	arg5 ,= 0x0060 [0x0020 : 4,
-			 0x0040 : 8,
-			 0x0060 : 12]
-	arg5 ,= 0x1000 [0x1000 : 16]
-}
+end
 
-// Generalized floor (tag, speed, height, target, change/model/direct/crush)
-[Generic_Floor] (0x6000, 0x7fff)
-{
-	flags ,= 0x0c20 [0x0020 : MONST]
-	arg2 = 0x0018 [0x0000 : F_SLOW,
-			0x0008 : F_NORMAL,
-			0x0010 : F_FAST,
-			0x0018 : F_TURBO]
-	arg3 = 0x0380 [0x0300 : 24,
-			0x0380 : 32]
-	arg4 = 0x0380 [0x0000 : 1,
-			0x0080 : 2,
-			0x0100 : 3,
-			0x0180 : 4,
-			0x0200 : 5,
-			0x0280 : 6]
-	arg5 = 0x0c00 [0x0000 : 0,
-			0x0400 : 1,
-			0x0800 : 2,
-			0x0c00 : 3]
-	arg5 ,= 0x0060 [0x0020 : 4,
-			 0x0040 : 8,
-			 0x0060 : 12]
-	arg5 ,= 0x1000 [0x1000 : 16]
-}
+
+function xlat:flags(list)
+	local result = list[i]
+	for i = 2, #list do
+		if(list[i+1] ~= nil) then
+			result = bit32.bor(result, list[i+1]
+		end
+	end
+end
 
 
 
 
-}
+
