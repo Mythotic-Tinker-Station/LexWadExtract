@@ -174,11 +174,12 @@ local wad = class("wad",
 ---------------------------------------------------------
 -- Main Functions
 ---------------------------------------------------------
-function wad:init(path, acronym, patches, base, pk3path)
+function wad:init(path, acronym, patches, base, pk3path, toolspath)
 
 	self.base = base or self
 	self.acronym = acronym
 	self.pk3path = pk3path
+	self.toolspath = toolspath
 	self.extractpatches = patches or false
 
 	self:printf(0, "------------------------------------------------------------------------------------------\n")
@@ -307,8 +308,12 @@ function wad:init(path, acronym, patches, base, pk3path)
 	self:printf(0, "Extracting SNDINFO...")
 	self:extractSNDINFO()
 
-	--self:printf(0, "Extracting Mapinfo...")
+	--self:printf(0, "ExtractingMapinfo...")
 	--self:extractMapinfo()
+
+	self:printf(0, "Converting Doom>Hexen...")
+	self:convertDoomToHexen()
+
 	self:printf(0, "Complete.\n")
 
 	collectgarbage()
@@ -1478,37 +1483,6 @@ function wad:ModifyMaps()
 	self:printf(1, "\tDone.\n")
 end
 
-function wad:ConvertMaps()
-	if(self.base ~= self) then
-		for m = 1, #self.maps do
-			self:printf(2, "\tConverting Map: %d", m)
-
-			-- doom map > hexen
-			if(self.maps[m].format == "DM") then
-
-				-- add hexen's additional properties
-
-				-- things
-				for t = 1, #self.maps[m].things do
-					self.maps[m].things[t].id = 0
-					self.maps[m].things[t].z = z
-					self.maps[m].things[t].special = 0
-					self.maps[m].things[t].a1 = 0
-					self.maps[m].things[t].a2 = 0
-					self.maps[m].things[t].a3 = 0
-					self.maps[m].things[t].a4 = 0
-					self.maps[m].things[t].a5 = self.maps[m].things[t].typ
-				end
-
-				--linedefs
-				for l = 1, #self.maps[m].linedefs do
-
-
-				end
-			end
-		end
-	end
-end
 
 function wad:extractTextures()
 	if(self.base ~= self) then
@@ -1577,7 +1551,7 @@ function wad:extractMaps()
 		for m = 1, #self.maps do
 
 			-- doom/hexen
-			if(self.maps[m].format == "DM") then
+			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
 
 				-- lumps
 				local order = {}
@@ -1619,7 +1593,13 @@ function wad:extractMaps()
 				if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
 				if(self.maps[m].raw.scripts) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
 
-				local wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
+				local wad
+				if(self.maps[m].format == "DM") then
+					wad, err = io.open(string.format("%s/MAPS/%s.WAD.DM", self.pk3path, self.maps[m].name), "w+b")
+				else
+					wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
+				end
+
 				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
@@ -1819,6 +1799,52 @@ function wad:extractMapinfo()
 		self:printf(1, "\tNot extracting mapinfo for base wad.\n")
 	end
 end
+
+function wad:convertDoomToHexen()
+	if(self.base ~= self) then
+
+
+		------------------------------------------------------------------------------------------
+		-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
+		local ffi = require('ffi')
+		local l = ffi.os == 'Windows' and ffi.load('love') or ffi.C
+
+		ffi.cdef [[
+			int PHYSFS_mount(const char *newDir, const char *mountPoint, int appendToPath);
+		]]
+		l.PHYSFS_mount(string.format("%s/maps", self.pk3path), 'maps', 1)
+		------------------------------------------------------------------------------------------
+
+		-- create a new bat file
+		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
+
+
+		-- get a list of all mapfiles
+		local maplist = love.filesystem.getDirectoryItems('maps')
+
+		-- for each map file
+		for k, v in pairs(maplist) do
+			-- that has the .DM extention
+			if(v:sub(-3) == ".DM") then
+				-- write a command to the bat file
+				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+			end
+		end
+
+		-- delete .dm files
+		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
+		file:write(string.format('del "*.DM" /q', self.pk3path))
+
+		-- close bat file
+		file:close()
+
+		-- run bat file
+		io.popen(string.format("start /wait %s/zwadconv.bat", self.toolspath))
+
+	end
+end
+
+
 
 ---------------------------------------------------------
 -- Helpers

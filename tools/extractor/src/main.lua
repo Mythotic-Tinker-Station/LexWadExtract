@@ -12,19 +12,25 @@ function love.load(arg)
     --xlat = require("xlat")
     wad = require("clsWad")
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
-    local apppath = love.filesystem.getSourceBaseDirectory()
-    local pk3path = apppath:sub(1, -16) .. "pk3"
 
-    -- Gather base wad
-    doom2 = wad(apppath .. "/doom2_lex.wad")
+    local apppath = love.filesystem.getSourceBaseDirectory()
+
+    local pk3path = apppath:sub(1, -16) .. "pk3"
+    local toolspath = apppath .. "/tools"
+
+    local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     -- Filepath and acronym should be self explanitory
     -- Change patches to true to extract patches(only necessary for zdoom mapsets that use patches as map textures directly)
     -- You shouldnt need to ever change base or pk3path
 
+    ---------- edit these!-----------
+    local acronym = "WORM"
+    local pwad = apppath .. "/chnworm_lex.wad"
 
-    --       wad(filepath                           acronym     patches      base       pk3path)
-    mapset = wad(apppath .. "/chnworm_lex.wad",     "WORM",     false,      doom2,      pk3path)
+
+    -- dont not edit this anymore!
+    mapset = wad(pwad,     acronym,     false,      doom2,      pk3path,    toolspath)
 
 end
 
