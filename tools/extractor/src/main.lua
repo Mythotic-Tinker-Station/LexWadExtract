@@ -9,7 +9,7 @@
 
 function love.load(arg)
     class = require("mod30log")
-    xlat = require("xlat")
+    --xlat = require("xlat")
     wad = require("clsWad")
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
     local apppath = love.filesystem.getSourceBaseDirectory()
