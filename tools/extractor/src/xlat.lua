@@ -809,10 +809,10 @@ function xlat:convert(doomid, tag)
 
 	for k, v in pairs(result) do
 		if(result[k] == "TAG") then
-			result[k] == tag
+			result[k] = tag
 		end
 		if(result[k] == "LINEID") then
-			result[k] == tag
+			result[k] = tag
 		end
 	end
 
