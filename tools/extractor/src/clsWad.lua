@@ -1,3 +1,10 @@
+--[[
+	if anyone is looking at this code
+	run away, its awful
+--]]
+
+
+
 
 local wad = class("wad",
 {
@@ -95,6 +102,29 @@ local wad = class("wad",
 		{"texture",	"SFALL1",		"SFALL4"},
 		{"texture",	"SLADRIP1",		"SLADRIP3", "allowdecals"},
 		{"texture",	"WFALL1",		"WFALL4"},
+	},
+
+	linedef_flags =
+	{
+		[0x0001] = "blocking",
+		[0x0002] = "blockmonsters",
+		[0x0004] = "twosided",
+		[0x0008] = "sontpegtop",
+		[0x0010] = "dontpegbottom",
+		[0x0020] = "secret",
+		[0x0040] = "blocksound",
+		[0x0080] = "dontdraw",
+		[0x0100] = "mapped",
+		[0x0200] = "repeatspecial",
+		[0x0400] = "playeruse",
+		[0x0800] = "monstercross",
+		[0x0C00] = "impact",
+		[0x1000] = "playerpush",
+		[0x1400] = "missilecross",
+		[0x1800] = "blocking",
+		[0x2000] = "monsteractivate",
+		[0x4000] = "blockplayers",
+		[0x8000] = "blockeverything",
 	},
 
 	ignorelist =
@@ -1803,18 +1833,6 @@ end
 function wad:convertDoomToHexen()
 	if(self.base ~= self) then
 
-
-		------------------------------------------------------------------------------------------
-		-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
-		local ffi = require('ffi')
-		local l = ffi.os == 'Windows' and ffi.load('love') or ffi.C
-
-		ffi.cdef [[
-			int PHYSFS_mount(const char *newDir, const char *mountPoint, int appendToPath);
-		]]
-		l.PHYSFS_mount(string.format("%s/maps", self.pk3path), 'maps', 1)
-		------------------------------------------------------------------------------------------
-
 		-- create a new bat file
 		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
 
@@ -1833,18 +1851,179 @@ function wad:convertDoomToHexen()
 
 		-- delete .dm files
 		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
-		file:write(string.format('del "*.DM" /q', self.pk3path))
+		file:write(string.format('del "*.DM" /q\n', self.pk3path))
+		file:write(string.format('exit', self.pk3path))
 
 		-- close bat file
 		file:close()
 
 		-- run bat file
-		io.popen(string.format("start /wait %s/zwadconv.bat", self.toolspath))
-
+		os.execute(string.format("start /wait %s/zwadconv.bat", self.toolspath))
 	end
 end
 
+function wad:convertHexenToUDMF()
+	if(self.base ~= self) then
 
+		-- get a list of all mapfiles
+		local maplist = love.filesystem.getDirectoryItems('maps')
+
+		-- for each map file
+		for k, v in pairs(maplist) do
+
+			-- open the map
+			local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
+			local raw = file:read("*all")
+			file:close()
+
+			-- gather header
+			local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", self.raw, 1)
+
+			-- dammit lua
+			lumpcount = lumpcount-1
+			dirpos = dirpos+1
+
+			-- check if valid(this shouldnt be necessary)
+			if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
+
+			self:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", self.header.magic, self.header.lumpcount, self.header.dirpos, isbase)
+			self:printf(1, "\tDone.\n")
+
+			local THINGS = {}
+			local LINEDEFS = {}
+			local SIDEDEFS = {}
+			local VERTEXES = {}
+			local SECTORS = {}
+			local BEHAVIOR = ""
+			local SCRIPTS = ""
+
+			-- for each lump
+			for l = 0, lumpcount do
+
+				-- get file meta data
+				local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(l*16))
+				name = self:removePadding(name)
+				filepos = filepos+1
+
+				-- get file data
+				local filedata = love.data.unpack(string.format("<c%d", size), raw, filepos)
+
+				-- gather thing information
+				if(name == "THINGS") then
+					local count = 0
+					for s = 1, #filedata, 20 do
+						count = count + 1
+						THINGS[count] = {}
+						THINGS[count].id = love.data.unpack("<H", filedata, s)
+						THINGS[count].x = love.data.unpack("<h", filedata, s+2)
+						THINGS[count].y = love.data.unpack("<h", filedata, s+4)
+						THINGS[count].z = love.data.unpack("<h", filedata, s+6)
+						THINGS[count].angle = love.data.unpack("<H", filedata, s+8)
+						THINGS[count].typ = love.data.unpack("<H", filedata, s+10)
+						THINGS[count].flags = love.data.unpack("<H", filedata, s+12)
+						THINGS[count].special = love.data.unpack("<B", filedata, s+14)
+						THINGS[count].a1 = love.data.unpack("<B", filedata, s+15)
+						THINGS[count].a2 = love.data.unpack("<B", filedata, s+16)
+						THINGS[count].a3 = love.data.unpack("<B", filedata, s+17)
+						THINGS[count].a4 = love.data.unpack("<B", filedata, s+18)
+						THINGS[count].a5 = love.data.unpack("<B", filedata, s+19)
+					end
+				end
+
+				-- gather linedef information
+				if(name == "LINEDEFS") then
+					local count = 0
+					for s = 1, #filedata, 16 do
+						count = count + 1
+						LINEDEFS[count] = {}
+						LINEDEFS[count].vertex_start = love.data.unpack("<H", filedata, s)
+						LINEDEFS[count].vertex_end = love.data.unpack("<H", filedata, s+2)
+						LINEDEFS[count].flags = love.data.unpack("<H", filedata, s+4)
+						LINEDEFS[count].special = love.data.unpack("<B", filedata, s+6)
+						LINEDEFS[count].a1 = love.data.unpack("<B", filedata, s+7)
+						LINEDEFS[count].a2 = love.data.unpack("<B", filedata, s+8)
+						LINEDEFS[count].a3 = love.data.unpack("<B", filedata, s+9)
+						LINEDEFS[count].a4 = love.data.unpack("<B", filedata, s+10)
+						LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
+						LINEDEFS[count].right_sidedef = love.data.unpack("<B", filedata, s+12)
+						LINEDEFS[count].left_sidedef = love.data.unpack("<B", filedata, s+14)
+					end
+				end
+
+				-- gather sidedef information
+				if(name == "SIDEDEFS") then
+					local count = 0
+					for s = 1, #filedata, 30 do
+						count = count + 1
+						SIDEDEFS[count] = {}
+						SIDEDEFS[count].xoffset = love.data.unpack("<h", filedata, s)
+						SIDEDEFS[count].yoffset = love.data.unpack("<h", filedata, s+2)
+						SIDEDEFS[count].upper_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+						SIDEDEFS[count].lower_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+						SIDEDEFS[count].middle_texture = self:removePadding(love.data.unpack("<c8", filedata, s+20))
+						SIDEDEFS[count].sector = love.data.unpack("<H", filedata, s+28)
+					end
+				end
+
+				-- gather vertex information
+				if(name == "VERTEXES") then
+					local count = 0
+					for s = 1, #filedata, 4 do
+						count = count + 1
+						VERTEXES[count] = {}
+						VERTEXES[count].x = love.data.unpack("<h", filedata, s)
+						VERTEXES[count].y = love.data.unpack("<h", filedata, s+2)
+					end
+				end
+
+				-- gather sector information
+				if(name == "SECTORS") then
+					local count = 0
+					for s = 1, #filedata, 4 do
+						count = count + 1
+						SECTORS[count] = {}
+						SECTORS[count].floor_height = love.data.unpack("<h", filedata, s)
+						SECTORS[count].ceiling_height = love.data.unpack("<h", filedata, s+2)
+						SECTORS[count].floor_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+						SECTORS[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+						SECTORS[count].light = love.data.unpack("<h", filedata, s+20)
+						SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
+						SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
+					end
+				end
+
+				-- copy the behavior lump
+				if(name == "BEHAVIOR") then
+					BEHAVIOR = filedata
+				end
+
+				-- copy the scripts lump
+				if(name == "SCRIPTS") then
+					SCRIPTS = filedata
+				end
+			end
+
+			-- build the udmf textmap
+			local textmap = ""
+
+
+			-- vertexes
+			for s = 1, #VERTEXES do
+				textmap = string.format("%sVertex\n{\nx=%d;\ny=%i\n}\n", textmap, VERTEXES[s].x, VERTEXES[s].y)
+			end
+--[[
+
+			for s = 1, #LINEDEFS do
+
+				textmap = string.format("%slinedef{v1=%s;v2=%s;", textmap, LINEDEFS[s].vertex_start, LINEDEFS[s].vertex_end)
+				--Console.WriteLine((myWeaponBag & knife) > 0 ? "--> Found knife" : "NO knife");
+				bit32.band(
+			end
+
+				]]
+		end
+	end
+end
 
 ---------------------------------------------------------
 -- Helpers

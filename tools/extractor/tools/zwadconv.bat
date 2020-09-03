@@ -12,3 +12,4 @@ D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/p
 D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/WORMAP.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/WORMAP.WAD
 cd D:/GitHub/LexWadExtract/pk3/MAPS/
 del "*.DM" /q
+exit
