@@ -23,8 +23,8 @@ function love.load(arg)
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
-    local acronym = "WORM"
-    local pwad = apppath .. "/chnworm_lex.wad"
+    local acronym = "MAYH"
+    local pwad = apppath .. "/mayhem_17_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -36,7 +36,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(pwad,     acronym,     false,      doom2,      pk3path,    toolspath)
+    mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath)
 
 end
 

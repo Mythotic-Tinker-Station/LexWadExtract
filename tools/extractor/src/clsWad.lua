@@ -344,6 +344,9 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath)
 	self:printf(0, "Converting Doom>Hexen...")
 	self:convertDoomToHexen()
 
+	self:printf(0, "Converting Hexen>UDMF...")
+	self:convertHexenToUDMF()
+
 	self:printf(0, "Complete.\n")
 
 	collectgarbage()
@@ -1318,8 +1321,8 @@ function wad:processMaps()
 					self.maps[m].linedefs[count].a3 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+9)
 					self.maps[m].linedefs[count].a4 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+10)
 					self.maps[m].linedefs[count].a5 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+11)
-					self.maps[m].linedefs[count].right_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+12)
-					self.maps[m].linedefs[count].left_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+14)
+					self.maps[m].linedefs[count].front_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+12)
+					self.maps[m].linedefs[count].back_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+14)
 				end
 
 				-- sidedefs
@@ -1626,6 +1629,8 @@ function wad:extractMaps()
 				local wad
 				if(self.maps[m].format == "DM") then
 					wad, err = io.open(string.format("%s/MAPS/%s.WAD.DM", self.pk3path, self.maps[m].name), "w+b")
+				elseif(self.maps[m].format == "HM") then
+					wad, err = io.open(string.format("%s/MAPS/%s.WAD.HM", self.pk3path, self.maps[m].name), "w+b")
 				else
 					wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
 				end
@@ -1845,7 +1850,7 @@ function wad:convertDoomToHexen()
 			-- that has the .DM extention
 			if(v:sub(-3) == ".DM") then
 				-- write a command to the bat file
-				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s.HM\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
 			end
 		end
 
@@ -1871,156 +1876,323 @@ function wad:convertHexenToUDMF()
 		-- for each map file
 		for k, v in pairs(maplist) do
 
-			-- open the map
-			local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
-			local raw = file:read("*all")
-			file:close()
+			if(v:sub(-3) == ".HM") then
 
-			-- gather header
-			local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", self.raw, 1)
+				-- open the map
+				local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
+				local raw = file:read("*all")
+				file:close()
 
-			-- dammit lua
-			lumpcount = lumpcount-1
-			dirpos = dirpos+1
+				-- gather header
+				local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", raw, 1)
 
-			-- check if valid(this shouldnt be necessary)
-			if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
+				-- dammit lua
+				lumpcount = lumpcount-1
+				dirpos = dirpos+1
 
-			self:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", self.header.magic, self.header.lumpcount, self.header.dirpos, isbase)
-			self:printf(1, "\tDone.\n")
+				-- check if valid(this shouldnt be necessary)
+				if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expesrc/clswadcted IWAD or PWAD, got: " .. magic) end
 
-			local THINGS = {}
-			local LINEDEFS = {}
-			local SIDEDEFS = {}
-			local VERTEXES = {}
-			local SECTORS = {}
-			local BEHAVIOR = ""
-			local SCRIPTS = ""
+				self:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", magic, lumpcount, dirpos, isbase)
+				self:printf(1, "\tDone.\n")
 
-			-- for each lump
-			for l = 0, lumpcount do
+				local THINGS = {}
+				local LINEDEFS = {}
+				local SIDEDEFS = {}
+				local VERTEXES = {}
+				local SECTORS = {}
+				local BEHAVIOR = ""
+				local SCRIPTS = ""
 
-				-- get file meta data
-				local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(l*16))
-				name = self:removePadding(name)
-				filepos = filepos+1
+				-- for each lump
+				for l = 0, lumpcount do
 
-				-- get file data
-				local filedata = love.data.unpack(string.format("<c%d", size), raw, filepos)
+					-- get file meta data
 
-				-- gather thing information
-				if(name == "THINGS") then
-					local count = 0
-					for s = 1, #filedata, 20 do
-						count = count + 1
-						THINGS[count] = {}
-						THINGS[count].id = love.data.unpack("<H", filedata, s)
-						THINGS[count].x = love.data.unpack("<h", filedata, s+2)
-						THINGS[count].y = love.data.unpack("<h", filedata, s+4)
-						THINGS[count].z = love.data.unpack("<h", filedata, s+6)
-						THINGS[count].angle = love.data.unpack("<H", filedata, s+8)
-						THINGS[count].typ = love.data.unpack("<H", filedata, s+10)
-						THINGS[count].flags = love.data.unpack("<H", filedata, s+12)
-						THINGS[count].special = love.data.unpack("<B", filedata, s+14)
-						THINGS[count].a1 = love.data.unpack("<B", filedata, s+15)
-						THINGS[count].a2 = love.data.unpack("<B", filedata, s+16)
-						THINGS[count].a3 = love.data.unpack("<B", filedata, s+17)
-						THINGS[count].a4 = love.data.unpack("<B", filedata, s+18)
-						THINGS[count].a5 = love.data.unpack("<B", filedata, s+19)
+					local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(l*16))
+					name = self:removePadding(name)
+					filepos = filepos+1
+
+					-- get file data
+					local filedata = love.data.unpack(string.format("<c%d", size), raw, filepos)
+
+					-- gather thing information
+					if(name == "THINGS") then
+						local count = 0
+						for s = 1, #filedata, 20 do
+							count = count + 1
+							THINGS[count] = {}
+							THINGS[count].id = love.data.unpack("<H", filedata, s)
+							THINGS[count].x = love.data.unpack("<h", filedata, s+2)
+							THINGS[count].y = love.data.unpack("<h", filedata, s+4)
+							THINGS[count].z = love.data.unpack("<h", filedata, s+6)
+							THINGS[count].angle = love.data.unpack("<H", filedata, s+8)
+							THINGS[count].typ = love.data.unpack("<H", filedata, s+10)
+							THINGS[count].flags = love.data.unpack("<H", filedata, s+12)
+							THINGS[count].special = love.data.unpack("<B", filedata, s+14)
+							THINGS[count].a1 = love.data.unpack("<B", filedata, s+15)
+							THINGS[count].a2 = love.data.unpack("<B", filedata, s+16)
+							THINGS[count].a3 = love.data.unpack("<B", filedata, s+17)
+							THINGS[count].a4 = love.data.unpack("<B", filedata, s+18)
+							THINGS[count].a5 = love.data.unpack("<B", filedata, s+19)
+						end
+					end
+
+					-- gather linedef information
+					if(name == "LINEDEFS") then
+						local count = 0
+						for s = 1, #filedata, 16 do
+							count = count + 1
+							LINEDEFS[count] = {}
+							LINEDEFS[count].v1 = love.data.unpack("<H", filedata, s)
+							LINEDEFS[count].v2 = love.data.unpack("<H", filedata, s+2)
+							LINEDEFS[count].flags = love.data.unpack("<H", filedata, s+4)
+							LINEDEFS[count].special = love.data.unpack("<B", filedata, s+6)
+							LINEDEFS[count].a1 = love.data.unpack("<B", filedata, s+7)
+							LINEDEFS[count].a2 = love.data.unpack("<B", filedata, s+8)
+							LINEDEFS[count].a3 = love.data.unpack("<B", filedata, s+9)
+							LINEDEFS[count].a4 = love.data.unpack("<B", filedata, s+10)
+							LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
+							LINEDEFS[count].front_sidedef = love.data.unpack("<H", filedata, s+12)
+							LINEDEFS[count].back_sidedef = love.data.unpack("<H", filedata, s+14)
+						end
+					end
+
+					-- gather sidedef information
+					if(name == "SIDEDEFS") then
+						local count = 0
+						for s = 1, #filedata, 30 do
+							count = count + 1
+							SIDEDEFS[count] = {}
+							SIDEDEFS[count].xoffset = love.data.unpack("<h", filedata, s)
+							SIDEDEFS[count].yoffset = love.data.unpack("<h", filedata, s+2)
+							SIDEDEFS[count].upper_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+							SIDEDEFS[count].lower_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+							SIDEDEFS[count].middle_texture = self:removePadding(love.data.unpack("<c8", filedata, s+20))
+							SIDEDEFS[count].sector = love.data.unpack("<H", filedata, s+28)
+						end
+					end
+
+					-- gather vertex information
+					if(name == "VERTEXES") then
+						local count = 0
+						for s = 1, #filedata, 4 do
+							count = count + 1
+							VERTEXES[count] = {}
+							VERTEXES[count].x = love.data.unpack("<h", filedata, s)
+							VERTEXES[count].y = love.data.unpack("<h", filedata, s+2)
+						end
+					end
+
+					-- gather sector information
+					if(name == "SECTORS") then
+						local count = 0
+						for s = 1, #filedata, 26 do
+							count = count + 1
+							SECTORS[count] = {}
+							SECTORS[count].floor_height = love.data.unpack("<h", filedata, s)
+							SECTORS[count].ceiling_height = love.data.unpack("<h", filedata, s+2)
+							SECTORS[count].floor_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+							SECTORS[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+							SECTORS[count].light = love.data.unpack("<h", filedata, s+20)
+							SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
+							SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
+						end
+					end
+
+					-- copy the behavior lump
+					if(name == "BEHAVIOR") then
+						BEHAVIOR = filedata
+					end
+
+					-- copy the scripts lump
+					if(name == "SCRIPTS") then
+						SCRIPTS = filedata
 					end
 				end
 
-				-- gather linedef information
-				if(name == "LINEDEFS") then
-					local count = 0
-					for s = 1, #filedata, 16 do
-						count = count + 1
-						LINEDEFS[count] = {}
-						LINEDEFS[count].vertex_start = love.data.unpack("<H", filedata, s)
-						LINEDEFS[count].vertex_end = love.data.unpack("<H", filedata, s+2)
-						LINEDEFS[count].flags = love.data.unpack("<H", filedata, s+4)
-						LINEDEFS[count].special = love.data.unpack("<B", filedata, s+6)
-						LINEDEFS[count].a1 = love.data.unpack("<B", filedata, s+7)
-						LINEDEFS[count].a2 = love.data.unpack("<B", filedata, s+8)
-						LINEDEFS[count].a3 = love.data.unpack("<B", filedata, s+9)
-						LINEDEFS[count].a4 = love.data.unpack("<B", filedata, s+10)
-						LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
-						LINEDEFS[count].right_sidedef = love.data.unpack("<B", filedata, s+12)
-						LINEDEFS[count].left_sidedef = love.data.unpack("<B", filedata, s+14)
-					end
+				-- build the udmf textmap
+				local textmap = {}
+				textmap[1] = 'namespace="zdoom";\n'
+
+				-- vertices
+				for s = 1, #VERTEXES do
+					textmap[#textmap+1] = string.format("vertex // %d\n{\nx = %d;\ny = %d;\n}\n", s-1, VERTEXES[s].x, VERTEXES[s].y)
+				end
+				collectgarbage()
+
+				-- sidedefs
+				for s = 1, #SIDEDEFS do
+					textmap[#textmap+1] = string.format("sidedef // %d\n{\n", s-1)
+
+					-- offsets
+					if(SIDEDEFS[s].xoffset ~= 0) then textmap[#textmap+1] = string.format("offsetx=%d;\n", SIDEDEFS[s].xoffset) end
+					if(SIDEDEFS[s].yoffset ~= 0) then textmap[#textmap+1] = string.format("offsety=%d;\n", SIDEDEFS[s].yoffset) end
+
+					-- textures
+					if(SIDEDEFS[s].upper_texture ~= "-") then textmap[#textmap+1] = string.format('texturetop="%s";\n', SIDEDEFS[s].upper_texture) end
+					if(SIDEDEFS[s].middle_texture ~= "-") then textmap[#textmap+1] = string.format('texturemiddle="%s";\n', SIDEDEFS[s].middle_texture) end
+					if(SIDEDEFS[s].lower_texture ~= "-") then textmap[#textmap+1] = string.format('texturebottom="%s";\n', SIDEDEFS[s].lower_texture) end
+
+					-- sector
+					textmap[#textmap+1] = string.format("sector=%d;\n", SIDEDEFS[s].sector)
+
+					textmap[#textmap+1] = string.format("}\n")
+				end
+				collectgarbage()
+
+				-- linedefs
+				for s = 1, #LINEDEFS do
+					textmap[#textmap+1] = string.format("linedef // %d\n{\n", s-1)
+
+					-- vertices
+					textmap[#textmap+1] = string.format("v1=%d;\n", LINEDEFS[s].v1)
+					textmap[#textmap+1] = string.format("v2=%d;\n", LINEDEFS[s].v2)
+
+					-- special
+					if(LINEDEFS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special) end
+					if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
+					if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
+					if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
+					if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
+					if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
+
+					-- sidedefs
+					if(LINEDEFS[s].front_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sidefront=%d;\n", LINEDEFS[s].front_sidedef) end
+					if(LINEDEFS[s].back_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sideback=%d;\n", LINEDEFS[s].back_sidedef) end
+
+					-- flags
+					if(self:flags(LINEDEFS[s].flags, 0x0001)) then textmap[#textmap+1] = "blocking=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0002)) then textmap[#textmap+1] = "blockmonsters=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0004)) then textmap[#textmap+1] = "twosided=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0008)) then textmap[#textmap+1] = "dontpegtop=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0010)) then textmap[#textmap+1] = "dontpegbottom=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0020)) then textmap[#textmap+1] = "secret=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0040)) then textmap[#textmap+1] = "blocksound=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0080)) then textmap[#textmap+1] = "dontdraw=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0100)) then textmap[#textmap+1] = "mapped=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0200)) then textmap[#textmap+1] = "repeatspecial=true;\n" end
+
+					-- linedef activation is special
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x0) then textmap[#textmap+1] = "playercross=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x400) then textmap[#textmap+1] = "playeruse=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x800) then textmap[#textmap+1] = "monstercross=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0xC00) then textmap[#textmap+1] = "impact=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1000) then textmap[#textmap+1] = "playerpush=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1400) then textmap[#textmap+1] = "missilecross=true;\n" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "blocking=true;\n" end -- ???
+
+					if(self:flags(LINEDEFS[s].flags, 0x2000)) then textmap[#textmap+1] = "monsteractivate=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x4000)) then textmap[#textmap+1] = "blockplayers=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x8000)) then textmap[#textmap+1] = "blockeverything=true;\n" end
+
+					textmap[#textmap+1] = string.format("}\n")
+				end
+				collectgarbage()
+
+				-- sectors
+				for s = 1, #SECTORS do
+					textmap[#textmap+1] = string.format("sector // %d\n{\n", s-1)
+
+					-- heights
+					if(SECTORS[s].floor_height ~= 0) then textmap[#textmap+1] = string.format("heightfloor=%d;\n", SECTORS[s].floor_height) end
+					if(SECTORS[s].ceiling_height ~= 0) then textmap[#textmap+1] = string.format("heightceiling=%d;\n", SECTORS[s].ceiling_height) end
+
+					-- texture
+					textmap[#textmap+1] = string.format('texturefloor="%s";\n', SECTORS[s].floor_texture)
+					textmap[#textmap+1] = string.format('textureceiling="%s";\n', SECTORS[s].ceiling_texture)
+
+					-- light
+					if(SECTORS[s].light ~= 160) then textmap[#textmap+1] = string.format("lightlevel=%d;\n", SECTORS[s].light) end
+
+					-- special
+					if(SECTORS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", SECTORS[s].special) end
+					if(SECTORS[s].tag ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", SECTORS[s].tag) end
+
+					textmap[#textmap+1] = string.format("}\n")
+				end
+				collectgarbage()
+
+				-- things
+				for s = 1, #THINGS do
+					textmap[#textmap+1] = string.format("thing // %d\n{\n", s-1)
+
+					if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", THINGS[s].id) end
+
+					-- position
+					textmap[#textmap+1] = string.format("x=%d;\n", THINGS[s].x)
+					textmap[#textmap+1] = string.format("y=%d;\n", THINGS[s].y)
+					if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;\n", THINGS[s].z) end
+
+					-- angle
+					if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;\n", THINGS[s].angle) end
+
+					-- type
+					textmap[#textmap+1] = string.format("type=%d;\n", THINGS[s].typ)
+
+					-- flags
+					if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;\nskill2=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;\nskill5=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;\n" end
+					if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;\n" end
+
+					-- special
+					if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", THINGS[s].special) end
+					if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", THINGS[s].a1) end
+					if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", THINGS[s].a2) end
+					if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", THINGS[s].a3) end
+					if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", THINGS[s].a4) end
+					if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", THINGS[s].a5) end
+
+					textmap[#textmap+1] = string.format("}\n")
+				end
+				collectgarbage()
+
+				-- lumps
+				local order = {}
+				order[#order+1] = table.concat(textmap)
+				if(BEHAVIOR ~= "") then order[#order+1] = BEHAVIOR end
+				if(SCRIPTS ~= "") then order[#order+1] = SCRIPTS end
+				order[#order+1] = ""
+
+				local pos = {}
+				local lumpchunk = ""
+				for o = 1, #order do
+					pos[o] = #lumpchunk
+					lumpchunk = lumpchunk .. order[o]
 				end
 
-				-- gather sidedef information
-				if(name == "SIDEDEFS") then
-					local count = 0
-					for s = 1, #filedata, 30 do
-						count = count + 1
-						SIDEDEFS[count] = {}
-						SIDEDEFS[count].xoffset = love.data.unpack("<h", filedata, s)
-						SIDEDEFS[count].yoffset = love.data.unpack("<h", filedata, s+2)
-						SIDEDEFS[count].upper_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
-						SIDEDEFS[count].lower_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
-						SIDEDEFS[count].middle_texture = self:removePadding(love.data.unpack("<c8", filedata, s+20))
-						SIDEDEFS[count].sector = love.data.unpack("<H", filedata, s+28)
-					end
-				end
+				-- header
+				local header = love.data.pack("string", "<c4LL", "PWAD", #order+1, 12+#lumpchunk)
 
-				-- gather vertex information
-				if(name == "VERTEXES") then
-					local count = 0
-					for s = 1, #filedata, 4 do
-						count = count + 1
-						VERTEXES[count] = {}
-						VERTEXES[count].x = love.data.unpack("<h", filedata, s)
-						VERTEXES[count].y = love.data.unpack("<h", filedata, s+2)
-					end
-				end
+				-- directory
+				local dir = love.data.pack("string", "<i4i4c8", 10, 0, "MAP01")
+				local count = 1
 
-				-- gather sector information
-				if(name == "SECTORS") then
-					local count = 0
-					for s = 1, #filedata, 4 do
-						count = count + 1
-						SECTORS[count] = {}
-						SECTORS[count].floor_height = love.data.unpack("<h", filedata, s)
-						SECTORS[count].ceiling_height = love.data.unpack("<h", filedata, s+2)
-						SECTORS[count].floor_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
-						SECTORS[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
-						SECTORS[count].light = love.data.unpack("<h", filedata, s+20)
-						SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
-						SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
-					end
-				end
+				dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "TEXTMAP")
+				if(BEHAVIOR ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "BEHAVIOR") end
+				if(SCRIPTS ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
+				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				-- copy the behavior lump
-				if(name == "BEHAVIOR") then
-					BEHAVIOR = filedata
-				end
+				local wad, err = io.open(string.format("%s/MAPS/%s", self.pk3path, v:sub(1, -3)), "w+b")
+				if err then error("[ERROR] " .. err) end
+				wad:write(header)
+				wad:write(lumpchunk)
+				wad:write(dir)
+				wad:close()
 
-				-- copy the scripts lump
-				if(name == "SCRIPTS") then
-					SCRIPTS = filedata
-				end
 			end
-
-			-- build the udmf textmap
-			local textmap = ""
-
-
-			-- vertexes
-			for s = 1, #VERTEXES do
-				textmap = string.format("%sVertex\n{\nx=%d;\ny=%i\n}\n", textmap, VERTEXES[s].x, VERTEXES[s].y)
-			end
---[[
-
-			for s = 1, #LINEDEFS do
-
-				textmap = string.format("%slinedef{v1=%s;v2=%s;", textmap, LINEDEFS[s].vertex_start, LINEDEFS[s].vertex_end)
-				--Console.WriteLine((myWeaponBag & knife) > 0 ? "--> Found knife" : "NO knife");
-				bit32.band(
-			end
-
-				]]
 		end
 	end
 end
@@ -2028,6 +2200,17 @@ end
 ---------------------------------------------------------
 -- Helpers
 ---------------------------------------------------------
+
+function wad:flags(v, ...)
+    local a = bit.bor(...)
+    return bit.band(v, a) == a
+end
+
+function wad:flagsEx(v, ...)
+    local a = bit.bor(...)
+    return bit.band(v, a)
+end
+
 function wad:printf(verbose, ...)
 	if(verbose <= self.verbose) then
 		print(string.format(...))
