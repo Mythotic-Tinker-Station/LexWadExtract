@@ -127,6 +127,157 @@ local wad = class("wad",
 		[0x8000] = "blockeverything",
 	},
 
+	thing_filter =
+	{
+		5,
+		6,
+		7,
+		8,
+		9,
+		10,
+		12,
+		13,
+		15,
+		16,
+		17,
+		18,
+		19,
+		20,
+		21,
+		22,
+		23,
+		24,
+		25,
+		26,
+		27,
+		28,
+		29,
+		30,
+		31,
+		32,
+		33,
+		34,
+		35,
+		36,
+		37,
+		38,
+		39,
+		40,
+		41,
+		42,
+		43,
+		44,
+		45,
+		46,
+		47,
+		48,
+		49,
+		50,
+		51,
+		52,
+		53,
+		54,
+		55,
+		56,
+		57,
+		58,
+		59,
+		60,
+		61,
+		62,
+		63,
+		64,
+		65,
+		66,
+		67,
+		68,
+		69,
+		70,
+		71,
+		72,
+		73,
+		74,
+		75,
+		76,
+		77,
+		78,
+		79,
+		80,
+		81,
+		82,
+		83,
+		84,
+		85,
+		86,
+		87,
+		88,
+		89,
+		888,
+		2001,
+		2002,
+		2003,
+		2004,
+		2005,
+		2006,
+		2007,
+		2008,
+		2010,
+		2011,
+		2012,
+		2013,
+		2014,
+		2015,
+		2018,
+		2019,
+		2022,
+		2023,
+		2024,
+		2025,
+		2026,
+		2028,
+		2035,
+		2045,
+		2046,
+		2047,
+		2048,
+		2049,
+		3001,
+		3002,
+		3003,
+		3004,
+		3005,
+		3006,
+		5003,
+		5004,
+		5005,
+		5006,
+		5007,
+		5008,
+		5010,
+		5011,
+		5012,
+		5013,
+		5014,
+		5015,
+		9037,
+		9050,
+		9051,
+		9052,
+		9053,
+		9054,
+		9055,
+		9056,
+		9057,
+		9058,
+		9059,
+		9060,
+		9061,
+	},
+	thing_ignore =
+	{
+		32000,
+	},
+
 	ignorelist =
 	{
 		"F_SKY1",
@@ -204,13 +355,14 @@ local wad = class("wad",
 ---------------------------------------------------------
 -- Main Functions
 ---------------------------------------------------------
-function wad:init(path, acronym, patches, base, pk3path, toolspath)
+function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 
 	self.base = base or self
 	self.acronym = acronym
 	self.pk3path = pk3path
 	self.toolspath = toolspath
 	self.extractpatches = patches or false
+	self.spritesname = sprites
 
 	self:printf(0, "------------------------------------------------------------------------------------------\n")
 	self:printf(0, "Loading Wad '%s'...", path)
@@ -2080,7 +2232,7 @@ function wad:convertHexenToUDMF()
 					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0xC00) then textmap[#textmap+1] = "impact=true;\n" end
 					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1000) then textmap[#textmap+1] = "playerpush=true;\n" end
 					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1400) then textmap[#textmap+1] = "missilecross=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "blocking=true;\n" end -- ???
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "passuse=true;\n" end -- ???
 
 					if(self:flags(LINEDEFS[s].flags, 0x2000)) then textmap[#textmap+1] = "monsteractivate=true;\n" end
 					if(self:flags(LINEDEFS[s].flags, 0x4000)) then textmap[#textmap+1] = "blockplayers=true;\n" end
@@ -2115,47 +2267,54 @@ function wad:convertHexenToUDMF()
 
 				-- things
 				for s = 1, #THINGS do
-					textmap[#textmap+1] = string.format("thing // %d\n{\n", s-1)
+					if(not self:ignore_thing(THINGS[s].typ)) then
+						textmap[#textmap+1] = string.format("thing // %d\n{\n", s-1)
 
-					if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", THINGS[s].id) end
+						if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", THINGS[s].id) end
 
-					-- position
-					textmap[#textmap+1] = string.format("x=%d;\n", THINGS[s].x)
-					textmap[#textmap+1] = string.format("y=%d;\n", THINGS[s].y)
-					if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;\n", THINGS[s].z) end
+						-- position
+						textmap[#textmap+1] = string.format("x=%d;\n", THINGS[s].x)
+						textmap[#textmap+1] = string.format("y=%d;\n", THINGS[s].y)
+						if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;\n", THINGS[s].z) end
 
-					-- angle
-					if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;\n", THINGS[s].angle) end
+						-- angle
+						if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;\n", THINGS[s].angle) end
 
-					-- type
-					textmap[#textmap+1] = string.format("type=%d;\n", THINGS[s].typ)
+						-- type
+						if(self:find_thing(THINGS[s].typ)) then
+							textmap[#textmap+1] = string.format("type=31999;\n")
+							textmap[#textmap+1] = string.format("score=%d;\n", THINGS[s].typ)
+						else
+							textmap[#textmap+1] = string.format("type=%d;\n", THINGS[s].typ)
+						end
 
-					-- flags
-					if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;\nskill2=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;\nskill5=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;\n" end
-					if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;\n" end
+						-- flags
+						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;\nskill2=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;\nskill5=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;\n" end
 
-					-- special
-					if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", THINGS[s].special) end
-					if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", THINGS[s].a1) end
-					if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", THINGS[s].a2) end
-					if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", THINGS[s].a3) end
-					if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", THINGS[s].a4) end
-					if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", THINGS[s].a5) end
+						-- special
+						if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", THINGS[s].special) end
+						if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", THINGS[s].a1) end
+						if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", THINGS[s].a2) end
+						if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", THINGS[s].a3) end
+						if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", THINGS[s].a4) end
+						if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", THINGS[s].a5) end
 
-					textmap[#textmap+1] = string.format("}\n")
+						textmap[#textmap+1] = string.format("}\n")
+					end
 				end
 				collectgarbage()
 
@@ -2200,6 +2359,22 @@ end
 ---------------------------------------------------------
 -- Helpers
 ---------------------------------------------------------
+
+function wad:ignore_thing(a)
+	for i = 1, #self.thing_ignore do
+		if(self.thing_ignore[i] == a) then
+			return true
+		end
+	end
+end
+
+function wad:find_thing(a)
+	for i = 1, #self.thing_filter do
+		if(self.thing_filter[i] == a) then
+			return true
+		end
+	end
+end
 
 function wad:flags(v, ...)
     local a = bit.bor(...)

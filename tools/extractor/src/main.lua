@@ -25,6 +25,7 @@ function love.load(arg)
     ---------- edit these!-----------
     local acronym = "MAYH"
     local pwad = apppath .. "/mayhem_17_lex.wad"
+	local sprites = "MH"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -36,7 +37,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath)
+    mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath, sprites)
 
 end
 
