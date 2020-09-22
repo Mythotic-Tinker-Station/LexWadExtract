@@ -2201,13 +2201,31 @@ function wad:convertHexenToUDMF()
 					textmap[#textmap+1] = string.format("v1=%d;\n", LINEDEFS[s].v1)
 					textmap[#textmap+1] = string.format("v2=%d;\n", LINEDEFS[s].v2)
 
-					-- special
-					if(LINEDEFS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special) end
-					if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
-					if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
-					if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
-					if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
-					if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
+
+					-- specials
+					if(LINEDEFS[s].special ~= 121) then
+						if(LINEDEFS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special) end
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
+						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
+						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
+						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
+						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
+
+					-- Line_SetIdentification conversion
+					else
+						-- set line id
+						textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a0+(LINEDEFS[s].a4*256))
+
+						-- set line flags
+						if(self:flags(LINEDEFS[s].a1, 0x0001)) then textmap[#textmap+1] = "zoneboundary=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0002)) then textmap[#textmap+1] = "jumpover=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0004)) then textmap[#textmap+1] = "blockfloaters=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0008)) then textmap[#textmap+1] = "clipmidtex=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0010)) then textmap[#textmap+1] = "wrapmidtex=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0020)) then textmap[#textmap+1] = "midtex3d=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0040)) then textmap[#textmap+1] = "checkswitchrange=true;\n" end
+						if(self:flags(LINEDEFS[s].a1, 0x0080)) then textmap[#textmap+1] = "firstsideonly=true;\n" end
+					end
 
 					-- sidedefs
 					if(LINEDEFS[s].front_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sidefront=%d;\n", LINEDEFS[s].front_sidedef) end
