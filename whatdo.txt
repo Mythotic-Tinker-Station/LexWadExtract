@@ -35,15 +35,30 @@
 13:	Go to \tools\extractor\src and open the main.lua file
 
 14:	Change this line:
-		mapset = wad(apppath .. "/epic2_lex.wad", "EPC2", doom2, pk3path)
+    ---------- edit these!-----------
+    local acronym = "EPIC" -- the acronym you used in slade
+    local pwad = apppath .. "/epic_lex.wad" -- the wad that the slade script made
 
-		Change epic2_lex.wad to the wad file name you copied to \tools\extractor\
-		Change "EPC2" to a 4 letter acronym for the mapset
+15:	in the root of the git, go to the pk3 folder, add these folders
+	FLATS
+	PATCHES
+	MAPS
+	SOUNDS
+	TEXTURES
 
-15:	in FLATS, MAPS, and TEXTURES folders, you need to make a folder with the acronym you're going to use in each
+16: Leave them empty
 
 16:	Click Run.Bat
 
 17:	Watch it do the thing.
 
-18:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest, that pk3 is our project folder
+18:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest
+
+19: Just copy all that stuff to your pack pk3 folder, then setup the MAPINFO, LAUNAGE, and acs script
+
+
+
+
+
+
+

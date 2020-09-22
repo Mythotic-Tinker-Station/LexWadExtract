@@ -1,7 +1,5 @@
-WAD directory starts at 0x18E6A5 and has 11 entries
+WAD directory starts at 0x1814A and has 11 entries
 
 Converting MAP01
-Sector tag 23 is unreferenced
-Setting LineIDs
 
 New wad has 12 entries
