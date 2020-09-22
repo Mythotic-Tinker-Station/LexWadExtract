@@ -1,32 +1,8 @@
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH01.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH01.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH02.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH02.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH03.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH03.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH04.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH04.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH05.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH05.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH06.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH06.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH07.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH07.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH08.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH08.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH09.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH09.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH10.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH10.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH11.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH11.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH12.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH12.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH13.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH13.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH14.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH14.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH15.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH15.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH16.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH16.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH17.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH17.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH18.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH18.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH19.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH19.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH20.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH20.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH21.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH21.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH22.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH22.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH23.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH23.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH24.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH24.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH25.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH25.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH26.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH26.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH27.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH27.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH31.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH31.WAD.HM
-D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/MAYH32.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/MAYH32.WAD.HM
+D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/EPIC01.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/EPIC01.WAD.HM
+D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/EPIC02.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/EPIC02.WAD.HM
+D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/EPIC03.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/EPIC03.WAD.HM
+D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/EPIC04.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/EPIC04.WAD.HM
+D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/EPIC05.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/EPIC05.WAD.HM
 cd D:/GitHub/LexWadExtract/pk3/MAPS/
 del "*.DM" /q
 exit

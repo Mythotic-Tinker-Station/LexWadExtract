@@ -25,7 +25,7 @@ function love.load(arg)
     ---------- edit these!-----------
     local acronym = "MAYH"
     local pwad = apppath .. "/mayhem_17_lex.wad"
-	local sprites = "MH"
+	--local sprites = "EP"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
