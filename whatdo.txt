@@ -48,7 +48,7 @@
 
 16: Leave them empty
 
-16:	Click Run.Bat
+16:	Click tools/extractor/Run.Bat
 
 17:	Watch it do the thing.
 
