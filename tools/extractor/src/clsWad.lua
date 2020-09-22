@@ -2213,8 +2213,8 @@ function wad:convertHexenToUDMF()
 
 
 					-- if the special is 0, assume lineid
-					elseif(LINEDEFS[s].special == 0) then
-						textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a1)
+				elseif(LINEDEFS[s].special == 0) then
+						if(LINEDEFS[s].a1 ~= 0) textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a1) end
 
 
 					-- Line_SetIdentification conversion
