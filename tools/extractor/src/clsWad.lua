@@ -278,6 +278,113 @@ local wad = class("wad",
 		32000,
 	},
 
+	door_actions =
+	{
+		10,
+		11,
+		12,
+		13,
+		14,
+		202,
+		249,
+	},
+
+	platform_actions =
+	{
+		29,
+		30,
+		94,
+		60,
+		61,
+		62,
+		63,
+		64,
+		65,
+		172,
+		203,
+		206,
+		207,
+		228,
+		230,
+		231,
+	},
+
+	floor_actions =
+	{
+		20,
+		21,
+		22,
+		23,
+		24,
+		25,
+		28,
+		35,
+		36,
+		37,
+		46,
+		66,
+		67,
+		68,
+		95,
+		96,
+		138,
+		200,
+		235,
+		236,
+		238,
+		239,
+		240,
+		241,
+		242,
+		250,
+		251,
+	},
+
+	ceiling_actions =
+	{
+		38,
+		40,
+		41,
+		42,
+		43,
+		44,
+		45,
+		47,
+		69,
+		97,
+		104,
+		169,
+		192,
+		193,
+		194,
+		195,
+		196,
+		197,
+		198,
+		199,
+		201,
+		205,
+		252,
+		253,
+		254,
+		255,
+	},
+
+	door_sounds =
+	{
+		"DSDOROPN",
+		"DSDORCLS",
+		"DSBDOPN",
+		"DSBDCLS",
+	},
+
+	platform_sounds =
+	{
+		"DSPSTART",
+		"DSPSTOP",
+		"DSSTNMOV",
+	},
+
 	ignorelist =
 	{
 		"F_SKY1",
@@ -490,8 +597,8 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Extracting SNDINFO...")
 	self:extractSNDINFO()
 
-	--self:printf(0, "ExtractingMapinfo...")
-	--self:extractMapinfo()
+	self:printf(0, "Extracting SNDSEQ...")
+	self:extractSNDSEQ()
 
 	self:printf(0, "Converting Doom>Hexen...")
 	self:convertDoomToHexen()
@@ -1870,7 +1977,7 @@ function wad:extractAnimdefs()
 
 		self:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad flats.\n")
+		self:printf(1, "\tNot extracting base wad animdefs.\n")
 	end
 end
 
@@ -1878,20 +1985,26 @@ function wad:extractSNDINFO()
 	if(self.base ~= self) then
 
 		local txt = ""
+		self.snddefs = {}
+
 		for s = 1, #self.doomsounds do
 			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.doomsounds[s].name, self.doomsounds[s].newname)
+			self.snddefs[#self.snddefs+1] = { string.format("%s\\%s", self.acronym, self.doomsounds[s].name),  self.doomsounds[s].name }
 		end
 
 		for s = 1, #self.wavesounds do
 			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.wavesounds[s].name, self.wavesounds[s].newname)
+			self.snddefs[#self.snddefs+1] = { string.format("%s\\%s", self.acronym, self.wavesounds[s].name),  self.wavesounds[s].name }
 		end
 
 		for s = 1, #self.oggsounds do
 			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.oggsounds[s].name, self.oggsounds[s].newname)
+			self.snddefs[#self.snddefs+1] = { string.format("%s\\%s", self.acronym, self.oggsounds[s].name),  self.oggsounds[s].name }
 		end
 
 		for s = 1, #self.flacsounds do
 			txt = string.format("%s\n%s\\%s\t\t\t\t%s", txt, self.acronym, self.flacsounds[s].name, self.flacsounds[s].newname)
+			self.snddefs[#self.snddefs+1] = { string.format("%s\\%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
 		end
 
 		local file, err = io.open(string.format("%s/SNDINFO.%s.TXT", self.pk3path, self.acronym), "w")
@@ -1902,7 +2015,43 @@ function wad:extractSNDINFO()
 
 		self:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad flats.\n")
+		self:printf(1, "\tNot extracting base wad sndinfo.\n")
+	end
+end
+
+function wad:extractSNDSEQ()
+	if(self.base ~= self) then
+
+		local txt = {}
+		local used_doors = {}
+		for i, v in ipairs(self.snddefs) do
+			for i2, v2 in ipairs(self.door_sounds) do
+				if(v[2] == v2) then
+					txt[#txt+1] = string.format(":%s%s\n", self.acronym, v2)
+					txt[#txt+1] = string.format('\tplay %s\n', v[1])
+					txt[#txt+1] = string.format("\tnostopcutoff\n")
+					txt[#txt+1] = string.format("end\n\n")
+					used_doors[i2] = { true, string.format("%s%s", self.acronym, v2) }
+				end
+			end
+		end
+
+
+		txt[#txt+1] = string.format("[%sDoor\n", self.acronym)
+		if(used_doors[1] ~= nil) then if(used_doors[1][1]) then txt[#txt+1] = string.format("\t0 %s\n", used_doors[1][2]) end end
+		if(used_doors[2] ~= nil) then if(used_doors[2][1]) then txt[#txt+1] = string.format("\t1 %s\n", used_doors[2][2]) end end
+		if(used_doors[3] ~= nil) then if(used_doors[3][1]) then txt[#txt+1] = string.format("\t2 %s\n", used_doors[3][2]) end end
+		if(used_doors[4] ~= nil) then if(used_doors[4][1]) then txt[#txt+1] = string.format("\t3 %s\n", used_doors[4][2]) end end
+		txt[#txt+1] = string.format("]\n")
+
+		local file, err = io.open(string.format("%s/SNDSEQ.TXT", self.pk3path), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(table.concat(txt))
+		file:close()
+
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad sndseq\n")
 	end
 end
 
@@ -1944,7 +2093,7 @@ function wad:extractSounds()
 		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad flats.\n")
+		self:printf(1, "\tNot extracting base wad sounds.\n")
 	end
 end
 
@@ -1958,7 +2107,7 @@ function wad:extractTexturesLump()
 
 		self:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad flats.\n")
+		self:printf(1, "\tNot extracting base wad TextureX.\n")
 	end
 end
 
@@ -2149,6 +2298,7 @@ function wad:convertHexenToUDMF()
 							SECTORS[count].light = love.data.unpack("<h", filedata, s+20)
 							SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
 							SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
+							SECTORS[count].hassound = false -- special extractor var for sound sequences
 						end
 					end
 
@@ -2193,6 +2343,12 @@ function wad:convertHexenToUDMF()
 				end
 				collectgarbage()
 
+
+				local door_tags = {}
+				local floor_tags = {}
+				local ceiling_tags = {}
+				local platform_tags = {}
+
 				-- linedefs
 				for s = 1, #LINEDEFS do
 					textmap[#textmap+1] = string.format("linedef // %d\n{\n", s-1)
@@ -2201,21 +2357,10 @@ function wad:convertHexenToUDMF()
 					textmap[#textmap+1] = string.format("v1=%d;\n", LINEDEFS[s].v1)
 					textmap[#textmap+1] = string.format("v2=%d;\n", LINEDEFS[s].v2)
 
-
 					-- specials
-					if(LINEDEFS[s].special ~= 121 and LINEDEFS[s].special ~= 0) then
-						if(LINEDEFS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special) end
-						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
-						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
-						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
-						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
-						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
-
-
 					-- if the special is 0, assume lineid
-				elseif(LINEDEFS[s].special == 0) then
+					if(LINEDEFS[s].special == 0) then
 						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a1) end
-
 
 					-- Line_SetIdentification conversion
 					elseif(LINEDEFS[s].special == 121) then
@@ -2231,6 +2376,42 @@ function wad:convertHexenToUDMF()
 						if(self:flags(LINEDEFS[s].a2, 0x0020)) then textmap[#textmap+1] = "midtex3d=true;\n" end
 						if(self:flags(LINEDEFS[s].a2, 0x0040)) then textmap[#textmap+1] = "checkswitchrange=true;\n" end
 						if(self:flags(LINEDEFS[s].a2, 0x0080)) then textmap[#textmap+1] = "firstsideonly=true;\n" end
+
+					else
+						textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special)
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
+						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
+						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
+						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
+						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
+
+						-- look for door actions
+						for d = 1, #self.door_actions do
+							if(LINEDEFS[s].special == self.door_actions[d]) then
+								if(LINEDEFS[s].a1 ~= 0) then door_tags[LINEDEFS[s].a1] = true end
+							end
+						end
+
+						-- look for floor actions
+						for f = 1, #self.floor_actions do
+							if(LINEDEFS[s].special == self.floor_actions[f]) then
+								if(LINEDEFS[s].a1 ~= 0) then floor_tags[LINEDEFS[s].a1] = true end
+							end
+						end
+
+						-- look for ceiling actions
+						for c = 1, #self.ceiling_actions do
+							if(LINEDEFS[s].special == self.ceiling_actions[c]) then
+								if(LINEDEFS[s].a1 ~= 0) then ceiling_tags[LINEDEFS[s].a1] = true end
+							end
+						end
+
+						-- look for platform actions
+						for p = 1, #self.platform_actions do
+							if(LINEDEFS[s].special == self.platform_actions[p]) then
+								if(LINEDEFS[s].a1 ~= 0) then platform_tags[LINEDEFS[s].a1] = true end
+							end
+						end
 					end
 
 					-- sidedefs
@@ -2284,6 +2465,36 @@ function wad:convertHexenToUDMF()
 					-- special
 					if(SECTORS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", SECTORS[s].special) end
 					if(SECTORS[s].tag ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", SECTORS[s].tag) end
+
+
+					-- look for door sectors
+					for k, v in pairs(door_tags) do
+						if(SECTORS[s].tag == k) then
+							textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+						end
+					end
+
+					-- look for floor sectors
+					for k, v in pairs(floor_tags) do
+						if(SECTORS[s].tag == k) then
+							textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
+						end
+					end
+
+					-- look for ceiling sectors
+					for k, v in pairs(ceiling_tags) do
+						if(SECTORS[s].tag == k) then
+							textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
+						end
+					end
+
+					-- look for platform sectors
+					for k, v in pairs(platform_tags) do
+						if(SECTORS[s].tag == k) then
+							textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
+						end
+					end
+
 
 					textmap[#textmap+1] = string.format("}\n")
 				end
