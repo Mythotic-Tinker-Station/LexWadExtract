@@ -11,6 +11,8 @@ function love.load(arg)
 
 -------------------------------------------------
 
+	love.graphics.setFont(love.graphics.newFont(50))
+	love.graphics.setFont(love.graphics.newFont(50))
     class = require("mod30log")
     --xlat = require("xlat")
     wad = require("clsWad")
@@ -48,13 +50,8 @@ end
 function love.draw()
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.print("Complete", 10, 10)
 end
-
-
-
-
-
-
 
 
 

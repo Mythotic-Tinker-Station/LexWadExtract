@@ -2023,7 +2023,19 @@ function wad:extractSNDSEQ()
 	if(self.base ~= self) then
 
 		local txt = {}
+--[[
+		local dsdoropn = false
+		local dsdorcls = false
+		local dsbdopn = false
+		local dsbdcls = false
 
+		for i, v in ipairs(self.snddefs) do
+			if(v[2] == "DSDOROPN") then dsdoropn = true end
+			if(v[2] == "DSDORCLS") then dsdorcls = true end
+			if(v[2] == "DSBDOPN") then dsbdopn = true end
+			if(v[2] == "DSBDCLS") then dsbdcls = true end
+		end
+]]
 		-- doors
 		local used_doors = {}
 		for i, v in ipairs(self.snddefs) do
@@ -2120,7 +2132,7 @@ function wad:extractSNDSEQ()
 
 		txt[#txt+1] = string.format("end\n\n")
 
-		local file, err = io.open(string.format("%s/SNDSEQ.TXT", self.pk3path), "w")
+		local file, err = io.open(string.format("%s/SNDSEQ.%s.TXT", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(table.concat(txt))
 		file:close()
