@@ -2716,7 +2716,7 @@ function wad:convertHexenToUDMF()
 				wad:close()
 
 				self:printf(1, "\tClean up...\n")
-				os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
+				--os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
 				self:printf(1, "\tDone.\n")
 			end
 		end
