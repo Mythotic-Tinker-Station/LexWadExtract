@@ -2264,7 +2264,7 @@ function wad:convertHexenToUDMF()
 
 		-- for each map file
 		for k, v in pairs(maplist) do
-
+			self:printf(1, "\tConverting Map \n" .. v)
 			if(v:sub(-3) == ".HM") then
 
 				-- open the map
