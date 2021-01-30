@@ -2264,8 +2264,12 @@ function wad:convertHexenToUDMF()
 
 		-- for each map file
 		for k, v in pairs(maplist) do
-			self:printf(1, "\tConverting Map \n" .. v)
+
+
+
 			if(v:sub(-3) == ".HM") then
+
+				self:printf(1, "\tConverting Map \n" .. v)
 
 				-- open the map
 				local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
@@ -2281,9 +2285,6 @@ function wad:convertHexenToUDMF()
 
 				-- check if valid(this shouldnt be necessary)
 				if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expesrc/clswadcted IWAD or PWAD, got: " .. magic) end
-
-				self:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", magic, lumpcount, dirpos, isbase)
-				self:printf(1, "\tDone.\n")
 
 				local THINGS = {}
 				local LINEDEFS = {}
@@ -2714,6 +2715,9 @@ function wad:convertHexenToUDMF()
 				wad:write(dir)
 				wad:close()
 
+				self:printf(1, "\tClean up...\n")
+				os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
+				self:printf(1, "\tDone.\n")
 			end
 		end
 	end
