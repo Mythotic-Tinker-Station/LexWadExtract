@@ -2261,12 +2261,9 @@ function wad:convertHexenToUDMF()
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
 
-
 		-- for each map file
 		for k, v in pairs(maplist) do
-
-
-
+			print(k, v)
 			if(v:sub(-3) == ".HM") then
 
 				self:printf(1, "\tConverting Map \n" .. v)
@@ -2345,6 +2342,9 @@ function wad:convertHexenToUDMF()
 							LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
 							LINEDEFS[count].front_sidedef = love.data.unpack("<H", filedata, s+12)
 							LINEDEFS[count].back_sidedef = love.data.unpack("<H", filedata, s+14)
+
+
+
 						end
 					end
 
@@ -2360,6 +2360,7 @@ function wad:convertHexenToUDMF()
 							SIDEDEFS[count].lower_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
 							SIDEDEFS[count].middle_texture = self:removePadding(love.data.unpack("<c8", filedata, s+20))
 							SIDEDEFS[count].sector = love.data.unpack("<H", filedata, s+28)
+
 						end
 					end
 
@@ -2388,6 +2389,9 @@ function wad:convertHexenToUDMF()
 							SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
 							SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
 							SECTORS[count].hassound = false -- special extractor var for sound sequences
+							if(SECTORS[count] == nil) then
+								print(count)
+							end
 						end
 					end
 
@@ -2401,6 +2405,12 @@ function wad:convertHexenToUDMF()
 						SCRIPTS = filedata
 					end
 				end
+
+				self:printf(1, "\tThings: %d", #THINGS)
+				self:printf(1, "\tLinedefs: %d", #LINEDEFS)
+				self:printf(1, "\tSidedefs: %d", #SIDEDEFS)
+				self:printf(1, "\tVertices: %d", #VERTEXES)
+				self:printf(1, "\tSectors: %d", #SECTORS)
 
 				-- build the udmf textmap
 				local textmap = {}
@@ -2480,7 +2490,10 @@ function wad:convertHexenToUDMF()
 								if(LINEDEFS[s].a1 ~= 0) then
 									door_tags[LINEDEFS[s].a1] = { true, true }
 								else
-									door_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+
+										door_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
 								end
 							end
 						end
@@ -2491,7 +2504,9 @@ function wad:convertHexenToUDMF()
 								if(LINEDEFS[s].a1 ~= 0) then
 									floor_tags[LINEDEFS[s].a1] = { true, true }
 								else
-									floor_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										floor_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
 								end
 							end
 						end
@@ -2502,7 +2517,9 @@ function wad:convertHexenToUDMF()
 								if(LINEDEFS[s].a1 ~= 0) then
 									ceiling_tags[LINEDEFS[s].a1] = { true, true }
 								else
-									ceiling_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										ceiling_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
 								end
 							end
 						end
@@ -2513,7 +2530,9 @@ function wad:convertHexenToUDMF()
 								if(LINEDEFS[s].a1 ~= 0) then
 									platform_tags[LINEDEFS[s].a1] = { true, true }
 								else
-									platform_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										platform_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
 								end
 							end
 						end

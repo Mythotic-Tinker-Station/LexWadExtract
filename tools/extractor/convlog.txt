@@ -1,4 +1,4 @@
-WAD directory starts at 0x1814A and has 11 entries
+WAD directory starts at 0x62376 and has 11 entries
 
 Converting MAP01
 
