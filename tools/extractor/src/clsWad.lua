@@ -2078,27 +2078,25 @@ function wad:extractSNDSEQ()
 
 		txt[#txt+1] = string.format("]\n\n")
 
-
-		local dspstart = false
-		local dspstop = false
-		local dsstnmov = false
-
+		self.dspstart = false
+		self.dspstop = false
+		self.dsstnmov = false
 
 		for i, v in ipairs(self.snddefs) do
-			if(v[2] == "DSPSTART") then dspstart = true end
-			if(v[2] == "DSPSTOP") then dspstop = true end
-			if(v[2] == "DSSTNMOV") then dsstnmov = true end
+			if(v[2] == "DSPSTART") then self.dspstart = true end
+			if(v[2] == "DSPSTOP") then self.dspstop = true end
+			if(v[2] == "DSSTNMOV") then self.dsstnmov = true end
 		end
 
 		-- platform
 		txt[#txt+1] = string.format(":%sPlatform\n", self.acronym)
-		if(dspstart == true) then
+		if(self.dspstart == true) then
 			txt[#txt+1] = string.format("\tplayuntildone %s/DSPSTART\n", self.acronym)
 		else
 			txt[#txt+1] = string.format("\tplayuntildone plats/pt1_strt\n", self.acronym)
 		end
 
-		if(dspstop == true) then
+		if(self.dspstop == true) then
 			txt[#txt+1] = string.format("\tstopsound %s/DSPSTOP\n", self.acronym)
 		else
 			txt[#txt+1] = string.format("\tstopsound plats/pt1_stop\n", self.acronym)
@@ -2108,13 +2106,13 @@ function wad:extractSNDSEQ()
 
 		-- floor
 		txt[#txt+1] = string.format(":%sFloor\n", self.acronym)
-		if(dsstnmov == true) then
+		if(self.dsstnmov == true) then
 			txt[#txt+1] = string.format("\tplayrepeat %s/DSSTNMOV\n", self.acronym)
 		else
 			txt[#txt+1] = string.format("\tplayrepeat plats/pt1_mid\n", self.acronym)
 		end
 
-		if(dspstop == true) then
+		if(self.dspstop == true) then
 			txt[#txt+1] = string.format("\tstopsound %s/DSPSTOP\n", self.acronym)
 		else
 			txt[#txt+1] = string.format("\tstopsound plats/pt1_stop\n", self.acronym)
@@ -2124,7 +2122,7 @@ function wad:extractSNDSEQ()
 
 		-- ceiling
 		txt[#txt+1] = string.format(":%sCeiling\n", self.acronym)
-		if(dsstnmov == true) then
+		if(self.dsstnmov == true) then
 			txt[#txt+1] = string.format("\tplayrepeat %s/DSSTNMOV\n", self.acronym)
 		else
 			txt[#txt+1] = string.format("\tplayrepeat plats/pt1_mid\n", self.acronym)
@@ -2574,57 +2572,58 @@ function wad:convertHexenToUDMF()
 
 
 					-- look for door sectors
-					for k, v in pairs(door_tags) do
-						if(v[1] == true) then
-							if(SECTORS[s].tag == k) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+					if(self.dspstart or self.dspstop or self.dsstnmov) then
+						for k, v in pairs(door_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+								end
 							end
-						else
-							if(s-1 == v[2]) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+						end
+
+						-- look for floor sectors
+						for k, v in pairs(floor_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
+								end
+							end
+						end
+
+						-- look for ceiling sectors
+						for k, v in pairs(ceiling_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
+								end
+							end
+						end
+
+						-- look for platform sectors
+						for k, v in pairs(platform_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
+								end
 							end
 						end
 					end
-
-					-- look for floor sectors
-					for k, v in pairs(floor_tags) do
-						if(v[1] == true) then
-							if(SECTORS[s].tag == k) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
-							end
-						else
-							if(s-1 == v[2]) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
-							end
-						end
-					end
-
-					-- look for ceiling sectors
-					for k, v in pairs(ceiling_tags) do
-						if(v[1] == true) then
-							if(SECTORS[s].tag == k) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
-							end
-						else
-							if(s-1 == v[2]) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
-							end
-						end
-					end
-
-					-- look for platform sectors
-					for k, v in pairs(platform_tags) do
-						if(v[1] == true) then
-							if(SECTORS[s].tag == k) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
-							end
-						else
-							if(s-1 == v[2]) then
-								textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
-							end
-						end
-					end
-
 					textmap[#textmap+1] = string.format("}\n")
 				end
 				collectgarbage()

@@ -39,21 +39,10 @@ end
 
 
 function love.update(dt)
-	log[#log+1] = love.thread.getChannel('info'):pop()
-	local error = thread:getError()
-    assert( not error, error )
 end
 
 
 function love.draw()
-	local logcount = 0
-	for i = #log, 32, -1 do
-		if log[i] ~= nil then
-			logcount = logcount + 1
-			love.graphics.print(log[i], 10, 10-(logcount*12))
-		end
-	end
-
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Complete", 10, 10)
