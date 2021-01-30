@@ -10,6 +10,7 @@ maps.zip
 *animdefs*
 *sndinfo*
 *textures*
+*sndseq*
 tools/extractor/convlog.txt
 tools/extractor/src/main.lua
 tools/extractor/tools/zwadconv.bat
