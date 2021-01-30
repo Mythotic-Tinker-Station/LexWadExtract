@@ -1,11 +1,5 @@
 
-
-
-
-
-
-
--- lua cant create folders, which is kind of annoying
+log = {}
 
 function love.load(arg)
 
@@ -13,10 +7,11 @@ function love.load(arg)
 
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setFont(love.graphics.newFont(50))
+	love.graphics.setDefaultFilter("nearest", "nearest", 0)
+
+	console = require("console")
     class = require("mod30log")
-    --xlat = require("xlat")
     wad = require("clsWad")
-    love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
     -- some stuff
     local apppath = love.filesystem.getSourceBaseDirectory()
@@ -44,10 +39,21 @@ end
 
 
 function love.update(dt)
-
+	log[#log+1] = love.thread.getChannel('info'):pop()
+	local error = thread:getError()
+    assert( not error, error )
 end
 
+
 function love.draw()
+	local logcount = 0
+	for i = #log, 32, -1 do
+		if log[i] ~= nil then
+			logcount = logcount + 1
+			love.graphics.print(log[i], 10, 10-(logcount*12))
+		end
+	end
+
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Complete", 10, 10)

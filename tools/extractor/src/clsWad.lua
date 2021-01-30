@@ -9,7 +9,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 0,
+	verbose = 1,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -2252,7 +2252,8 @@ function wad:convertDoomToHexen()
 		file:close()
 
 		-- run bat file
-		os.execute(string.format("start /wait %s/zwadconv.bat", self.toolspath))
+		io.popen(string.format("start /wait /I /SEPARATE %s/zwadconv.bat", self.toolspath))
+
 	end
 end
 
@@ -2261,6 +2262,7 @@ function wad:convertHexenToUDMF()
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
+
 
 		-- for each map file
 		for k, v in pairs(maplist) do
