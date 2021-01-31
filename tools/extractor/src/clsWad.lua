@@ -2225,6 +2225,9 @@ end
 function wad:convertDoomToHexen()
 	if(self.base ~= self) then
 
+		local waitfile = io.open(string.format("%s/MAPS/wait.txt", self.pk3path), "w")
+		waitfile:close()
+
 		-- create a new bat file
 		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
 
@@ -2244,13 +2247,26 @@ function wad:convertDoomToHexen()
 		-- delete .dm files
 		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
 		file:write(string.format('del "*.DM" /q\n', self.pk3path))
+		file:write(string.format('del "wait.txt"\n', self.pk3path))
 		file:write(string.format('exit', self.pk3path))
 
 		-- close bat file
 		file:close()
 
 		-- run bat file
-		io.popen(string.format("start /wait /I /SEPARATE %s/zwadconv.bat", self.toolspath))
+		io.popen(string.format("start /wait %s/zwadconv.bat", self.toolspath))
+
+		-- wait for zwadconv
+		self:printf(1, "\tWaiting for zwadconv...")
+		local wait = true
+		while(wait) do
+			info = love.filesystem.getInfo('maps/wait.txt')
+			if(info == nil) then
+				wait = false
+			end
+		end
+
+		self:printf(1, "\tDone.\n")
 
 	end
 end
@@ -2263,10 +2279,9 @@ function wad:convertHexenToUDMF()
 
 		-- for each map file
 		for k, v in pairs(maplist) do
-			print(k, v)
 			if(v:sub(-3) == ".HM") then
 
-				self:printf(1, "\tConverting Map \n" .. v)
+				self:printf(1, "\tConverting Map " .. v)
 
 				-- open the map
 				local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
@@ -2281,7 +2296,7 @@ function wad:convertHexenToUDMF()
 				dirpos = dirpos+1
 
 				-- check if valid(this shouldnt be necessary)
-				if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expesrc/clswadcted IWAD or PWAD, got: " .. magic) end
+				if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
 
 				local THINGS = {}
 				local LINEDEFS = {}
@@ -2342,9 +2357,6 @@ function wad:convertHexenToUDMF()
 							LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
 							LINEDEFS[count].front_sidedef = love.data.unpack("<H", filedata, s+12)
 							LINEDEFS[count].back_sidedef = love.data.unpack("<H", filedata, s+14)
-
-
-
 						end
 					end
 
@@ -2372,6 +2384,7 @@ function wad:convertHexenToUDMF()
 							VERTEXES[count] = {}
 							VERTEXES[count].x = love.data.unpack("<h", filedata, s)
 							VERTEXES[count].y = love.data.unpack("<h", filedata, s+2)
+							VERTEXES[count].newref = count-1
 						end
 					end
 
@@ -2406,6 +2419,48 @@ function wad:convertHexenToUDMF()
 					end
 				end
 
+				-- scan for vestigial vertices
+				local cont = true
+				while(cont) do
+					cont = false
+					local refcount = 0
+					for v = 1, #VERTEXES do
+						local used = false
+						for l = 1, #LINEDEFS do
+							if(LINEDEFS[l].v1 == v-1 or LINEDEFS[l].v2 == v-1) then
+								used = true
+							end
+						end
+
+						if(used == false) then
+							cont = true
+							refcount = refcount + 1
+						end
+						VERTEXES[v].newref = VERTEXES[v].newref-refcount
+					end
+
+					-- remove vestigial vertices
+					for v = 1, #VERTEXES do
+						local used = false
+						for l = 1, #LINEDEFS do
+							if(LINEDEFS[l].v1 == v-1 or LINEDEFS[l].v2 == v-1) then
+								used = true
+							end
+						end
+
+						if(used == false) then
+							cont = true
+							table.remove(VERTEXES, v)
+						end
+					end
+
+					-- rereference linedefs vertices
+					for l = 1, #LINEDEFS do
+						LINEDEFS[l].v1 = VERTEXES[LINEDEFS[l].v1+1].newref
+						LINEDEFS[l].v2 = VERTEXES[LINEDEFS[l].v2+1].newref
+					end
+				end
+
 				self:printf(1, "\tThings: %d", #THINGS)
 				self:printf(1, "\tLinedefs: %d", #LINEDEFS)
 				self:printf(1, "\tSidedefs: %d", #SIDEDEFS)
@@ -2414,31 +2469,31 @@ function wad:convertHexenToUDMF()
 
 				-- build the udmf textmap
 				local textmap = {}
-				textmap[1] = 'namespace="zdoom";\n'
+				textmap[1] = 'namespace="zdoom";'
 
 				-- vertices
 				for s = 1, #VERTEXES do
-					textmap[#textmap+1] = string.format("vertex // %d\n{\nx = %d;\ny = %d;\n}\n", s-1, VERTEXES[s].x, VERTEXES[s].y)
+					textmap[#textmap+1] = string.format("vertex{x=%d;y=%d;}", VERTEXES[s].x, VERTEXES[s].y)
 				end
 				collectgarbage()
 
 				-- sidedefs
 				for s = 1, #SIDEDEFS do
-					textmap[#textmap+1] = string.format("sidedef // %d\n{\n", s-1)
+					textmap[#textmap+1] = string.format("sidedef{")
 
 					-- offsets
-					if(SIDEDEFS[s].xoffset ~= 0) then textmap[#textmap+1] = string.format("offsetx=%d;\n", SIDEDEFS[s].xoffset) end
-					if(SIDEDEFS[s].yoffset ~= 0) then textmap[#textmap+1] = string.format("offsety=%d;\n", SIDEDEFS[s].yoffset) end
+					if(SIDEDEFS[s].xoffset ~= 0) then textmap[#textmap+1] = string.format("offsetx=%d;", SIDEDEFS[s].xoffset) end
+					if(SIDEDEFS[s].yoffset ~= 0) then textmap[#textmap+1] = string.format("offsety=%d;", SIDEDEFS[s].yoffset) end
 
 					-- textures
-					if(SIDEDEFS[s].upper_texture ~= "-") then textmap[#textmap+1] = string.format('texturetop="%s";\n', SIDEDEFS[s].upper_texture) end
-					if(SIDEDEFS[s].middle_texture ~= "-") then textmap[#textmap+1] = string.format('texturemiddle="%s";\n', SIDEDEFS[s].middle_texture) end
-					if(SIDEDEFS[s].lower_texture ~= "-") then textmap[#textmap+1] = string.format('texturebottom="%s";\n', SIDEDEFS[s].lower_texture) end
+					if(SIDEDEFS[s].upper_texture ~= "-") then textmap[#textmap+1] = string.format('texturetop="%s";', SIDEDEFS[s].upper_texture) end
+					if(SIDEDEFS[s].middle_texture ~= "-") then textmap[#textmap+1] = string.format('texturemiddle="%s";', SIDEDEFS[s].middle_texture) end
+					if(SIDEDEFS[s].lower_texture ~= "-") then textmap[#textmap+1] = string.format('texturebottom="%s";', SIDEDEFS[s].lower_texture) end
 
 					-- sector
-					textmap[#textmap+1] = string.format("sector=%d;\n", SIDEDEFS[s].sector)
+					textmap[#textmap+1] = string.format("sector=%d;", SIDEDEFS[s].sector)
 
-					textmap[#textmap+1] = string.format("}\n")
+					textmap[#textmap+1] = string.format("}")
 				end
 				collectgarbage()
 
@@ -2450,39 +2505,39 @@ function wad:convertHexenToUDMF()
 
 				-- linedefs
 				for s = 1, #LINEDEFS do
-					textmap[#textmap+1] = string.format("linedef // %d\n{\n", s-1)
+					textmap[#textmap+1] = string.format("linedef{", s-1)
 
 					-- vertices
-					textmap[#textmap+1] = string.format("v1=%d;\n", LINEDEFS[s].v1)
-					textmap[#textmap+1] = string.format("v2=%d;\n", LINEDEFS[s].v2)
+					textmap[#textmap+1] = string.format("v1=%d;", LINEDEFS[s].v1)
+					textmap[#textmap+1] = string.format("v2=%d;", LINEDEFS[s].v2)
 
 					-- specials
 					-- if the special is 0, assume lineid
 					if(LINEDEFS[s].special == 0) then
-						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a1) end
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("id=%d;", LINEDEFS[s].a1) end
 
 					-- Line_SetIdentification conversion
 					elseif(LINEDEFS[s].special == 121) then
 						-- set line id
-						textmap[#textmap+1] = string.format("id=%d;\n", LINEDEFS[s].a1+(LINEDEFS[s].a5*256))
+						textmap[#textmap+1] = string.format("id=%d;", LINEDEFS[s].a1+(LINEDEFS[s].a5*256))
 
 						-- set line flags
-						if(self:flags(LINEDEFS[s].a2, 0x0001)) then textmap[#textmap+1] = "zoneboundary=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0002)) then textmap[#textmap+1] = "jumpover=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0004)) then textmap[#textmap+1] = "blockfloaters=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0008)) then textmap[#textmap+1] = "clipmidtex=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0010)) then textmap[#textmap+1] = "wrapmidtex=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0020)) then textmap[#textmap+1] = "midtex3d=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0040)) then textmap[#textmap+1] = "checkswitchrange=true;\n" end
-						if(self:flags(LINEDEFS[s].a2, 0x0080)) then textmap[#textmap+1] = "firstsideonly=true;\n" end
+						if(self:flags(LINEDEFS[s].a2, 0x0001)) then textmap[#textmap+1] = "zoneboundary=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0002)) then textmap[#textmap+1] = "jumpover=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0004)) then textmap[#textmap+1] = "blockfloaters=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0008)) then textmap[#textmap+1] = "clipmidtex=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0010)) then textmap[#textmap+1] = "wrapmidtex=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0020)) then textmap[#textmap+1] = "midtex3d=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0040)) then textmap[#textmap+1] = "checkswitchrange=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0080)) then textmap[#textmap+1] = "firstsideonly=true;" end
 
 					else
-						textmap[#textmap+1] = string.format("special=%d;\n", LINEDEFS[s].special)
-						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", LINEDEFS[s].a1) end
-						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", LINEDEFS[s].a2) end
-						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", LINEDEFS[s].a3) end
-						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", LINEDEFS[s].a4) end
-						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", LINEDEFS[s].a5) end
+						textmap[#textmap+1] = string.format("special=%d;", LINEDEFS[s].special)
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;", LINEDEFS[s].a1) end
+						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;", LINEDEFS[s].a2) end
+						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;", LINEDEFS[s].a3) end
+						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;", LINEDEFS[s].a4) end
+						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", LINEDEFS[s].a5) end
 
 						-- look for door actions
 						for d = 1, #self.door_actions do
@@ -2491,7 +2546,6 @@ function wad:convertHexenToUDMF()
 									door_tags[LINEDEFS[s].a1] = { true, true }
 								else
 									if(LINEDEFS[s].back_sidedef ~= 65535) then
-
 										door_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
 									end
 								end
@@ -2539,56 +2593,56 @@ function wad:convertHexenToUDMF()
 					end
 
 					-- sidedefs
-					if(LINEDEFS[s].front_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sidefront=%d;\n", LINEDEFS[s].front_sidedef) end
-					if(LINEDEFS[s].back_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sideback=%d;\n", LINEDEFS[s].back_sidedef) end
+					if(LINEDEFS[s].front_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sidefront=%d;", LINEDEFS[s].front_sidedef) end
+					if(LINEDEFS[s].back_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sideback=%d;", LINEDEFS[s].back_sidedef) end
 
 					-- flags
-					if(self:flags(LINEDEFS[s].flags, 0x0001)) then textmap[#textmap+1] = "blocking=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0002)) then textmap[#textmap+1] = "blockmonsters=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0004)) then textmap[#textmap+1] = "twosided=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0008)) then textmap[#textmap+1] = "dontpegtop=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0010)) then textmap[#textmap+1] = "dontpegbottom=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0020)) then textmap[#textmap+1] = "secret=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0040)) then textmap[#textmap+1] = "blocksound=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0080)) then textmap[#textmap+1] = "dontdraw=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0100)) then textmap[#textmap+1] = "mapped=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x0200)) then textmap[#textmap+1] = "repeatspecial=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x0001)) then textmap[#textmap+1] = "blocking=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0002)) then textmap[#textmap+1] = "blockmonsters=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0004)) then textmap[#textmap+1] = "twosided=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0008)) then textmap[#textmap+1] = "dontpegtop=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0010)) then textmap[#textmap+1] = "dontpegbottom=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0020)) then textmap[#textmap+1] = "secret=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0040)) then textmap[#textmap+1] = "blocksound=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0080)) then textmap[#textmap+1] = "dontdraw=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0100)) then textmap[#textmap+1] = "mapped=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0200)) then textmap[#textmap+1] = "repeatspecial=true;" end
 
 					-- linedef activation is special
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x0) then textmap[#textmap+1] = "playercross=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x400) then textmap[#textmap+1] = "playeruse=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x800) then textmap[#textmap+1] = "monstercross=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0xC00) then textmap[#textmap+1] = "impact=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1000) then textmap[#textmap+1] = "playerpush=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1400) then textmap[#textmap+1] = "missilecross=true;\n" end
-					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "passuse=true;\n" end -- ???
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x0) then textmap[#textmap+1] = "playercross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x400) then textmap[#textmap+1] = "playeruse=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x800) then textmap[#textmap+1] = "monstercross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0xC00) then textmap[#textmap+1] = "impact=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1000) then textmap[#textmap+1] = "playerpush=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1400) then textmap[#textmap+1] = "missilecross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "passuse=true;" end -- ???
 
-					if(self:flags(LINEDEFS[s].flags, 0x2000)) then textmap[#textmap+1] = "monsteractivate=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x4000)) then textmap[#textmap+1] = "blockplayers=true;\n" end
-					if(self:flags(LINEDEFS[s].flags, 0x8000)) then textmap[#textmap+1] = "blockeverything=true;\n" end
+					if(self:flags(LINEDEFS[s].flags, 0x2000)) then textmap[#textmap+1] = "monsteractivate=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x4000)) then textmap[#textmap+1] = "blockplayers=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x8000)) then textmap[#textmap+1] = "blockeverything=true;" end
 
-					textmap[#textmap+1] = string.format("}\n")
+					textmap[#textmap+1] = string.format("}")
 				end
 				collectgarbage()
 
 				-- sectors
 				for s = 1, #SECTORS do
-					textmap[#textmap+1] = string.format("sector // %d\n{\n", s-1)
+					textmap[#textmap+1] = string.format("sector{", s-1)
 
 					-- heights
-					if(SECTORS[s].floor_height ~= 0) then textmap[#textmap+1] = string.format("heightfloor=%d;\n", SECTORS[s].floor_height) end
-					if(SECTORS[s].ceiling_height ~= 0) then textmap[#textmap+1] = string.format("heightceiling=%d;\n", SECTORS[s].ceiling_height) end
+					if(SECTORS[s].floor_height ~= 0) then textmap[#textmap+1] = string.format("heightfloor=%d;", SECTORS[s].floor_height) end
+					if(SECTORS[s].ceiling_height ~= 0) then textmap[#textmap+1] = string.format("heightceiling=%d;", SECTORS[s].ceiling_height) end
 
 					-- texture
-					textmap[#textmap+1] = string.format('texturefloor="%s";\n', SECTORS[s].floor_texture)
-					textmap[#textmap+1] = string.format('textureceiling="%s";\n', SECTORS[s].ceiling_texture)
+					textmap[#textmap+1] = string.format('texturefloor="%s";', SECTORS[s].floor_texture)
+					textmap[#textmap+1] = string.format('textureceiling="%s";', SECTORS[s].ceiling_texture)
 
 					-- light
-					if(SECTORS[s].light ~= 160) then textmap[#textmap+1] = string.format("lightlevel=%d;\n", SECTORS[s].light) end
+					if(SECTORS[s].light ~= 160) then textmap[#textmap+1] = string.format("lightlevel=%d;", SECTORS[s].light) end
 
 					-- special
-					if(SECTORS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", SECTORS[s].special) end
-					if(SECTORS[s].tag ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", SECTORS[s].tag) end
+					if(SECTORS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;", SECTORS[s].special) end
+					if(SECTORS[s].tag ~= 0) then textmap[#textmap+1] = string.format("id=%d;", SECTORS[s].tag) end
 
 
 					-- look for door sectors
@@ -2596,11 +2650,11 @@ function wad:convertHexenToUDMF()
 						for k, v in pairs(door_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Door")
 								end
 							else
 								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Door")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Door")
 								end
 							end
 						end
@@ -2609,11 +2663,11 @@ function wad:convertHexenToUDMF()
 						for k, v in pairs(floor_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
 								end
 							else
 								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Floor")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
 								end
 							end
 						end
@@ -2622,11 +2676,11 @@ function wad:convertHexenToUDMF()
 						for k, v in pairs(ceiling_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
 								end
 							else
 								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Ceiling")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
 								end
 							end
 						end
@@ -2635,68 +2689,70 @@ function wad:convertHexenToUDMF()
 						for k, v in pairs(platform_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Platform")
 								end
 							else
 								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";\n', self.acronym, "Platform")
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Platform")
 								end
 							end
 						end
 					end
-					textmap[#textmap+1] = string.format("}\n")
+					textmap[#textmap+1] = string.format("}")
 				end
 				collectgarbage()
+
+				textmap[#textmap+1] = "\n"
 
 				-- things
 				for s = 1, #THINGS do
 					if(not self:ignore_thing(THINGS[s].typ)) then
-						textmap[#textmap+1] = string.format("thing // %d\n{\n", s-1)
+						textmap[#textmap+1] = string.format("thing{", s-1)
 
-						if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;\n", THINGS[s].id) end
+						if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;", THINGS[s].id) end
 
 						-- position
-						textmap[#textmap+1] = string.format("x=%d;\n", THINGS[s].x)
-						textmap[#textmap+1] = string.format("y=%d;\n", THINGS[s].y)
-						if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;\n", THINGS[s].z) end
+						textmap[#textmap+1] = string.format("x=%d;", THINGS[s].x)
+						textmap[#textmap+1] = string.format("y=%d;", THINGS[s].y)
+						if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;", THINGS[s].z) end
 
 						-- angle
-						if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;\n", THINGS[s].angle) end
+						if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;", THINGS[s].angle) end
 
 						-- type
 						if(self:find_thing(THINGS[s].typ)) then
-							textmap[#textmap+1] = string.format("type=31999;\n")
-							textmap[#textmap+1] = string.format("score=%d;\n", THINGS[s].typ)
+							textmap[#textmap+1] = string.format("type=31999;")
+							textmap[#textmap+1] = string.format("score=%d;", THINGS[s].typ)
 						else
-							textmap[#textmap+1] = string.format("type=%d;\n", THINGS[s].typ)
+							textmap[#textmap+1] = string.format("type=%d;", THINGS[s].typ)
 						end
 
 						-- flags
-						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;\nskill2=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;\nskill5=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;\n" end
-						if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;\n" end
+						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;skill2=true;" end
+						if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;" end
+						if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;skill5=true;" end
+						if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;" end
+						if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;" end
+						if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;" end
+						if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;" end
+						if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;" end
+						if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;" end
+						if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;" end
+						if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;" end
+						if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;" end
+						if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;" end
+						if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;" end
+						if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;" end
 
 						-- special
-						if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;\n", THINGS[s].special) end
-						if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;\n", THINGS[s].a1) end
-						if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;\n", THINGS[s].a2) end
-						if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;\n", THINGS[s].a3) end
-						if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;\n", THINGS[s].a4) end
-						if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;\n", THINGS[s].a5) end
+						if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;", THINGS[s].special) end
+						if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;", THINGS[s].a1) end
+						if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;", THINGS[s].a2) end
+						if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;", THINGS[s].a3) end
+						if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;", THINGS[s].a4) end
+						if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", THINGS[s].a5) end
 
-						textmap[#textmap+1] = string.format("}\n")
+						textmap[#textmap+1] = string.format("}")
 					end
 				end
 				collectgarbage()
@@ -2734,8 +2790,8 @@ function wad:convertHexenToUDMF()
 				wad:write(dir)
 				wad:close()
 
-				self:printf(1, "\tClean up...\n")
-				--os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
+				self:printf(1, "\tClean up...")
+				os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
 				self:printf(1, "\tDone.\n")
 			end
 		end

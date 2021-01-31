@@ -77,4 +77,5 @@ D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/p
 D:/GitHub/LexWadExtract/tools/extractor/tools/zwadconv D:/GitHub/LexWadExtract/pk3/MAPS/CORE77.WAD.DM D:/GitHub/LexWadExtract/pk3/MAPS/CORE77.WAD.HM
 cd D:/GitHub/LexWadExtract/pk3/MAPS/
 del "*.DM" /q
+del "wait.txt"
 exit
