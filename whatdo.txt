@@ -1,4 +1,4 @@
-
+These instructions are for SLADE v3.1.12 and don't work on the beta version.
 
 -------------------------------------------
 -- You only need to do steps 1 - 7 once
