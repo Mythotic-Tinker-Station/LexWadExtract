@@ -9,7 +9,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 1,
+	verbose = 0,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -561,14 +561,14 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Processing ANIMDEFS...")
 	self.animdefs.original = self:processTextLump("ANIMDEFS")
 
-	self:printf(0, "Processing ANIMDEFS for Doom/Boom...")
-	self:buildAnimdefs()
-
 	self:printf(0, "Processing Maps...")
 	self:processMaps()
 
 	self:printf(0, "Modifying Maps...")
 	self:ModifyMaps()
+
+	self:printf(0, "Processing ANIMDEFS for Doom/Boom...")
+	self:buildAnimdefs()
 
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
@@ -605,6 +605,9 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 
 	self:printf(0, "Converting Hexen>UDMF...")
 	self:convertHexenToUDMF()
+
+	--self:printf(0, "Removing Unused Textures")
+	--self:removeUnusedTextures()
 
 	self:printf(0, "Complete.\n")
 
@@ -1344,24 +1347,26 @@ function wad:buildAnimdefs()
 		-- animations
 		self.animdefs.anims = {}
 		for c = 1, #self.composites do
-			for al = 1, #self.animlist do
-				if(not self.composites[c].isdoomdup) then
-					if(self.composites[c].name == self.animlist[al][2]) then
-						if(self.animlist[al][1] == "texture") then
+			if(self.composites[c].used) then
+				for al = 1, #self.animlist do
+					if(not self.composites[c].isdoomdup) then
+						if(self.composites[c].name == self.animlist[al][2]) then
+							if(self.animlist[al][1] == "texture") then
 
-							local a = #self.animdefs.anims+1
-							self.animdefs.anims[a] = {}
-							self.animdefs.anims[a].text1 = self.composites[c].newname
-							self.animdefs.anims[a].typ = self.animlist[al][1]
-							self.animdefs.anims[a].decal = self.animlist[al][4]
+								local a = #self.animdefs.anims+1
+								self.animdefs.anims[a] = {}
+								self.animdefs.anims[a].text1 = self.composites[c].newname
+								self.animdefs.anims[a].typ = self.animlist[al][1]
+								self.animdefs.anims[a].decal = self.animlist[al][4]
 
-							for c2 = 1, #self.composites do
-								if(self.composites[c2].name == self.animlist[al][3]) then
-									self.animdefs.anims[a].text2 = self.composites[c2].newname
-									break
+								for c2 = 1, #self.composites do
+									if(self.composites[c2].name == self.animlist[al][3]) then
+										self.animdefs.anims[a].text2 = self.composites[c2].newname
+										break
+									end
 								end
+								break
 							end
-							break
 						end
 					end
 				end
@@ -1369,45 +1374,50 @@ function wad:buildAnimdefs()
 		end
 
 		for f = 1, #self.flats do
-			for al = 1, #self.animlist do
-				if(not self.flats[f].isdoomdup) then
-					if(self.flats[f].name == self.animlist[al][2]) then
-						if(self.animlist[al][1] == "flat") then
-							local a = #self.animdefs.anims+1
-							self.animdefs.anims[a] = {}
-							self.animdefs.anims[a].text1 = self.flats[f].newname
-							self.animdefs.anims[a].typ = self.animlist[al][1]
-							self.animdefs.anims[a].decal = self.animlist[al][4]
+			if(self.flats[f].used) then
+				for al = 1, #self.animlist do
+					if(not self.flats[f].isdoomdup) then
+						if(self.flats[f].name == self.animlist[al][2]) then
+							if(self.animlist[al][1] == "flat") then
+								local a = #self.animdefs.anims+1
+								self.animdefs.anims[a] = {}
+								self.animdefs.anims[a].text1 = self.flats[f].newname
+								self.animdefs.anims[a].typ = self.animlist[al][1]
+								self.animdefs.anims[a].decal = self.animlist[al][4]
 
-							for f2 = 1, #self.flats do
-								if(self.flats[f2].name == self.animlist[al][3]) then
-									self.animdefs.anims[a].text2 = self.flats[f2].newname
-									break
+								for f2 = 1, #self.flats do
+									if(self.flats[f2].name == self.animlist[al][3]) then
+										self.animdefs.anims[a].text2 = self.flats[f2].newname
+										break
+									end
 								end
+								break
 							end
-							break
 						end
 					end
 				end
 			end
 		end
+
 		-- switches
 		self.animdefs.switches = {}
 
 		for c = 1, #self.composites do
-			for sl = 1, #self.switchlist do
-				if(self.composites[c].name == self.switchlist[sl][1]) then
+			if(self.composites[c].used) then
+				for sl = 1, #self.switchlist do
+					if(self.composites[c].name == self.switchlist[sl][1]) then
 
-					local s = #self.animdefs.switches+1
-					self.animdefs.switches[s] = {}
-					self.animdefs.switches[s].text1 = self.composites[c].newname
+						local s = #self.animdefs.switches+1
+						self.animdefs.switches[s] = {}
+						self.animdefs.switches[s].text1 = self.composites[c].newname
 
-					for c2 = 1, #self.composites do
-						if(self.composites[c2].name == self.switchlist[sl][2]) then
-							self.animdefs.switches[s].text2 = self.composites[c2].newname
+						for c2 = 1, #self.composites do
+							if(self.composites[c2].name == self.switchlist[sl][2]) then
+								self.animdefs.switches[s].text2 = self.composites[c2].newname
+							end
 						end
+						break
 					end
-					break
 				end
 			end
 		end
@@ -1647,28 +1657,56 @@ function wad:ModifyMaps()
 
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].newname end
-							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname end
-							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname end
+
+							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.composites[c].newname
+								self.composites[c].used = true
+							end
+
+							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname
+								self.composites[c].used = true
+							end
+
+							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname
+								self.composites[c].used = true
+							end
 						end
 
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then self.maps[m].sectors[ss].floor_texture = self.composites[c].newname end
-							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then self.maps[m].sectors[ss].ceiling_texture = self.composites[c].newname end
+							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then
+								self.maps[m].sectors[ss].floor_texture = self.composites[c].newname
+								self.composites[c].used = true
+							end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then
+								self.maps[m].sectors[ss].ceiling_texture = self.composites[c].newname
+								self.composites[c].used = true
+							end
 						end
 					else
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then self.maps[m].sidedefs[s].upper_texture = self.composites[c].doomdup end
-							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then self.maps[m].sidedefs[s].lower_texture = self.composites[c].doomdup end
-							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then self.maps[m].sidedefs[s].middle_texture = self.composites[c].doomdup end
+							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.composites[c].doomdup
+							end
+							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.composites[c].doomdup
+							end
+							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.composites[c].doomdup
+							end
 						end
 
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then self.maps[m].sectors[ss].floor_texture = self.composites[c].doomdup end
-							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then self.maps[m].sectors[ss].ceiling_texture = self.composites[c].doomdup end
+							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then
+								self.maps[m].sectors[ss].floor_texture = self.composites[c].doomdup
+							end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then
+								self.maps[m].sectors[ss].ceiling_texture = self.composites[c].doomdup
+							end
 						end
 					end
 				end
@@ -1679,22 +1717,43 @@ function wad:ModifyMaps()
 
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then self.maps[m].sidedefs[s].upper_texture = self.flats[f].newname end
-							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then self.maps[m].sidedefs[s].lower_texture = self.flats[f].newname end
-							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then self.maps[m].sidedefs[s].middle_texture = self.flats[f].newname end
+							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.flats[f].newname
+								self.flats[f].used = true
+							end
+							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.flats[f].newname
+								self.flats[f].used = true
+							end
+							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.flats[f].newname
+								self.flats[f].used = true
+							end
 						end
 
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[ss].floor_texture == self.flats[f].name) then self.maps[m].sectors[ss].floor_texture = self.flats[f].newname end
-							if(self.maps[m].sectors[ss].ceiling_texture == self.flats[f].name) then self.maps[m].sectors[ss].ceiling_texture = self.flats[f].newname end
+							if(self.maps[m].sectors[ss].floor_texture == self.flats[f].name) then
+								self.maps[m].sectors[ss].floor_texture = self.flats[f].newname
+								self.flats[f].used = true
+							end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.flats[f].name) then
+								self.maps[m].sectors[ss].ceiling_texture = self.flats[f].newname
+								self.flats[f].used = true
+							end
 						end
 					else
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then self.maps[m].sidedefs[s].upper_texture = self.flats[f].doomdup end
-							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then self.maps[m].sidedefs[s].lower_texture = self.flats[f].doomdup end
-							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then self.maps[m].sidedefs[s].middle_texture = self.flats[f].doomdup end
+							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.flats[f].doomdup
+							end
+							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.flats[f].doomdup
+							end
+							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.flats[f].doomdup
+							end
 						end
 
 						for ss = 1, #self.maps[m].sectors do
@@ -1710,27 +1769,52 @@ function wad:ModifyMaps()
 
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then self.maps[m].sidedefs[s].upper_texture = self.patches[p].newname end
-							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then self.maps[m].sidedefs[s].lower_texture = self.patches[p].newname end
-							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then self.maps[m].sidedefs[s].middle_texture = self.patches[p].newname end
+							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.patches[p].newname
+								self.patches[p].used = true
+							end
+							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.patches[p].newname
+								self.patches[p].used = true
+							end
+							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.patches[p].newname
+								self.patches[p].used = true
+							end
 						end
 
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then self.maps[m].sectors[ss].floor_texture = self.patches[p].newname end
-							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then self.maps[m].sectors[ss].ceiling_texture = self.patches[p].newname end
+							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then
+								self.maps[m].sectors[ss].floor_texture = self.patches[p].newname
+								self.patches[p].used = true
+							end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then
+								self.maps[m].sectors[ss].ceiling_texture = self.patches[p].newname
+								self.patches[p].used = true
+							end
 						end
 					else
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
-							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then self.maps[m].sidedefs[s].upper_texture = self.patches[p].doomdup end
-							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then self.maps[m].sidedefs[s].lower_texture = self.patches[p].doomdup end
-							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then self.maps[m].sidedefs[s].middle_texture = self.patches[p].doomdup end
+							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].upper_texture = self.patches[p].doomdup
+							end
+							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].lower_texture = self.patches[p].doomdup
+							end
+							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then
+								self.maps[m].sidedefs[s].middle_texture = self.patches[p].doomdup
+							end
 						end
 
 						for ss = 1, #self.maps[m].sectors do
-							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then self.maps[m].sectors[ss].floor_texture = self.patches[p].doomdup end
-							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then self.maps[m].sectors[ss].ceiling_texture = self.patches[p].doomdup end
+							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then
+								self.maps[m].sectors[ss].floor_texture = self.patches[p].doomdup
+							end
+							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then
+								self.maps[m].sectors[ss].ceiling_texture = self.patches[p].doomdup
+							end
 						end
 					end
 				end
@@ -2797,6 +2881,28 @@ function wad:convertHexenToUDMF()
 		end
 	end
 end
+
+function wad:removeUnusedTextures()
+	for c = 1, #self.composites do
+		if(not self.composites[c].used) then
+			os.remove(string.format("%s/TEXTURES/%s.png", self.pk3path, self.composites[c].newname))
+		end
+	end
+
+	for f = 1, #self.flats do
+		if(not self.flats[f].used) then
+			os.remove(string.format("%s/FLATS/%s.png", self.pk3path, self.flats[f].newname))
+		end
+	end
+
+	for p = 1, #self.patches do
+		if(not self.patches[p].used) then
+			os.remove(string.format("%s/PATCHES/%s.png", self.pk3path, self.patches[p].newname))
+		end
+	end
+
+end
+
 
 ---------------------------------------------------------
 -- Helpers

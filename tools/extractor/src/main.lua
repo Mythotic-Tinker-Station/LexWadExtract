@@ -20,8 +20,8 @@ function love.load(arg)
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
-    local acronym = "CORE"
-    local pwad = apppath .. "/dctrilogyv2_lex.wad"
+    local acronym = "DBP3"
+    local pwad = apppath .. "/DBP_03_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -30,6 +30,9 @@ function love.load(arg)
 
 	ffi.cdef [[int PHYSFS_mount(const char *newDir, const char *mountPoint, int appendToPath);]]
 	l.PHYSFS_mount(string.format("%s/maps", pk3path), 'maps', 1)
+	l.PHYSFS_mount(string.format("%s/textures", pk3path), 'textures', 1)
+	l.PHYSFS_mount(string.format("%s/flats", pk3path), 'flats', 1)
+	l.PHYSFS_mount(string.format("%s/patches", pk3path), 'patches', 1)
 	-----------------------------------------
 
     -- do all the things

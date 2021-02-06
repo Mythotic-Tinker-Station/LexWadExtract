@@ -272,7 +272,7 @@ function execute(arch)
 
 	App.logMessage("Start") -- since we have no os time functions, lets use the consoles timestamps to measure how long this takes
 
-	acronym = App.promptString("Acronym", "Please provide a 4 letter acronym for this mapset.", "DOOM"):sub(1, 4)
+	acronym = DOOM
 
 	SplashWindow.show("Slade will freeze, DONT PANIC!", true)
 
