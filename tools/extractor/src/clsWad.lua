@@ -711,19 +711,21 @@ function wad:organizeNamespace(name)
 
 		-- for each lump in the namespace
 		for l = 1, #self.namespaces[name].lumps do
-
-			if(self.base ~= self) then
-				local skip = false
-				for ignore = 1, #self.ignorelist do
-					if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
-						skip = true
+			if(self.namespaces[name].lumps[l].size > 0) then
+				if(self.base ~= self) then
+					local skip = false
+					for ignore = 1, #self.ignorelist do
+						if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
+							skip = true
+						end
 					end
 				end
-			end
-			if(not skip) then
-				local v = self.namespaces[name].lumps[l]
-				local index = #self[self.namespaces[name].name]+1
-				self[self.namespaces[name].name][index] = v
+
+				if(not skip) then
+					local v = self.namespaces[name].lumps[l]
+					local index = #self[self.namespaces[name].name]+1
+					self[self.namespaces[name].name][index] = v
+				end
 			end
 		end
 		self:printf(1, "\tFound '%d' %s.", #self[self.namespaces[name].name], self.namespaces[name].name)
