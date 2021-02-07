@@ -1,5 +1,0 @@
-WAD directory starts at 0x81AC7 and has 11 entries
-
-Converting MAP01
-
-New wad has 12 entries

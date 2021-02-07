@@ -9,7 +9,7 @@
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 0,
+	verbose = 1,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -470,6 +470,7 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self.toolspath = toolspath
 	self.extractpatches = patches or false
 	self.spritesname = sprites
+	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
 
 	self:printf(0, "------------------------------------------------------------------------------------------\n")
 	self:printf(0, "Loading Wad '%s'...", path)
@@ -2327,6 +2328,8 @@ function wad:convertDoomToHexen()
 			if(v:sub(-3) == ".DM") then
 				-- write a command to the bat file
 				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s.HM\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+				file:write(string.format('ren "convlog.txt" "%s_convlog.txt"\n', v))
+				file:write(string.format('move "%s_convlog.txt" "logs"\n', v))
 			end
 		end
 
