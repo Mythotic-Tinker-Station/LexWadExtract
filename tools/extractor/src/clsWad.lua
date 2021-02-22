@@ -2318,8 +2318,11 @@ function wad:convertDoomToHexen()
 		-- create a new bat file
 		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
 		
+		-- Move current directory to where zwadconv is located.
+		file:write("cd tools\n")
+
 		-- Make sure the logs directory exists.
-		file:write("mkdir .\\logs") 
+		file:write("mkdir .\\logs\n")
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')

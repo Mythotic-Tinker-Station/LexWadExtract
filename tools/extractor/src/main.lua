@@ -21,7 +21,7 @@ function love.load(arg)
 
     ---------- edit these!-----------
     local acronym = "CCST"
-    local pwad = apppath .. "/cchest4_lex.wad"
+    local pwad = apppath .. "/cchest4fix_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
