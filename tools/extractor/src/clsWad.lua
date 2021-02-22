@@ -2317,7 +2317,9 @@ function wad:convertDoomToHexen()
 
 		-- create a new bat file
 		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
-
+		
+		-- Make sure the logs directory exists.
+		file:write("mkdir .\\logs") 
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
@@ -2328,8 +2330,7 @@ function wad:convertDoomToHexen()
 			if(v:sub(-3) == ".DM") then
 				-- write a command to the bat file
 				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s.HM\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
-				file:write(string.format('ren "convlog.txt" "%s_convlog.txt"\n', v))
-				file:write(string.format('move "%s_convlog.txt" "logs"\n', v))
+				file:write(string.format('move /Y "convlog.txt" "./logs/%s_convlog.txt"\n', v))
 			end
 		end
 

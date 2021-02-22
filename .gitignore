@@ -13,3 +13,5 @@ maps.zip
 *sndseq*
 tools/extractor/convlog.txt
 tools/extractor/tools/zwadconv.bat
+tools/extractor/tools/convlog.txt
+tools/extractor/tools/logs/
