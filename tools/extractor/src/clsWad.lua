@@ -2337,6 +2337,8 @@ function wad:convertDoomToHexen()
 			end
 		end
 
+		-- file:write("pause\n")
+		
 		-- delete .dm files
 		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
 		file:write(string.format('del "*.DM" /q\n', self.pk3path))
