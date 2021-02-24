@@ -8,11 +8,13 @@
 -- when slade freezes due to this script it steals focus and hides the splash screen behind it
 
 
-local acronym = "EPC2"
+local acronym = "DOOM"
 local archive = false
 local callcount = 0
 local texturenumber = 0
 local renamelist = {}
+
+local index = 1
 
 -- idk if doom even reads up to nine, or if any wad uses these in the first place, but just incase
 local ignorelist = {"P1_START", "P2_START", "P3_START", "P4_START", "P5_START", "P6_START", "P7_START", "P8_START", "P9_START", "F1_START", "F2_START", "F3_START", "F4_START", "F5_START", "F6_START", "F7_START", "F8_START", "F9_START",
@@ -269,24 +271,35 @@ local namespaces =
 }
 
 function execute(arch)
-
-	App.logMessage("Start") -- since we have no os time functions, lets use the consoles timestamps to measure how long this takes
-
-	acronym = DOOM
+	archive = arch
+    App.logMessage(string.format("Start - lump count: %d", #archive.entries)) -- since we have no os time functions, lets use the consoles timestamps to measure how long this takes
 
 	SplashWindow.show("Slade will freeze, DONT PANIC!", true)
 
-	archive = arch
+    -- Do the namespace stuff
+    findNamespaces()
+    verifyNamespaces()
+    gatherNamespaceLumps()
 
 	-- build up data table
-	findNamespaces()
-	verifyNamespaces()
-	gatherNamespaceLumps()
-	gatherMaps()
-	gatherSounds()
-	gatherMusic()
-	gatherSpecialLumps()
+    while index < #archive.entries do
+        --App.logMessage(string.format("Start - Lumps processed: %i/%i", index, #archive.entries))
+        splashbarHelper(index, 0, #archive.entries, "Lumps processed: %i/%i", index, #archive.entries)
+        
+        gatherMaps()
+        --App.logMessage(string.format("Maps - Lumps processed: %i/%i", index, #archive.entries))
+		
+		gatherSounds()
+        --App.logMessage(string.format("Sounds - Lumps processed: %i/%i", index, #archive.entries))
+        
+		gatherMusic()
+        --App.logMessage(string.format("Music - Lumps processed: %i/%i", index, #archive.entries))
+        
+		gatherSpecialLumps()
+        --App.logMessage(string.format("Special - Lumps processed: %i/%i", index, #archive.entries))
 
+        index = index + 1;
+    end
 
 	-- build wad
 	buildWad()
@@ -297,9 +310,12 @@ function execute(arch)
 end
 
 function findNamespaces()
+    --App.logMessage("findNamespaces()")
 
+	local i = 1
+	
 	-- for each lump
-	for i = 1, #archive.entries do
+	while i <= #archive.entries do
 
 		splashbarHelper(i, 0, #archive.entries, "Finding existing namespaces...")
 
@@ -353,11 +369,15 @@ function findNamespaces()
 			end
 		end
 		countcall()
+
+        i = i + 1
 	end
 	collectgarbage()
 end
 
 function verifyNamespaces()
+    --App.logMessage("verifyNamespaces()")
+
 	local count = 1
 	for k, v in pairs(namespaces) do
 		splashbarHelper(count, 0, 9, "Verifying namespaces...")
@@ -375,12 +395,14 @@ end
 
 -- gather all items already in namespaces
 function gatherNamespaceLumps()
-	local count = 1
+    --App.logMessage("gatherNamespaceLumps()")
+	
+    local count = 1
 	for k, v in pairs(namespaces) do
 		for i = v.pos[1]+1, v.pos[2]-1 do
 			v.lumps[#v.lumps+1] = archive.entries[i]
 			splashbarHelper(count, 0, v.count, "Gathering file '%s' in namespace '%s'", v.lumps[#v.lumps].name, k)
-			count=count+1
+			count = count + 1
 			countcall()
 		end
 		countcall()
@@ -390,223 +412,286 @@ end
 
 -- gather all the sounds
 function gatherSounds()
+    --App.logMessage("gatherSounds()")
 
-	local index = 1
 	local lumpcount = #archive.entries
+	--splashbarHelper(index, 0, lumpcount, "Gathering sounds...(Found: %d)", namespaces.sounds.count)
 
-	-- for each entry
-	while(index <= lumpcount) do
-		splashbarHelper(index, 0, lumpcount, "Gathering sounds...(Found: %d)", namespaces.sounds.count)
+	if(archive.entries[index].type.id == "snd_doom") then
+		namespaces.sounds.lumps[#namespaces.sounds.lumps+1] = archive.entries[index]
+		namespaces.sounds.count = namespaces.sounds.count + 1
+	end
 
-		if(archive.entries[index].type.id == "snd_doom") then
-			namespaces.sounds.lumps[#namespaces.sounds.lumps+1] = archive.entries[index]
-			namespaces.sounds.count = namespaces.sounds.count + 1
-		end
+	if(archive.entries[index].type.id == "snd_wav") then
+		namespaces.sounds_wave.lumps[#namespaces.sounds_wave.lumps+1] = archive.entries[index]
+		namespaces.sounds_wave.count = namespaces.sounds_wave.count + 1
+	end
 
-		if(archive.entries[index].type.id == "snd_wav") then
-			namespaces.sounds_wave.lumps[#namespaces.sounds_wave.lumps+1] = archive.entries[index]
-			namespaces.sounds_wave.count = namespaces.sounds_wave.count + 1
-		end
+	if(archive.entries[index].type.id == "snd_ogg") then
+		namespaces.sounds_ogg.lumps[#namespaces.sounds_ogg.lumps+1] = archive.entries[index]
+		namespaces.sounds_ogg.count = namespaces.sounds_ogg.count + 1
+	end
 
-		if(archive.entries[index].type.id == "snd_ogg") then
-			namespaces.sounds_ogg.lumps[#namespaces.sounds_ogg.lumps+1] = archive.entries[index]
-			namespaces.sounds_ogg.count = namespaces.sounds_ogg.count + 1
-		end
-
-		if(archive.entries[index].type.id == "snd_flac") then
-			namespaces.sounds_flac.lumps[#namespaces.sounds_flac.lumps+1] = archive.entries[index]
-			namespaces.sounds_flac.count = namespaces.sounds_flac.count + 1
-		end
-
-		index = index + 1
+	if(archive.entries[index].type.id == "snd_flac") then
+		namespaces.sounds_flac.lumps[#namespaces.sounds_flac.lumps+1] = archive.entries[index]
+		namespaces.sounds_flac.count = namespaces.sounds_flac.count + 1
 	end
 end
 
 -- gather all the music
 function gatherMusic()
+    --App.logMessage("gatherMusic()")
 
-	local index = 1
-	local lumpcount = #archive.entries
+	--splashbarHelper(index, 0, #archive.entries, "Gathering music...(Found: %d)", namespaces.music.count)
 
-	-- for each entry
-	while(index <= lumpcount) do
-		splashbarHelper(index, 0, lumpcount, "Gathering music...(Found: %d)", namespaces.music.count)
-
-		if(archive.entries[index].type.id == "midi_mus") then
-			namespaces.music.lumps[#namespaces.music.lumps+1] = archive.entries[index]
-		end
-		namespaces.music.count = #namespaces.music.lumps
-		index = index + 1
+	if(archive.entries[index].type.id == "midi_mus") then
+		namespaces.music.lumps[#namespaces.music.lumps+1] = archive.entries[index]
 	end
+	
+    namespaces.music.count = #namespaces.music.lumps
 end
 
 -- gather all the maps
 function gatherMaps()
-	local index = 1
-	local lumpcount = #archive.entries
+    --App.logMessage("gatherMaps()")
 
-	-- for each entry
-	while(index <= lumpcount) do
-		splashbarHelper(index, 0, lumpcount, "Gathering maps...(Found: %d)", namespaces.maps.count)
+    --splashbarHelper(index, 0, #archive.entries, "Gathering maps... (Found: %i) (%i/%i)", namespaces.maps.count, index, #archive.entries)
 
-		-- if we are not under any namespaces
-		if(countNamespaceLevel(index) == 0) then
+    -- doom/hexen
+    if (archive.entries[index].name == "THINGS") then
+        local found_things = index
+        local found_lines = false
+        local found_sides = false
+        local found_vertexes = false
+        local found_segs = false
+        local found_ssectors = false
+        local found_nodes = false
+        local found_sectors = false
+        local found_reject = false
+        local found_blockmap = false
+        local found_behavior = false
+        local found_scripts = false
+        local map_lumpcount = 1
 
-			-- doom/hexen
-			if(archive.entries[index].name == "THINGS") then
-				local found_things 		= index
-				local found_lines 		= false
-				local found_sides 		= false
-				local found_vertexes 	= false
-				local found_segs 		= false
-				local found_ssectors 	= false
-				local found_nodes 		= false
-				local found_sectors 	= false
-				local found_reject  	= false
-				local found_blockmap 	= false
-				local found_behavior 	= false
-				local found_scripts 	= false
-				local map_lumpcount 	= 1
-				for i = 1, 11 do
-					if(index+i <= lumpcount) then
-						if(archive.entries[index+i].name == "THINGS")		then break end
-						if(archive.entries[index+i].name == "LINEDEFS") 	then found_lines 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SIDEDEFS") 	then found_sides 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "VERTEXES") 	then found_vertexes 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SEGS") 		then found_segs 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SSECTORS") 	then found_ssectors 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "NODES") 		then found_nodes	 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SECTORS")		then found_sectors 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "REJECT") 		then found_reject	 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "BLOCKMAP") 	then found_blockmap 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "BEHAVIOR") 	then found_behavior 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SCRIPTS")		then found_scripts 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-					end
-					countcall()
-				end
+        for i = 1, 11 do
+            if (index + i <= #archive.entries) then
+                if (archive.entries[index + i].name == "THINGS") then
+                    break
+                end
 
-				if(found_lines and found_sides and found_vertexes and found_sectors) then
-					local mapindex = #namespaces.maps.lumps+1
-					namespaces.maps.found = true
-					namespaces.maps.count = namespaces.maps.count + 1
-					namespaces.maps.lumps[mapindex] = {}
-					namespaces.maps.lumps[mapindex].name = archive.entries[found_things-1]
-					namespaces.maps.lumps[mapindex].things = archive.entries[found_things]
-					namespaces.maps.lumps[mapindex].lines = archive.entries[found_lines]
-					namespaces.maps.lumps[mapindex].sides = archive.entries[found_sides]
-					namespaces.maps.lumps[mapindex].vertexes = archive.entries[found_vertexes]
-					namespaces.maps.lumps[mapindex].segs = archive.entries[found_segs]
-					namespaces.maps.lumps[mapindex].ssectors = archive.entries[found_ssectors]
-					namespaces.maps.lumps[mapindex].nodes = archive.entries[found_nodes]
-					namespaces.maps.lumps[mapindex].sectors = archive.entries[found_sectors]
-					namespaces.maps.lumps[mapindex].reject = archive.entries[found_reject]
-					namespaces.maps.lumps[mapindex].blockmap = archive.entries[found_blockmap]
-					namespaces.maps.lumps[mapindex].behavior = archive.entries[found_behavior]
-					namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
-					namespaces.maps.lumps[mapindex].format = "DM"
+            if (archive.entries[index + i].name == "LINEDEFS") then
+                found_lines = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					if(found_behavior) then
-						namespaces.maps.lumps[mapindex].format = "HM"
-					end
+            if (archive.entries[index + i].name == "SIDEDEFS") then
+                found_sides = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_things-1))
+            if (archive.entries[index + i].name == "VERTEXES") then
+                found_vertexes = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					index = index + map_lumpcount + 1
-				else
-					local mlumps = ""
+            if (archive.entries[index + i].name == "SEGS") then
+                found_segs = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					if(found_lines == false) then 	mlumps = mlumps .. "-LINEDEFS-" end
-					if(found_sides == false) then 	mlumps = mlumps .. "-SIDEDEFS-" end
-					if(found_vertexes == false) then  mlumps = mlumps .. "-VERTEXES-" end
-					if(found_sectors == false) then   mlumps = mlumps .. "-SECTORS-" end
+            if (archive.entries[index + i].name == "SSECTORS") then 
+                found_ssectors = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					error(string.format("Map %s(entry number %d) is missing the following required lumps '%s'", archive.entries[found_things-1].name, found_things-2, mlumps), 1)
-				end
+            if (archive.entries[index + i].name == "NODES") then
+                found_nodes = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-			-- udmf
-			elseif(archive.entries[index].name == "TEXTMAP") then
-				local found_textmap 	= index
-				local found_znodes	 	= false
-				local found_reject	 	= false
-				local found_dialogue	= false
-				local found_behavior	= false
-				local found_scripts 	= false
-				local found_endmap		= false
-				local map_lumpcount 	= 1
+            if (archive.entries[index + i].name == "SECTORS") then
+                found_sectors = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-				for i = 1, 5 do
-					if(index+i <= lumpcount) then
-						if(archive.entries[index+i].name == "TEXTMAP") 	then break end
-						if(archive.entries[index+i].name == "ZNODES") 	then found_znodes 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "REJECT") 	then found_reject 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "DIALOGUE") then found_dialogue 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "BEHAVIOR") then found_behavior 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "SCRIPTS") 	then found_scripts 		= index+i; 	map_lumpcount = map_lumpcount+1 end
-						if(archive.entries[index+i].name == "ENDMAP") 	then found_endmap	 	= index+i; 	map_lumpcount = map_lumpcount+1 end
-					end
-					countcall()
-				end
+            if (archive.entries[index + i].name == "REJECT") then
+                found_reject = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-				if(found_endmap) then
-					local mapindex = #namespaces.maps.lumps+1
-					namespaces.maps.found = true
-					namespaces.maps.count = namespaces.maps.count + 1
-					namespaces.maps.lumps[mapindex] = {}
-					namespaces.maps.lumps[mapindex].name = archive.entries[found_textmap-1]
-					namespaces.maps.lumps[mapindex].textmap = archive.entries[found_textmap]
-					namespaces.maps.lumps[mapindex].znodes = archive.entries[found_znodes]
-					namespaces.maps.lumps[mapindex].reject = archive.entries[found_reject]
-					namespaces.maps.lumps[mapindex].dialogue = archive.entries[found_dialogue]
-					namespaces.maps.lumps[mapindex].behavior = archive.entries[found_behavior]
-					namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
-					namespaces.maps.lumps[mapindex].endmap = archive.entries[found_endmap]
-					namespaces.maps.lumps[mapindex].format = "UM"
+            if (archive.entries[index + i].name == "BLOCKMAP") then
+                found_blockmap = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_textmap-1))
+            if (archive.entries[index + i].name == "BEHAVIOR") then
+                found_behavior = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
 
-					index = index + map_lumpcount + 1
-				else
-					error(string.format("Map %s has no ENDMAP.", archive.entries[found_textmap-1].name), 0)
-				end
-			else
-				index = index + 1
-			end
-		else
-			index = index + 1
-		end
-		countcall()
-	end
+            if (archive.entries[index + i].name == "SCRIPTS") then
+                found_scripts = index + i;
+                map_lumpcount = map_lumpcount + 1
+            end
+        end
+
+        countcall()
+    end
+
+        if (found_lines and found_sides and found_vertexes and found_sectors) then
+            local mapindex = #namespaces.maps.lumps + 1
+            namespaces.maps.found = true
+            namespaces.maps.count = namespaces.maps.count + 1
+            namespaces.maps.lumps[mapindex] = {}
+            namespaces.maps.lumps[mapindex].name = archive.entries[found_things - 1]
+
+            namespaces.maps.lumps[mapindex].things = archive.entries[found_things]
+            namespaces.maps.lumps[mapindex].lines = archive.entries[found_lines]
+            namespaces.maps.lumps[mapindex].sides = archive.entries[found_sides]
+            namespaces.maps.lumps[mapindex].vertexes = archive.entries[found_vertexes]
+            namespaces.maps.lumps[mapindex].segs = archive.entries[found_segs]
+            namespaces.maps.lumps[mapindex].ssectors = archive.entries[found_ssectors]
+            namespaces.maps.lumps[mapindex].nodes = archive.entries[found_nodes]
+            namespaces.maps.lumps[mapindex].sectors = archive.entries[found_sectors]
+            namespaces.maps.lumps[mapindex].reject = archive.entries[found_reject]
+            namespaces.maps.lumps[mapindex].blockmap = archive.entries[found_blockmap]
+            namespaces.maps.lumps[mapindex].behavior = archive.entries[found_behavior]
+            namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
+            namespaces.maps.lumps[mapindex].format = "DM"
+
+            if (found_behavior) then
+                namespaces.maps.lumps[mapindex].format = "HM"
+            end
+
+            App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_things - 1))
+
+           --index = index + map_lumpcount + 1
+        else
+            local mlumps = ""
+
+            if (found_lines == false) then
+                mlumps = mlumps .. "-LINEDEFS-"
+            end
+
+            if (found_sides == false) then
+                mlumps = mlumps .. "-SIDEDEFS-"
+            end
+
+            if (found_vertexes == false) then
+                mlumps = mlumps .. "-VERTEXES-"
+            end
+
+            if (found_sectors == false) then
+                mlumps = mlumps .. "-SECTORS-"
+            end
+
+            error(string.format("Map %s(entry number %d) is missing the following required lumps '%s'", archive.entries[found_things - 1].name, found_things - 2, mlumps), 1)
+        end
+
+        -- udmf
+    elseif (archive.entries[index].name == "TEXTMAP") then
+        local found_textmap = index
+        local found_znodes = false
+        local found_reject = false
+        local found_dialogue = false
+        local found_behavior = false
+        local found_scripts = false
+        local found_endmap = false
+        local map_lumpcount = 1
+
+        for i = 1, 5 do
+            if (index + i <= #archive.entries) then
+                if (archive.entries[index + i].name == "TEXTMAP") then
+                    break
+                end
+
+                if (archive.entries[index + i].name == "ZNODES") then
+                    found_znodes = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+
+                if (archive.entries[index + i].name == "REJECT") then
+                    found_reject = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+
+                if (archive.entries[index + i].name == "DIALOGUE") then
+                    found_dialogue = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+
+                if (archive.entries[index + i].name == "BEHAVIOR") then
+                    found_behavior = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+
+                if (archive.entries[index + i].name == "SCRIPTS") then
+                    found_scripts = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+
+                if (archive.entries[index + i].name == "ENDMAP") then
+                    found_endmap = index + i;
+                    map_lumpcount = map_lumpcount + 1
+                end
+            end
+            countcall()
+        end
+
+        if (found_endmap) then
+            local mapindex = #namespaces.maps.lumps + 1
+            namespaces.maps.found = true
+            namespaces.maps.count = namespaces.maps.count + 1
+            namespaces.maps.lumps[mapindex] = {}
+            namespaces.maps.lumps[mapindex].name = archive.entries[found_textmap - 1]
+            namespaces.maps.lumps[mapindex].textmap = archive.entries[found_textmap]
+            namespaces.maps.lumps[mapindex].znodes = archive.entries[found_znodes]
+            namespaces.maps.lumps[mapindex].reject = archive.entries[found_reject]
+            namespaces.maps.lumps[mapindex].dialogue = archive.entries[found_dialogue]
+            namespaces.maps.lumps[mapindex].behavior = archive.entries[found_behavior]
+            namespaces.maps.lumps[mapindex].scripts = archive.entries[found_scripts]
+            namespaces.maps.lumps[mapindex].endmap = archive.entries[found_endmap] 
+            namespaces.maps.lumps[mapindex].format = "UM"
+
+            App.logMessage(string.format("Found map: '%s'; format: %s; at %d", namespaces.maps.lumps[mapindex].name.name, namespaces.maps.lumps[mapindex].format, found_textmap - 1))
+            --index = index + map_lumpcount + 1
+        else
+            error(string.format("Map %s has no ENDMAP.", archive.entries[found_textmap - 1].name), 0)
+        end
+    end
+
+    --index = index + 1
 	collectgarbage()
 end
 
+
 -- gather all items already not in a namespace
 function gatherSpecialLumps()
-
-	-- for each lump
-	for i = 1, #archive.entries do
-		splashbarHelper(i, 0, #archive.entries, "Moving unmarked lumps to new namespaces...")
+    --App.logMessage("gatherSpecialLumps()")
+		--splashbarHelper(index, 0, #archive.entries, "Moving unmarked lumps to new namespaces...")
 
 		-- check if we are not inside any namespaces
-		if(countNamespaceLevel(i) <= 0) then
+		if(countNamespaceLevel(index) <= 0) then
 
 			-- for each type
 			for k, v in ipairs(namespaces.specials.types) do
-				if(archive.entries[i].name == v:sub(2)) then
+				if(archive.entries[index].name == v:sub(2)) then
 					namespaces.specials.count = namespaces.specials.count + 1
-					namespaces.specials.lumps[namespaces.specials.count] = archive.entries[i]
+					namespaces.specials.lumps[namespaces.specials.count] = archive.entries[index]
 					break
 				end
 				countcall()
 			end
 		end
+
 		countcall()
-	end
-	collectgarbage()
+	    collectgarbage()
 end
 
 
 -- build the new wad
 function buildWad()
+    --App.logMessage("buildWad()")
 
 	-- create new wad
 	newwad = Archives.create("wad")
@@ -637,7 +722,7 @@ function buildWad()
 				-- for each lump in namespace
 				for ii = 1, #v.lumps do
 
-					splashbarHelper(ii, 0, #v.lumps, "Building new wad... Current namespace: %s", k)
+					splashbarHelper(ii, 0, #v.lumps, "Building new wad... Current namespace: %s (%i/%i)", k, ii, #v.lumps)
 
 					-- if lump exist?(i feel like there is a bug here if i need this check...)
 					if(v.lumps[ii]) then
@@ -702,7 +787,7 @@ function buildWad()
 
 	newwad:createEntry(string.format("%s_START", namespaces.maps.ids[1]), -1)
 	for l = 1, #namespaces.maps.lumps do
-		splashbarHelper(l, 0, #namespaces.maps.lumps, "Building new wad... Current namespace: maps")
+		splashbarHelper(l, 0, #namespaces.maps.lumps, "Building new wad... Current namespace: maps (%i/%i)", l, #namespaces.maps.lumps)
 		newwad:createEntry(string.format("%s_START", namespaces.maps.lumps[l].format), -1)
 		newwad:createEntry(namespaces.maps.lumps[l].name.name, -1):importData(namespaces.maps.lumps[l].name.data)
 
@@ -738,10 +823,11 @@ function buildWad()
 	newwad:createEntry(string.format("%s_END", namespaces.maps.ids[1]), -1)
 
 	-- RNAMEDEF
-	splashbarHelper(0, 0, 0, "Building RNAMEDEF...")
 	local entry = newwad:createEntry("RNAMEDEF", 1)
 
 	for index = 1, #renamelist do
+		splashbarHelper(index, 0, #renamelis, "Building RNAMEDEF... (%i/%i)", index, #renamelist)
+
 		-- slade seems to change this to a \, so let use that and hope no wads used this in a name
 		renamelist[index] = table.concat(renamelist[index], "^")
 	end
@@ -759,12 +845,15 @@ end
 ------------------------------------------------
 local namespace_level = 0
 function countNamespaceLevel(i)
+    --App.logMessage(string.format("countNamespaceLevel(%i)", i))
 	if(archive.entries[i].name:sub(-6) == "_START") then namespace_level = namespace_level + 1 end
 	if(archive.entries[i].name:sub(-4) == "_END") then namespace_level = namespace_level - 1 end
 	return namespace_level
 end
 
 function printTable(tbl, indent)
+    --App.logMessage("printTable(?, ?)")
+
 	if not indent then indent = 0 end
 	for k, v in pairs(tbl) do
 		formatting = string.rep("  ", indent) .. k .. ": "
@@ -783,8 +872,10 @@ end
 
 -- helper function for displaying more accurate progress bar info
 function splashbarHelper(val, min, max, text, ...)
+    --App.logMessage(string.format("splashbarHelper(%d, %d, %d, %s)", val, min, max, text))
+
 	SplashWindow.setProgressMessage(string.format(text, ...))
-	SplashWindow.setProgress((val-min) / (max-min))
+	SplashWindow.setProgress(val / max)
 end
 
 function countcall()

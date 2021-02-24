@@ -20,8 +20,8 @@ function love.load(arg)
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
-    local acronym = "CCST"
-    local pwad = apppath .. "/cchest4fix_lex.wad"
+    local acronym = "CCH2"
+    local pwad = apppath .. "/cchest2_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
