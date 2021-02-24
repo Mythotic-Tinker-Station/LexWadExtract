@@ -282,7 +282,7 @@ function execute(arch)
     gatherNamespaceLumps()
 
 	-- build up data table
-    while index < #archive.entries do
+    while index <= #archive.entries do
         --App.logMessage(string.format("Start - Lumps processed: %i/%i", index, #archive.entries))
         splashbarHelper(index, 0, #archive.entries, "Lumps processed: %i/%i", index, #archive.entries)
         
