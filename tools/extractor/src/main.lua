@@ -1,9 +1,12 @@
 
 log = {}
+startTime = 0;
+endTime = 0;
 
 function love.load(arg)
 
 -------------------------------------------------
+    startTime = os.time()
 
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setFont(love.graphics.newFont(50))
@@ -20,8 +23,8 @@ function love.load(arg)
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
-    local acronym = "CCH2"
-    local pwad = apppath .. "/cchest2_lex.wad"
+    local acronym = "D2RL"
+    local pwad = apppath .. "/d2reload_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -38,6 +41,7 @@ function love.load(arg)
     -- do all the things
     mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath, sprites)
 
+    endTime = os.time();
 end
 
 
@@ -46,9 +50,12 @@ end
 
 
 function love.draw()
+    local timeTaken = os.difftime(endTime, startTime)
+
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Complete", 10, 10)
+	love.graphics.print(string.format("Time taken: %d seconds.", timeTaken), 10, 60)
 end
 
 
