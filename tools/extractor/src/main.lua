@@ -1,12 +1,11 @@
 
 log = {}
-startTime = 0;
-endTime = 0;
+timeTaken = ""
 
 function love.load(arg)
 
 -------------------------------------------------
-    startTime = os.time()
+    local startTime = os.time()
 
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setFont(love.graphics.newFont(50))
@@ -23,8 +22,8 @@ function love.load(arg)
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
-    local acronym = "D2RL"
-    local pwad = apppath .. "/d2reload_lex.wad"
+    local acronym = "3HA1"
+    local pwad = apppath .. "/3hafinal_lex.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -41,7 +40,20 @@ function love.load(arg)
     -- do all the things
     mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath, sprites)
 
-    endTime = os.time();
+    local endTime = os.time();
+
+    local timeTaken_seconds = os.difftime(endTime, startTime)
+   
+    local minutes = 0
+    if timeTaken_seconds >= 60 then
+        minutes = math.floor(timeTaken_seconds / 60)
+        local s = ternary(minutes ~= 1, "minutes", "minute")
+        timeTaken = string.format("%d %s and ", minutes, s)
+    end
+
+    local seconds = timeTaken_seconds - (minutes * 60)
+    local s = ternary(seconds ~= 1, "seconds", "second")
+    timeTaken = timeTaken .. string.format("%d %s", seconds, s)
 end
 
 
@@ -50,15 +62,15 @@ end
 
 
 function love.draw()
-    local timeTaken = os.difftime(endTime, startTime)
-
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Complete", 10, 10)
-	love.graphics.print(string.format("Time taken: %d seconds.", timeTaken), 10, 60)
+	love.graphics.print(string.format("Time taken:\n%s.", timeTaken), 10, 70)
 end
 
-
+function ternary(cond, T, F)
+    if cond then return T else return F end
+end
 
 
 
