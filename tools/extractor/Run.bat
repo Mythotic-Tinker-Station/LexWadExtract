@@ -1,5 +1,6 @@
-rmdir ..\..\pk3 /s /q
+mkdir logs
 
+rmdir ..\..\pk3 /s /q
 mkdir ..\..\pk3\FLATS
 mkdir ..\..\pk3\PATCHES
 mkdir ..\..\pk3\MAPS
