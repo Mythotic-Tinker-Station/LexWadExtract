@@ -2894,24 +2894,35 @@ function wad:convertHexenToUDMF()
 end
 
 function wad:removeUnusedTextures()
+
+	local tex = 0
+	local flats = 0
+	local patches = 0
+
 	for c = 1, #self.composites do
 		if(not self.composites[c].used) then
+			tex = tex + 1
 			os.remove(string.format("%s/TEXTURES/%s.png", self.pk3path, self.composites[c].newname))
 		end
 	end
 
 	for f = 1, #self.flats do
 		if(not self.flats[f].used) then
+			flats = flats + 1
 			os.remove(string.format("%s/FLATS/%s.png", self.pk3path, self.flats[f].newname))
 		end
 	end
 
 	for p = 1, #self.patches do
 		if(not self.patches[p].used) then
+			patches = patches + 1
 			os.remove(string.format("%s/PATCHES/%s.png", self.pk3path, self.patches[p].newname))
 		end
 	end
 
+	self:printf(1, "\tFound: %i Unused Textures.", tex)
+	self:printf(1, "\tFound: %i Unused Flats.", flats)
+	self:printf(1, "\tFound: %i Unused Patches.", patches)
 end
 
 

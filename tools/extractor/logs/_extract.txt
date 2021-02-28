@@ -150,6 +150,9 @@ Extracting SNDSEQ...
 Converting Doom>Hexen...
 Converting Hexen>UDMF...
 Removing Unused Textures
+	Found: 428 Unused Textures.
+	Found: 147 Unused Flats.
+	Found: 470 Unused Patches.
 Complete.
 
 ------------------------------------------------------------------------------------------
@@ -379,5 +382,8 @@ Converting Hexen>UDMF...
 	Done.
 
 Removing Unused Textures
+	Found: 444 Unused Textures.
+	Found: 12 Unused Flats.
+	Found: 106 Unused Patches.
 Complete.
 
