@@ -472,7 +472,7 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self.spritesname = sprites
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
 
-	self:printf(0, "------------------------------------------------------------------------------------------\n")
+	self:printf(0, "------------------------------------------------------------------------------------------")
 	self:printf(0, "Loading Wad '%s'...", path)
 	self:open(path)
 
@@ -2948,6 +2948,7 @@ end
 function wad:printf(verbose, ...)
 	if(verbose <= self.verbose) then
 		print(string.format(...))
+		logfile:write(string.format(...) .. "\n")
 	end
 end
 

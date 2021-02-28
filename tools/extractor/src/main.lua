@@ -11,7 +11,6 @@ function love.load(arg)
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
-	console = require("console")
     class = require("mod30log")
     wad = require("clsWad")
 
@@ -19,6 +18,12 @@ function love.load(arg)
     local apppath = love.filesystem.getSourceBaseDirectory()
     local pk3path = apppath:sub(1, -16) .. "pk3"
     local toolspath = apppath .. "/tools"
+
+	-- start logging
+	local logpath = apppath .. "/logs/_extract.txt"
+	logfile = io.open(logpath, "w+")
+
+	-- read doom2.wad
     local doom2 = wad(apppath .. "/doom2_lex.wad")
 
     ---------- edit these!-----------
@@ -37,6 +42,8 @@ function love.load(arg)
 	l.PHYSFS_mount(string.format("%s/patches", pk3path), 'patches', 1)
 	-----------------------------------------
 
+
+
     -- do all the things
     mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath, sprites)
 
@@ -54,6 +61,8 @@ function love.load(arg)
     local seconds = timeTaken_seconds - (minutes * 60)
     local s = ternary(seconds ~= 1, "seconds", "second")
     timeTaken = timeTaken .. string.format("%d %s", seconds, s)
+
+	logfile:close()
 end
 
 

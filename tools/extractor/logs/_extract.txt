@@ -1,0 +1,383 @@
+------------------------------------------------------------------------------------------
+Loading Wad 'C:/GitHub/LexWadExtract/tools/extractor/doom2_lex.wad'...
+Gathering Header...
+	Type: PWAD
+	Lumps: 2590
+	Directory Position: 0xE5E28E.
+	Base: true
+	Done.
+
+Processing Lexinizer Data...
+	Done.
+
+Gathering Namespaces...
+	Found Start of Namespace SP_START.
+	Found End of Namespace SP_END.
+	Found Start of Namespace DS_START.
+	Found End of Namespace DS_END.
+	Found Start of Namespace WS_START.
+	Found End of Namespace WS_END.
+	Found Start of Namespace OS_START.
+	Found End of Namespace OS_END.
+	Found Start of Namespace MS_START.
+	Found End of Namespace MS_END.
+	Found Start of Namespace FF_START.
+	Found End of Namespace FF_END.
+	Found Start of Namespace PP_START.
+	Found End of Namespace PP_END.
+	Found Start of Namespace SS_START.
+	Found End of Namespace SS_END.
+	Found Start of Namespace MM_START.
+	Found End of Namespace MM_END.
+	Done.
+
+Organizing Zdoom Textures...
+	No 'textures' found.
+	Done.
+
+Organizing Flats...
+	Found '147' flats.
+	Done.
+
+Organizing Patches...
+	Found '470' patches.
+	Done.
+
+Organizing Graphics...
+	No 'graphics' found.
+	Done.
+
+Organizing DMX Sounds...
+	Found '107' doomsounds.
+	Done.
+
+Organizing WAV Sounds...
+	Found '6' wavesounds.
+	Done.
+
+Organizing OGG Sounds...
+	Found '1' oggsounds.
+	Done.
+
+Organizing FLAC Sounds...
+	No 'flacsounds' found.
+	Done.
+
+Organizing Music...
+	Found '35' songs.
+	Done.
+
+Organizing Maps...
+	Not organizing base wad maps.
+	Done.
+
+Processing Palette...
+	Done.
+
+Processing Boom Animations...
+Processing Boom Switches...
+Processing Patches...
+	Done.
+
+Processing Flats...
+	Done.
+
+Processing PNAMES...
+	Found '469' patches.
+	Done.
+
+Processing TEXTUREx...
+	Found '428' textures.
+	No TEXTURE2 found. using base wad TEXTURE2
+	Done.
+
+Processing Zdoom Textures...
+	Not moving base wad zdoom textures.
+
+Processing Duplicates...
+	Found '21' duplicates
+	Found '0' doom duplicates
+	Done.
+
+Rename Flats...
+	Not renaming base wad flats.
+
+Rename Composites...
+	Not renaming base wad textures.
+
+Rename Patches...
+	Not renaming base wad patches.
+
+Rename Sounds...
+Processing TEXTURES...
+Processing ANIMDEFS...
+Processing Maps...
+	Not processing base wad maps.
+	Done.
+
+Modifying Maps...
+	Not modifying base wad maps.
+	Done.
+
+Processing ANIMDEFS for Doom/Boom...
+	Not building animdefs for base wad.
+
+Extracting Flats...
+	Not extracting base wad flats.
+
+Extracting Composites...
+	Not extracting base wad composites.
+
+Skipping Patches...
+Extracting Maps...
+	Not extracting base wad maps.
+
+Extracting Sounds...
+	Not extracting base wad sounds.
+
+Extracting ANIMDEFS...
+	Not extracting base wad animdefs.
+
+Extracting TEXTURES...
+	Not extracting base wad TextureX.
+
+Extracting SNDINFO...
+	Not extracting base wad sndinfo.
+
+Extracting SNDSEQ...
+	Not extracting base wad sndseq
+
+Converting Doom>Hexen...
+Converting Hexen>UDMF...
+Removing Unused Textures
+Complete.
+
+------------------------------------------------------------------------------------------
+Loading Wad 'C:/GitHub/LexWadExtract/tools/extractor/DBP_02_lex.wad'...
+Gathering Header...
+	Type: PWAD
+	Lumps: 296
+	Directory Position: 0x54DF43.
+	Base: false
+	Done.
+
+Processing Lexinizer Data...
+	Done.
+
+Gathering Namespaces...
+	Found Start of Namespace SP_START.
+	Found End of Namespace SP_END.
+	Found Start of Namespace DS_START.
+	Found End of Namespace DS_END.
+	Found Start of Namespace MS_START.
+	Found End of Namespace MS_END.
+	Found Start of Namespace FF_START.
+	Found End of Namespace FF_END.
+	Found Start of Namespace PP_START.
+	Found End of Namespace PP_END.
+	Found Start of Namespace SS_START.
+	Found End of Namespace SS_END.
+	Found Start of Namespace MM_START.
+	Found End of Namespace MM_END.
+	Done.
+
+Organizing Zdoom Textures...
+	No 'textures' found.
+	Done.
+
+Organizing Flats...
+	Found '41' flats.
+	Done.
+
+Organizing Patches...
+	Found '106' patches.
+	Done.
+
+Organizing Graphics...
+	No 'graphics' found.
+	Done.
+
+Organizing DMX Sounds...
+	Found '8' doomsounds.
+	Done.
+
+Organizing WAV Sounds...
+	No 'wavesounds' found.
+	Done.
+
+Organizing OGG Sounds...
+	No 'oggsounds' found.
+	Done.
+
+Organizing FLAC Sounds...
+	No 'flacsounds' found.
+	Done.
+
+Organizing Music...
+	Found '8' songs.
+	Done.
+
+Organizing Maps...
+	Doom Maps: '8' 
+	Hexen Maps: '0' 
+	UDMF Maps: '0'
+	Done.
+
+Processing Palette...
+	Done.
+
+Processing Boom Animations...
+Processing Boom Switches...
+Processing Patches...
+	Done.
+
+Processing Flats...
+	Done.
+
+Processing PNAMES...
+	Found '572' patches.
+	Done.
+
+Processing TEXTUREx...
+	Found '530' textures.
+	No TEXTURE2 found. using base wad TEXTURE2
+	Done.
+
+Processing Zdoom Textures...
+	Done.
+
+Processing Duplicates...
+	Found '12711' duplicates
+	Found '210' doom duplicates
+	Done.
+
+Rename Flats...
+	Done.
+
+Rename Composites...
+	Done.
+
+Rename Patches...
+	Done.
+
+Rename Sounds...
+	Done.
+
+Processing TEXTURES...
+Processing ANIMDEFS...
+Processing Maps...
+	Done.
+
+Modifying Maps...
+	Done.
+
+Processing ANIMDEFS for Doom/Boom...
+	Done.
+
+Extracting Flats...
+	Done.
+
+Extracting Composites...
+	Done.
+
+Extracting Patches...
+	Done.
+
+Extracting Maps...
+	Done.
+
+Extracting Sounds...
+	Done.
+
+Extracting ANIMDEFS...
+	Done.
+
+Extracting TEXTURES...
+	Done.
+
+Extracting SNDINFO...
+	Done.
+
+Extracting SNDSEQ...
+	Done.
+
+Converting Doom>Hexen...
+	Waiting for zwadconv...
+	Done.
+
+Converting Hexen>UDMF...
+	Converting Map DBP201.WAD.HM
+	Things: 126
+	Linedefs: 2669
+	Sidedefs: 4370
+	Vertices: 2303
+	Sectors: 340
+	Clean up...
+	Done.
+
+	Converting Map DBP202.WAD.HM
+	Things: 218
+	Linedefs: 2210
+	Sidedefs: 3706
+	Vertices: 1810
+	Sectors: 424
+	Clean up...
+	Done.
+
+	Converting Map DBP203.WAD.HM
+	Things: 168
+	Linedefs: 1591
+	Sidedefs: 2587
+	Vertices: 1274
+	Sectors: 313
+	Clean up...
+	Done.
+
+	Converting Map DBP204.WAD.HM
+	Things: 381
+	Linedefs: 2838
+	Sidedefs: 4368
+	Vertices: 2283
+	Sectors: 443
+	Clean up...
+	Done.
+
+	Converting Map DBP205.WAD.HM
+	Things: 1241
+	Linedefs: 4672
+	Sidedefs: 8002
+	Vertices: 3998
+	Sectors: 742
+	Clean up...
+	Done.
+
+	Converting Map DBP206.WAD.HM
+	Things: 224
+	Linedefs: 2892
+	Sidedefs: 4925
+	Vertices: 2399
+	Sectors: 532
+	Clean up...
+	Done.
+
+	Converting Map DBP207.WAD.HM
+	Things: 596
+	Linedefs: 5975
+	Sidedefs: 11200
+	Vertices: 5132
+	Sectors: 1052
+	Clean up...
+	Done.
+
+	Converting Map DBP208.WAD.HM
+	Things: 523
+	Linedefs: 3567
+	Sidedefs: 6570
+	Vertices: 3002
+	Sectors: 631
+	Clean up...
+	Done.
+
+Removing Unused Textures
+Complete.
+
