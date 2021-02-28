@@ -607,8 +607,8 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Converting Hexen>UDMF...")
 	self:convertHexenToUDMF()
 
-	--self:printf(0, "Removing Unused Textures")
-	--self:removeUnusedTextures()
+	self:printf(0, "Removing Unused Textures")
+	self:removeUnusedTextures()
 
 	self:printf(0, "Complete.\n")
 
@@ -2317,7 +2317,7 @@ function wad:convertDoomToHexen()
 
 		-- create a new bat file
 		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
-		
+
 		-- Move current directory to where zwadconv is located.
 		file:write("cd tools\n")
 
@@ -2338,7 +2338,7 @@ function wad:convertDoomToHexen()
 		end
 
 		-- file:write("pause\n")
-		
+
 		-- delete .dm files
 		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
 		file:write(string.format('del "*.DM" /q\n', self.pk3path))

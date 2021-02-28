@@ -43,7 +43,7 @@ function love.load(arg)
     local endTime = os.time();
 
     local timeTaken_seconds = os.difftime(endTime, startTime)
-   
+
     local minutes = 0
     if timeTaken_seconds >= 60 then
         minutes = math.floor(timeTaken_seconds / 60)
