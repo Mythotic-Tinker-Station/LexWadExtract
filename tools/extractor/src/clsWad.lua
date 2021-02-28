@@ -607,8 +607,8 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Converting Hexen>UDMF...")
 	self:convertHexenToUDMF()
 
-	self:printf(0, "Removing Unused Textures")
-	self:removeUnusedTextures()
+	--self:printf(0, "Removing Unused Textures")
+	--self:removeUnusedTextures()
 
 	self:printf(0, "Complete.\n")
 
