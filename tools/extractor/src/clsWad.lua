@@ -1482,7 +1482,7 @@ end
 function wad:processMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
-			self:printf(2, "\tProcessing Map: %d", m)
+			self:printf(2, "\tProcessing Map: %d, %s", m, self.maps[m].name)
 
 			-- doom
 			if(self.maps[m].format == "DM") then
