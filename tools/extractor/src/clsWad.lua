@@ -3,7 +3,7 @@
 	run away, its awful
 --]]
 
-
+animdefsIgnore = {}
 
 
 local wad = class("wad",
@@ -607,8 +607,8 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Converting Hexen>UDMF...")
 	self:convertHexenToUDMF()
 
-	--self:printf(0, "Removing Unused Textures")
-	--self:removeUnusedTextures()
+	self:printf(0, "Removing Unused Textures")
+	self:removeUnusedTextures()
 
 	self:printf(0, "Complete.\n")
 
@@ -2044,6 +2044,29 @@ function wad:extractAnimdefs()
 		local anim = ""
 		for a = 1, #self.animdefs.anims do
 			anim = string.format("%s\n%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
+			
+			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
+			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
+			
+			for i = tonumber(texNumMin), tonumber(texNumMax) do
+				local lumpName = self.acronym 
+
+				if i < 1000 then
+					lumpName = lumpName .. "0"
+				end
+
+				if i < 100 then
+					lumpName = lumpName .. "0"
+				end
+
+				if i < 10 then
+					lumpName = lumpName .. "0"
+				end
+
+				animdefsIgnore[lumpName .. i] = "not nil";
+				i = i + 1
+			end
+
 			if(self.animdefs.anims[a].decal) then
 				anim = string.format("%s %s", anim, self.animdefs.anims[a].decal)
 			end
@@ -2052,7 +2075,11 @@ function wad:extractAnimdefs()
 		local switch = ""
 		for s = 1, #self.animdefs.switches do
 			switch = string.format("%s\nswitch %s on pic %s tics 0", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
+
+			animdefsIgnore[self.animdefs.switches[s].text1] = "not nil";
+			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
 		end
+
 		local file, err = io.open(string.format("%s/ANIMDEFS.%s.TXT", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(anim)
@@ -2894,27 +2921,26 @@ function wad:convertHexenToUDMF()
 end
 
 function wad:removeUnusedTextures()
-
 	local tex = 0
 	local flats = 0
 	local patches = 0
 
 	for c = 1, #self.composites do
-		if(not self.composites[c].used) then
+		if(not self.composites[c].used and animdefsIgnore[self.composites[c].newname] == nil) then
 			tex = tex + 1
 			os.remove(string.format("%s/TEXTURES/%s.png", self.pk3path, self.composites[c].newname))
 		end
 	end
 
 	for f = 1, #self.flats do
-		if(not self.flats[f].used) then
+		if(not self.flats[f].used and animdefsIgnore[self.flats[f].newname] == nil) then
 			flats = flats + 1
 			os.remove(string.format("%s/FLATS/%s.png", self.pk3path, self.flats[f].newname))
 		end
 	end
 
 	for p = 1, #self.patches do
-		if(not self.patches[p].used) then
+		if(not self.patches[p].used and animdefsIgnore[self.patches[p].newname] == nil) then
 			patches = patches + 1
 			os.remove(string.format("%s/PATCHES/%s.png", self.pk3path, self.patches[p].newname))
 		end
