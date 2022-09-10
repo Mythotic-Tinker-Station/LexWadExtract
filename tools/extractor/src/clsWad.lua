@@ -671,6 +671,7 @@ end
 function wad:buildNamespaces()
 	local found = false
 	local namespace = ""
+    local foundend = false
 
 	for l = 0, self.header.lumpcount do
 
@@ -686,6 +687,7 @@ function wad:buildNamespaces()
 		if(name == string.format("%s_END", namespace)) then
 			found = false
 			self:printf(1, "\tFound End of Namespace %s.", name)
+            foundend = true
 		end
 
 		-- in namespace
@@ -702,6 +704,10 @@ function wad:buildNamespaces()
 			self:printf(1, "\tFound Start of Namespace %s.", name)
 		end
 	end
+    if(not foundend) then
+        self:printf(0, "\tCould not find the end marker of namespace %s", name)
+        error()
+    end
 	self:printf(1, "\tDone.\n")
 	collectgarbage()
 end
@@ -1042,7 +1048,7 @@ function wad:processTexturesX(num)
 
 						-- flats
 						if(notfound) then
-							love.graphics.draw(self.flats[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+							--love.graphics.draw(self.flats[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
 						end
 					else
 						love.graphics.draw(self.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
@@ -2044,12 +2050,12 @@ function wad:extractAnimdefs()
 		local anim = ""
 		for a = 1, #self.animdefs.anims do
 			anim = string.format("%s\n%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
-			
+
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
-			
+
 			for i = tonumber(texNumMin), tonumber(texNumMax) do
-				local lumpName = self.acronym 
+				local lumpName = self.acronym
 
 				if i < 1000 then
 					lumpName = lumpName .. "0"
