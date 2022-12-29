@@ -2548,7 +2548,7 @@ function wad:extractAnimdefs()
 			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
 		end
 
-		local file, err = io.open(string.format("%s/ANIMDEFS.%s.TXT", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/ANIMDEFS.%s", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(anim)
 		file:write("\n")
@@ -2589,7 +2589,7 @@ function wad:extractSNDINFO()
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
 		end
 
-		local file, err = io.open(string.format("%s/SNDINFO.%s.TXT", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/SNDINFO.%s", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(txt)
 		--file:write(self.animdefs.original)
@@ -2605,19 +2605,19 @@ function wad:extractSNDSEQ()
 	if(self.base ~= self) then
 
 		local txt = {}
---[[
-		local dsdoropn = false
-		local dsdorcls = false
-		local dsbdopn = false
-		local dsbdcls = false
+
+		self.dsdoropn = false
+		self.dsdorcls = false
+		self.dsbdopn = false
+		self.dsbdcls = false
 
 		for i, v in ipairs(self.snddefs) do
-			if(v[2] == "DSDOROPN") then dsdoropn = true end
-			if(v[2] == "DSDORCLS") then dsdorcls = true end
-			if(v[2] == "DSBDOPN") then dsbdopn = true end
-			if(v[2] == "DSBDCLS") then dsbdcls = true end
+			if(v[2] == "DSDOROPN") then self.dsdoropn = true end
+			if(v[2] == "DSDORCLS") then self.dsdorcls = true end
+			if(v[2] == "DSBDOPN") then self.dsbdopn = true end
+			if(v[2] == "DSBDCLS") then self.dsbdcls = true end
 		end
-]]
+
 		-- doors
 		local used_doors = {}
 		for i, v in ipairs(self.snddefs) do
@@ -2712,7 +2712,7 @@ function wad:extractSNDSEQ()
 
 		txt[#txt+1] = string.format("end\n\n")
 
-		local file, err = io.open(string.format("%s/SNDSEQ.%s.TXT", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/SNDSEQ.%s", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(table.concat(txt))
 		file:close()
@@ -2768,7 +2768,7 @@ end
 function wad:extractTexturesLump()
 	if(self.base ~= self) then
 
-		local file, err = io.open(string.format("%s/TEXTURES.%s.TXT", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/TEXTURES.%s", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(self.textures.original)
 		file:close()
@@ -3236,7 +3236,7 @@ function wad:convertHexenToUDMF()
 
 
 					-- look for door sectors
-					if(self.dspstart or self.dspstop or self.dsstnmov) then
+					if(self.dsdoropn or self.dsdorcls or self.dsbdopn or self.dsbdclr) then
 						for k, v in pairs(door_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
@@ -3248,34 +3248,36 @@ function wad:convertHexenToUDMF()
 								end
 							end
 						end
+                    end
 
-						-- look for floor sectors
-						for k, v in pairs(floor_tags) do
-							if(v[1] == true) then
-								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
-								end
-							else
-								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
-								end
+					-- look for floor sectors
+					for k, v in pairs(floor_tags) do
+						if(v[1] == true) then
+							if(SECTORS[s].tag == k) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
+							end
+						else
+							if(s-1 == v[2]) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
 							end
 						end
+					end
 
-						-- look for ceiling sectors
-						for k, v in pairs(ceiling_tags) do
-							if(v[1] == true) then
-								if(SECTORS[s].tag == k) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
-								end
-							else
-								if(s-1 == v[2]) then
-									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
-								end
+					-- look for ceiling sectors
+					for k, v in pairs(ceiling_tags) do
+						if(v[1] == true) then
+							if(SECTORS[s].tag == k) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
+							end
+						else
+							if(s-1 == v[2]) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
 							end
 						end
+					end
 
 						-- look for platform sectors
+                    if(self.dspstart or self.dspstop or self.dsstnmov) then
 						for k, v in pairs(platform_tags) do
 							if(v[1] == true) then
 								if(SECTORS[s].tag == k) then
