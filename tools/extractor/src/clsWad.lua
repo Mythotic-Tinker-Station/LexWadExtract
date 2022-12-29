@@ -9,7 +9,7 @@ animdefsIgnore = {}
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 1,
+	verbose = 2,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
@@ -1101,12 +1101,17 @@ function wad:addExtraMarkers()
     local pos = {}
     local lumpchunk = ""
 
-    self:printf(1, "\tConcatenating lump data...(for some reason this part takes A LONG time)", name)
+    self:printf(1, "\tConcatenating lump data...")
+
+
+    local datatable = {}
+    local size = 0
     for lump = 1, #lumplist_new do
-        pos[lump] = #lumpchunk
-        lumpchunk = string.format("%s%s", lumpchunk, lumplist_new[lump].data)
-        collectgarbage()
+        pos[lump] = size
+        datatable[lump] = lumplist_new[lump].data
+        size = size + lumplist_new[lump].size
     end
+    lumpchunk = table.concat(datatable)
 
 	-- header
 	local header = love.data.pack("string", "<c4LL", "PWAD", #lumplist_new, 12+#lumpchunk)
