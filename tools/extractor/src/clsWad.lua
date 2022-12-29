@@ -1101,7 +1101,7 @@ function wad:addExtraMarkers()
     local pos = {}
     local lumpchunk = ""
 
-    
+    self:printf(1, "\tConcatenating lump data...(for some reason this part takes A LONG time)", name)
     for lump = 1, #lumplist_new do
         pos[lump] = #lumpchunk
         lumpchunk = string.format("%s%s", lumpchunk, lumplist_new[lump].data)
@@ -1117,14 +1117,14 @@ function wad:addExtraMarkers()
     for lump = 1, #lumplist_new do
         dir = dir .. love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplist_new[lump].data, lumplist_new[lump].name)
     end
-
+--[[
     local wad, err = io.open(string.format("%s.wad",  self.acronym), "w+b")
     if err then error("[ERROR] " .. err) end
     wad:write(header)
     wad:write(lumpchunk)
     wad:write(dir)
     wad:close()
-
+]]
     self.raw = header .. lumpchunk .. dir
     self:gatherHeader()
 end
