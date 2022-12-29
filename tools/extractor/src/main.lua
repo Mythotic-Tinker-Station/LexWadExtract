@@ -24,11 +24,11 @@ function love.load(arg)
 	logfile = io.open(logpath, "w+")
 
 	-- read doom2.wad
-    local doom2 = wad(apppath .. "/doom2_lex.wad")
+    local doom2 = wad(apppath .. "/doom2.wad")
 
     ---------- edit these!-----------
-    local acronym = "TOKE"
-    local pwad = apppath .. "/TokeDM_lex.wad"
+    local acronym = "MAYH"
+    local pwad = apppath .. "/mayhem17.wad"
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that

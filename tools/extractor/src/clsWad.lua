@@ -35,6 +35,125 @@ local wad = class("wad",
 	dups = {},
 	doomdups = {},
 	animdefs = {},
+
+    maplumps =
+    {
+        "THINGS", 
+        "LINEDEFS", 
+        "SIDEDEFS", 
+        "VERTEXES", 
+        "SEGS", 
+        "SSECTORS", 
+        "NODES", 
+        "SECTORS", 
+        "REJECT", 
+        "BLOCKMAP",
+        "BEHAVIOR",
+        "SCRIPTS",
+        "TEXTMAP",
+        "ZNODES",
+        "DIALOGUE",
+        "ENDMAP",
+    },
+
+    specialslist =
+    {
+		"ALTHUDCF",
+		"ANIMATED",
+		"ANIMDEFS",
+		"COLORMAP",
+		"CVARINFO",
+		"DECALDEF",
+		"DECORATE",
+		"DEFBINDS",
+		"DEFCVARS",
+		"DEHACKED",
+		"DEHSUPP",
+		"DEMO1",
+		"DEMO2",
+		"DEMO3",
+		"DMXGUS",
+		"_DEUTEX_",
+		"ENDOOM",
+		"FONTDEFS",
+		"FSGLOBAL",
+		"GAMINFO",
+		"GENMIDI",
+		"GLDEFS",
+		"IWADINFO",
+		"LANGUAGE",
+		"LOADACS",
+		"LOCKDEFS",
+		"MAPINFO",
+		"MENUDEF",
+		"MODELDEF",
+		"MUSINFO",
+		"PALVARS",
+		"PLAYPAL",
+		"PNAMES",
+		"REVERB",
+		"SBARINFO",
+		"SECRETS",
+		"SNDCURVE",
+		"SNDINFO",
+		"SNDSEQ",
+		"SWITCHES",
+		"TEAMINFO",
+		"TERRAIN",
+		"TEXTCOLO",
+		"TEXTURE1",
+		"TEXTURE2",
+		"TEXTURES",
+		"TRNSLATE",
+		"VOXELDEF",
+		"X11R6RGB",
+		"XHAIRS",
+		"XLAT",
+		"ZMAPINFO",
+    },
+
+    graphicslist =
+    {
+        {"CWILV00", "LV00"},
+        {"CWILV01", "LV01"},
+        {"CWILV02", "LV02"},
+        {"CWILV03", "LV03"},
+        {"CWILV04", "LV04"},
+        {"CWILV05", "LV05"},
+        {"CWILV06", "LV06"},
+        {"CWILV07", "LV07"},
+        {"CWILV08", "LV08"},
+        {"CWILV09", "LV09"},
+        {"CWILV10", "LV10"},
+        {"CWILV11", "LV11"},
+        {"CWILV12", "LV12"},
+        {"CWILV13", "LV13"},
+        {"CWILV14", "LV14"},
+        {"CWILV15", "LV15"},
+        {"CWILV16", "LV16"},
+        {"CWILV17", "LV17"},
+        {"CWILV18", "LV18"},
+        {"CWILV19", "LV19"},
+        {"CWILV20", "LV20"},
+        {"CWILV21", "LV21"},
+        {"CWILV22", "LV22"},
+        {"CWILV23", "LV23"},
+        {"CWILV24", "LV24"},
+        {"CWILV25", "LV25"},
+        {"CWILV26", "LV26"},
+        {"CWILV27", "LV27"},
+        {"CWILV28", "LV28"},
+        {"CWILV29", "LV29"},
+        {"CWILV30", "LV30"},
+        {"CWILV31", "LV31"},
+        {"CWILV32", "LV32"},
+        {"INTERPIC", "INTR"},
+        {"TITLEPIC", "TITL"},
+        {"HELP", "HELP"},
+        {"CREDIT", "CRED"},
+        {"BOSSBACK", "BOSS"},
+    },
+
 	switchlist =
 	{
 		{"SW1BRCOM", 	"SW2BRCOM"},
@@ -479,8 +598,8 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 	self:printf(0, "Gathering Header...")
 	self:gatherHeader()
 
-	self:printf(0, "Processing Lexinizer Data...")
-	self:checkMetadata()
+	self:printf(0, "Adding Extra Namespace Markers...")
+	self:addExtraMarkers()
 
 	self:printf(0, "Gathering Namespaces...")
 	self:buildNamespaces()
@@ -612,6 +731,7 @@ function wad:init(path, acronym, patches, base, pk3path, toolspath, sprites)
 
 	self:printf(0, "Complete.\n")
 
+    ::endit::
 	collectgarbage()
 end
 
@@ -637,36 +757,378 @@ function wad:gatherHeader()
 	self:printf(1, "\tDone.\n")
 end
 
-function wad:checkMetadata()
+function wad:addExtraMarkers()
 
-	local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+16)
-	name = self:removePadding(name)
-	local filedata = love.data.unpack(string.format("<c%d", size), self.raw, filepos)
+    local lumplist = {}
+    local lumplist_new = {}
 
-	if(name ~= "RNAMEDEF") then
-		error("Wad has not been Lexinized...Please run this wad through the slade lexinizer before extraction.")
-	else
-		for line in string.gmatch(filedata, "[^\n]+") do
-			local index = #self.metadata+1
-			local count = 1
-			self.metadata[index] = {}
-			for param in string.gmatch(line, "[^%^]+") do
-				if(count == 1) then self.metadata[index].namespace = param end
-				if(count == 2) then self.metadata[index].oldname = param end
-				if(count == 3) then self.metadata[index].newname = param end
-				if(count == 4) then self.metadata[index].id = param end
-				if(count == 5) then self.metadata[index].name = param end
-				if(count == 6) then self.metadata[index].ext = param end
-				if(count == 7) then self.metadata[index].format = param end
-				if(count == 8) then self.metadata[index].editor = param end
-				if(count == 9) then self.metadata[index].category = param end
-				count = count + 1
-			end
-		end
-		self:printf(1, "\tDone.\n")
-	end
-	collectgarbage()
+    -- save all lumps into a table
+    for lump = 0, self.header.lumpcount do
+        lumpindex = #lumplist+1
+        lumplist[lumpindex] = {}
+		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(lump*16))
+        lumplist[lumpindex].filepos = filepos
+        lumplist[lumpindex].size = size
+        lumplist[lumpindex].name = self:removePadding(name)
+        lumplist[lumpindex].data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
+    end
+    ------------------
+    -- specials 
+    ------------------
+    self:printf(1, "\tCreating Specials Namespace...", name)
+
+    -- make the SP_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SP_START", data = ""}
+
+    -- copy all the special lumps below the SP_START marker
+    for l, lump in ipairs(lumplist) do
+        for s, special in ipairs(self.specialslist) do
+            if lump.name == special then
+                self:printf(2, "\t\tFound %s", special)
+                lumplist_new[#lumplist_new+1] = lump
+            end
+        end
+    end
+
+    -- make the SP_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SP_END", data = ""}
+
+    ------------------
+    -- graphics
+    ------------------
+    self:printf(1, "\tCreating Graphics Namespace...", name)
+
+    -- make the GG_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "GG_START", data = ""}
+
+    -- copy all the graphics lumps below the GG_START marker
+    for l, lump in ipairs(lumplist) do
+        for g, graphic in ipairs(self.graphicslist) do
+            if lump.name == graphic[1] then
+                self:printf(2, "\t\tFound %s; renaming to %s%s", graphic[1], self.acronym, graphic[2])
+                lumplist_new[#lumplist_new+1] = lump
+            end
+        end
+    end
+
+    -- make the GG_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "GG_END", data = ""}
+
+    ------------------
+    -- maps
+    ------------------
+    self:printf(1, "\tCreating Maps Namespace...", name)
+
+    -- make the MM_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_START", data = ""}
+
+    -- copy all the map lumps below the MM_START marker
+    local maplist = {}
+
+    -- go through all the lumps
+    for l, lump in ipairs(lumplist) do
+
+        -- find markers
+        if(lump.size == 0) then
+
+            -- make sure we wont hit the end of the list
+            if l+10 <= #lumplist then
+                local t = "Doom"
+                local function continue()
+                    if lumplist[l+1].name ~= "THINGS" then return false end
+                    if lumplist[l+2].name ~= "LINEDEFS" then return false end
+                    if lumplist[l+3].name ~= "SIDEDEFS" then return false end
+                    if lumplist[l+4].name ~= "VERTEXES" then return false end
+                    if lumplist[l+5].name ~= "SEGS" then return  false end
+                    if lumplist[l+6].name ~= "SSECTORS" then return  false end
+                    if lumplist[l+7].name ~= "NODES" then return false end
+                    if lumplist[l+8].name ~= "SECTORS" then return false end
+                    if lumplist[l+9].name ~= "REJECT" then return false end
+                    if lumplist[l+10].name ~= "BLOCKMAP" then return false end
+                    return true
+                end
+                if continue() then
+                    if l+11 <= #lumplist then
+                        if lumplist[l+11].name == "BEHAVIOR" then 
+                            t = "Hexen"
+                        end
+                    end
+
+                    if t == "Doom" then
+                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DM_START", data = ""}
+                        for ll = l, l+10 do
+                            lumplist_new[#lumplist_new+1] = lumplist[ll]
+                        end
+                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DM_END", data = ""}
+
+                    elseif t == "Hexen" then
+                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "HM_START", data = ""}
+                        for ll = l, l+10 do
+                            lumplist_new[#lumplist_new+1] = lumplist[ll]
+                        end
+                        lumplist_new[#lumplist_new+1] = lumplist[l+11]
+                        if l+12 <= #lumplist then
+                            if lumplist[l+12].name == "SCRIPTS" then 
+                                lumplist_new[#lumplist_new+1] = lumplist[l+12]
+                            end
+                        end
+                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "HM_END", data = ""}
+                    end
+
+                    self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
+                end
+                if lumplist[l+1].name == "TEXTMAP" then 
+                    for ll = l, #lumplist do
+                        if lumplist[ll].name == "ENDMAP" then 
+                            lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_START", data = ""}
+                            for lll = l, ll do
+                                lumplist_new[#lumplist_new+1] = lumplist[lll]
+                            end
+                            lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_END", data = ""}
+                            t = "UDMF"
+                            break;
+                        end
+                    end
+                    self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
+                end
+                
+            end
+        end
+    end
+    -- make the MM_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_END", data = ""} 
+
+    ------------------
+    -- doom sounds
+    ------------------
+    self:printf(1, "\tCreating Doom Sounds Namespace...", name)
+
+    -- make the DS_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name:sub(1, 2) == "DS" then
+            self:printf(2, "\t\tFound Doom Sound: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+    end
+
+    -- make the DS_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DS_END", data = ""}
+
+    ------------------
+    -- wave sounds
+    ------------------
+    self:printf(1, "\tCreating Wave Sounds Namespace...", name)
+
+    -- make the WS_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "WS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name:sub(1, 4) == "RIFF" then
+            self:printf(2, "\t\tFound Wave Sound: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+    end
+
+    -- make the WS_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "WS_END", data = ""}
+
+    ------------------
+    -- ogg sounds
+    ------------------
+    self:printf(1, "\tCreating Ogg Sounds Namespace...", name)
+
+    -- make the OS_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "OS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.data:sub(1, 3) == "Ogg" then
+            self:printf(2, "\t\tFound OGG Sound: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+    end
+
+    -- make the OS_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "OS_END", data = ""}  
+
+    ------------------
+    -- flac sounds
+    ------------------
+    self:printf(1, "\tCreating Flac Sounds Namespace...", name)
+
+    -- make the CS_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "CS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.data:sub(1, 4) == "fLaC" then
+            self:printf(2, "\t\tFound FLAC Sound: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+    end
+
+    -- make the CS_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "CS_END", data = ""}    
+
+    ------------------
+    -- music
+    ------------------
+    self:printf(1, "\tCreating Music Namespace...", name)
+
+    -- make the MS_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.data:sub(1, 3) == "MUS" then
+            self:printf(2, "\t\tFound MUS song: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+        if lump.data:sub(1, 4) == "MThd" then
+            self:printf(2, "\t\tFound MIDI song: %s", lumplist[l].name)
+            lumplist_new[#lumplist_new+1] = lump
+        end
+    end
+
+    -- make the MS_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MS_END", data = ""}
+
+    ------------------
+    -- texture
+    ------------------
+    self:printf(1, "\tCreating Textures Namespace...", name)
+
+    -- make the TX_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "TX_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name == "TX_START" then
+            for ll = l, #lumplist do
+                if lumplist[ll].name == "TX_END" then
+                    for lll = l, ll do
+                        self:printf(2, "\t\tFound Texture: %s", lumplist[lll].name)
+                        lumplist_new[#lumplist_new+1] = lumplist[lll]
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    -- make the TX_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "TX_END", data = ""}
+
+    ------------------
+    -- sprites
+    ------------------
+    self:printf(1, "\tCreating Sprites Namespace...", name)
+
+    -- make the S_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SS_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name == "S_START" or lump.name == "SS_START" then
+            for ll = l, #lumplist do
+                if lumplist[ll].name == "S_END" or lumplist[ll].name == "SS_END" then
+                    for lll = l+1, ll-1 do
+                        self:printf(2, "\t\tFound Sprite: %s", lumplist[lll].name)
+                        lumplist_new[#lumplist_new+1] = lumplist[lll]
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    -- make the S_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SS_END", data = ""}
+
+    ------------------
+    -- flats
+    ------------------
+    self:printf(1, "\tCreating Flats Namespace...", name)
+
+    -- make the F_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "FF_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name == "F_START" or lump.name == "FF_START" then
+            for ll = l, #lumplist do
+                if lumplist[ll].name == "F_END" or lumplist[ll].name == "FF_END" then
+                    for lll = l+1, ll-1 do
+                        if lumplist[lll].name:sub(1,2) ~= "F1" and lumplist[lll].name:sub(1,2) ~= "F2" and lumplist[lll].name:sub(1,2) ~= "F3" and lumplist[lll].name:sub(1,2) ~= "F4" then
+                            self:printf(2, "\t\tFound Flat: %s", lumplist[lll].name)
+                            lumplist_new[#lumplist_new+1] = lumplist[lll]
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    -- make the F_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "FF_END", data = ""}
+
+
+    ------------------
+    -- patches
+    ------------------
+    self:printf(1, "\tCreating Patches Namespace...", name)
+
+    -- make the P_START marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "PP_START", data = ""}
+
+    for l, lump in ipairs(lumplist) do
+        if lump.name == "P_START" or lump.name == "PP_START" then
+            for ll = l, #lumplist do
+                if lumplist[ll].name == "P_END" or lumplist[ll].name == "PP_END" then
+                    for lll = l+1, ll-1 do
+                        if lumplist[lll].name:sub(1,2) ~= "P1" and lumplist[lll].name:sub(1,2) ~= "P2" and lumplist[lll].name:sub(1,2) ~= "P3" and lumplist[lll].name:sub(1,2) ~= "P4" then
+                            self:printf(2, "\t\tFound Patch: %s", lumplist[lll].name)
+                            lumplist_new[#lumplist_new+1] = lumplist[lll]
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    -- make the P_END marker
+    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "PP_END", data = ""}
+
+    -- lump data
+    local pos = {}
+    local lumpchunk = ""
+
+    
+    for lump = 1, #lumplist_new do
+        pos[lump] = #lumpchunk
+        lumpchunk = string.format("%s%s", lumpchunk, lumplist_new[lump].data)
+        collectgarbage()
+    end
+
+	-- header
+	local header = love.data.pack("string", "<c4LL", "PWAD", #lumplist_new, 12+#lumpchunk)
+    
+    -- dir
+    local dir = ""
+
+    for lump = 1, #lumplist_new do
+        dir = dir .. love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplist_new[lump].data, lumplist_new[lump].name)
+    end
+
+    local wad, err = io.open(string.format("%s.wad",  self.acronym), "w+b")
+    if err then error("[ERROR] " .. err) end
+    wad:write(header)
+    wad:write(lumpchunk)
+    wad:write(dir)
+    wad:close()
+
+    self.raw = header .. lumpchunk .. dir
+    self:gatherHeader()
 end
+
 
 function wad:buildNamespaces()
 	local found = false
