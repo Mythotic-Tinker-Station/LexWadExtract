@@ -1,51 +1,24 @@
 These instructions are for SLADE v3.1.12 and don't work on the beta version.
 
 -------------------------------------------
--- You only need to do steps 1 - 7 once
--------------------------------------------
-1:	Copy /tools/slade_script/LexEx.lua to %appdata%/slade3/scripts/archive
-
-2:	Copy the doom2.wad to \tools\extractor\
-
-3:	Open the doom2.wad in \tools\extractor\ in slade
-
-4:	Go to Archive > Run Script > LexEx
-
-5:	You'll be prompted to provide an acronym, this can be ingored for the doom2 wad, leave it the default "DOOM"
-
-6:	This script takes a few minutes to complete, slade will freeze during this time, dont panic!
-
-7:	You will have a doom2_lex.wad in the same folder, you can delete the doom2.wad
-
--------------------------------------------
 -- Repeat these steps for each mapset
 -------------------------------------------
-8:	Open the mapset you wanna convert in slade
+1:  Copy the wad you want to convert to \tools\extractor\
 
-9:	Go to Archive > Run Script > LexEx
+2:  Go to \tools\extractor\src and open the main.lua file
 
-10:	You'll be prompted to provide a 4 letter acronym, this acronym is important for renaming textures and the like
-
-11:	This script takes a few minutes to complete, slade will freeze during this time, dont panic!
-
-12:	You will have a wad with the same name with _lex appended in the same folder
-
-13:	Copy that wad to \tools\extractor\
-
-14:	Go to \tools\extractor\src and open the main.lua file
-
-15:	Change this line:
+3:	Change this line:
     ---------- edit these!-----------
-    local acronym = "EPIC" -- the acronym you used in slade
-    local pwad = apppath .. "/epic_lex.wad" -- the wad that the slade script made
+    local acronym = "EPIC" -- the acronym of the mapset, we use a 4 letter acronym to ID and name assets from that wad, for example, all textures are renamed "EPIC0000" ect
+    local pwad = apppath .. "/epip.wad" -- the wad to convert
 
-16:	Click tools/extractor/Run.Bat
+4:	Click tools/extractor/Run.Bat
 
-17:	Watch it do the thing.
+5:	Watch it do the thing.
 
-18:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest
+6:	Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest
 
-19: Just copy all that stuff to your pack pk3 folder, then setup the MAPINFO, LAUNAGE, and acs script
+7:  Just copy all that stuff to your pack pk3 folder, then setup the MAPINFO, LAUNAGE, and ACS Script
 
 
 
