@@ -1,1 +1,0 @@
-# Lexicon Wad Extractor Thing
