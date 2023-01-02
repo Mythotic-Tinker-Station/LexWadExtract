@@ -583,9 +583,7 @@ local wad = class("wad",
 ---------------------------------------------------------
 function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites)
 
-    if verbose == "1" or verbose == "2" or verbose == "3" then
-        self.verbose = verbose
-    end
+    self.verbose = tonumber(verbose)
 
 	self.base = base or self
 	self.acronym = acronym
