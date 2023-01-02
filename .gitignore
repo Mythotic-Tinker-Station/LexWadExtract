@@ -1,5 +1,4 @@
 doom2.wad
-doom2_lex.wad
 maps.zip
 *.png
 *.wad*
@@ -11,8 +10,8 @@ maps.zip
 *sndinfo*
 *textures*
 *sndseq*
-tools/extractor/convlog.txt
-tools/extractor/tools/zwadconv.bat
-tools/extractor/tools/convlog.txt
-tools/extractor/tools/logs/
-tools/extractor/logs/
+tools/convlog.txt
+tools/tools/zwadconv.bat
+tools/tools/convlog.txt
+tools/tools/logs/
+tools//logs/

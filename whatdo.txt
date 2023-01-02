@@ -6,16 +6,12 @@ Prerequisite: Add the doom2.wad to the \tools\extractor\ folder
 -------------------------------------------
 -- Repeat these steps for each mapset
 -------------------------------------------
-1:  Copy the wad you want to convert to \tools\extractor\
+1:  Copy the wad you want to convert to root
 
-2:  Go to \tools\extractor\src and open the main.lua file
+2:  edit the run.bat to and add the wad name you want to convert and the 4 letter ALL CAPS acronym for the mapset
+    should look something like this: start Love2D/love.exe "src" "mayhem17.wad" "MAYH"
 
-3:	Change this line:
-    ---------- edit these!-----------
-    local acronym = "EPIC" -- the acronym of the mapset, we use a 4 letter acronym to ID and name assets from that wad, for example, all textures are renamed "EPIC0000" ect
-    local pwad = apppath .. "/epic.wad" -- the wad to convert
-
-4:	Click tools/extractor/Run.Bat
+4:	Click Run.Bat
 
 5:	Watch it do the thing.
 

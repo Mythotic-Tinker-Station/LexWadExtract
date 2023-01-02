@@ -9,7 +9,7 @@ animdefsIgnore = {}
 local wad = class("wad",
 {
 	-- class variables
-	verbose = 2,
+	verbose = 0,
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
