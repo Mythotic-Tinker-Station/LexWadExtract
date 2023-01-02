@@ -10,7 +10,7 @@ These instructions are for SLADE v3.1.12 and don't work on the beta version.
 3:	Change this line:
     ---------- edit these!-----------
     local acronym = "EPIC" -- the acronym of the mapset, we use a 4 letter acronym to ID and name assets from that wad, for example, all textures are renamed "EPIC0000" ect
-    local pwad = apppath .. "/epip.wad" -- the wad to convert
+    local pwad = apppath .. "/epic.wad" -- the wad to convert
 
 4:	Click tools/extractor/Run.Bat
 
