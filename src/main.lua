@@ -25,12 +25,13 @@ function love.load(arg)
 	local logpath = apppath .. "/logs/extract.txt"
 	logfile = io.open(logpath, "w+")
 
-	-- read doom2.wad
-    local doom2 = wad(apppath .. "/doom2.wad")
-
     -- get command line args
     local acronym = arg[2]
     local pwad = apppath .. "/" .. arg[1]
+    local verbose = arg[3]
+
+	-- read doom2.wad
+    local doom2 = wad(verbose, apppath .. "/doom2.wad")
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -45,7 +46,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(pwad, acronym, true, doom2, pk3path, toolspath, sprites)
+    mapset = wad(verbose, pwad, acronym, true, doom2, pk3path, toolspath, sprites)
 
     local endTime = os.time();
 
