@@ -1,63 +1,69 @@
 cd tools
 mkdir .\logs
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH01.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH01.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH01.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH02.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH02.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH02.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH03.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH03.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH03.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH04.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH04.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH04.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH05.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH05.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH05.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH06.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH06.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH06.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH07.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH07.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH07.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH08.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH08.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH08.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH09.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH09.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH09.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH10.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH10.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH10.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH11.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH11.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH11.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH12.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH12.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH12.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH13.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH13.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH13.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH14.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH14.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH14.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH15.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH15.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH15.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH16.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH16.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH16.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH17.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH17.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH17.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH18.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH18.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH18.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH19.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH19.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH19.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH20.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH20.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH20.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH21.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH21.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH21.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH22.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH22.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH22.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH23.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH23.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH23.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH24.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH24.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH24.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH25.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH25.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH25.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH26.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH26.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH26.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH27.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH27.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH27.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH31.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH31.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH31.WAD.DM_convlog.txt"
-E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/MAYH32.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/MAYH32.WAD.HM
-move /Y "convlog.txt" "./logs/MAYH32.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND01.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND01.WAD.HM
+move /Y "convlog.txt" "./logs/GOND01.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND02.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND02.WAD.HM
+move /Y "convlog.txt" "./logs/GOND02.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND03.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND03.WAD.HM
+move /Y "convlog.txt" "./logs/GOND03.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND04.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND04.WAD.HM
+move /Y "convlog.txt" "./logs/GOND04.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND05.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND05.WAD.HM
+move /Y "convlog.txt" "./logs/GOND05.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND06.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND06.WAD.HM
+move /Y "convlog.txt" "./logs/GOND06.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND07.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND07.WAD.HM
+move /Y "convlog.txt" "./logs/GOND07.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND08.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND08.WAD.HM
+move /Y "convlog.txt" "./logs/GOND08.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND09.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND09.WAD.HM
+move /Y "convlog.txt" "./logs/GOND09.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND10.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND10.WAD.HM
+move /Y "convlog.txt" "./logs/GOND10.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND11.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND11.WAD.HM
+move /Y "convlog.txt" "./logs/GOND11.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND12.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND12.WAD.HM
+move /Y "convlog.txt" "./logs/GOND12.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND13.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND13.WAD.HM
+move /Y "convlog.txt" "./logs/GOND13.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND14.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND14.WAD.HM
+move /Y "convlog.txt" "./logs/GOND14.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND15.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND15.WAD.HM
+move /Y "convlog.txt" "./logs/GOND15.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND16.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND16.WAD.HM
+move /Y "convlog.txt" "./logs/GOND16.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND17.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND17.WAD.HM
+move /Y "convlog.txt" "./logs/GOND17.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND18.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND18.WAD.HM
+move /Y "convlog.txt" "./logs/GOND18.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND19.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND19.WAD.HM
+move /Y "convlog.txt" "./logs/GOND19.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND20.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND20.WAD.HM
+move /Y "convlog.txt" "./logs/GOND20.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND21.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND21.WAD.HM
+move /Y "convlog.txt" "./logs/GOND21.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND22.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND22.WAD.HM
+move /Y "convlog.txt" "./logs/GOND22.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND23.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND23.WAD.HM
+move /Y "convlog.txt" "./logs/GOND23.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND24.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND24.WAD.HM
+move /Y "convlog.txt" "./logs/GOND24.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND25.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND25.WAD.HM
+move /Y "convlog.txt" "./logs/GOND25.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND26.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND26.WAD.HM
+move /Y "convlog.txt" "./logs/GOND26.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND27.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND27.WAD.HM
+move /Y "convlog.txt" "./logs/GOND27.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND28.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND28.WAD.HM
+move /Y "convlog.txt" "./logs/GOND28.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND29.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND29.WAD.HM
+move /Y "convlog.txt" "./logs/GOND29.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND30.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND30.WAD.HM
+move /Y "convlog.txt" "./logs/GOND30.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND31.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND31.WAD.HM
+move /Y "convlog.txt" "./logs/GOND31.WAD.DM_convlog.txt"
+E:/GitHub/LexWadExtract/tools/zwadconv E:/GitHub/LexWadExtract/pk3/MAPS/GOND32.WAD.DM E:/GitHub/LexWadExtract/pk3/MAPS/GOND32.WAD.HM
+move /Y "convlog.txt" "./logs/GOND32.WAD.DM_convlog.txt"
 cd E:/GitHub/LexWadExtract/pk3/MAPS/
 del "*.DM" /q
 del "wait.txt"

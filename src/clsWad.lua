@@ -1116,7 +1116,7 @@ function wad:addExtraMarkers()
     lumpchunk = table.concat(datatable)
 
 	-- header
-	local header = love.data.pack("string", "<c4LL", "PWAD", #lumplist_new, 12+#lumpchunk)
+	local header = love.data.pack("string", "<c4LL", self.header.magic, #lumplist_new, 12+#lumpchunk)
     
     -- dir
     local dir = ""
@@ -1132,6 +1132,7 @@ function wad:addExtraMarkers()
     wad:write(dir)
     wad:close()
 ]]
+    collectgarbage()
     self.raw = header .. lumpchunk .. dir
     self:gatherHeader()
 end
