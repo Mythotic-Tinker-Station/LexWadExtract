@@ -1317,7 +1317,7 @@ function wad:buildPatches()
 
 					local topdelta_prev = topdelta
 
-					topdelta = love.data.unpack("<B", self.patches[p].data, post)
+					topdelta = love.data.unpack("<I[1]", self.patches[p].data, post)
 					if(topdelta == 0xFF) then break end
 
 					-- tall patches
@@ -1325,11 +1325,11 @@ function wad:buildPatches()
 						topdelta = topdelta+topdelta_prev
 					end
 
-					local length = love.data.unpack("<B", self.patches[p].data, post+1)
+					local length = love.data.unpack("<I[1]", self.patches[p].data, post+1)
 					local data = self.patches[p].data:sub(post+3, post+3+length)
 
 					for pixel = 1, length do
-						local color = love.data.unpack("<B", data, pixel)+1
+						local color = love.data.unpack("<I[1]", data, pixel)+1
 						self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
 
