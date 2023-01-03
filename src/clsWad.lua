@@ -1116,8 +1116,8 @@ function wad:addExtraMarkers()
     lumpchunk = table.concat(datatable)
 
 	-- header
-	local header = love.data.pack("string", "<c4LL", self.header.magic, #lumplist_new, 12+#lumpchunk)
-    
+	local header = love.data.pack("string", "<c4i4i4", self.header.magic, #lumplist_new, 12+#lumpchunk)
+
     -- dir
     local dir = ""
 
@@ -1149,7 +1149,7 @@ function wad:buildNamespaces()
 		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(l*16))
 		name = self:removePadding(name)
 		filepos = filepos+1
-
+        
 		-- get file data
 		local filedata = love.data.unpack(string.format("<c%d", size), self.raw, filepos)
 
