@@ -1308,7 +1308,7 @@ function wad:buildPatches()
 
 			for c = 1, self.patches[p].width do
 
-				self.patches[p].columns[c] = love.data.unpack("<L", self.patches[p].data, 9+((c-1)*4))
+				self.patches[p].columns[c] = love.data.unpack("<i4", self.patches[p].data, 9+((c-1)*4))
 
 				local topdelta = 0
 				local post = self.patches[p].columns[c]+1
@@ -1317,7 +1317,7 @@ function wad:buildPatches()
 
 					local topdelta_prev = topdelta
 
-					topdelta = love.data.unpack("<I[1]", self.patches[p].data, post)
+					topdelta = love.data.unpack("<B", self.patches[p].data, post)
 					if(topdelta == 0xFF) then break end
 
 					-- tall patches
@@ -1325,11 +1325,11 @@ function wad:buildPatches()
 						topdelta = topdelta+topdelta_prev
 					end
 
-					local length = love.data.unpack("<I[1]", self.patches[p].data, post+1)
+					local length = love.data.unpack("<B", self.patches[p].data, post+1)
 					local data = self.patches[p].data:sub(post+3, post+3+length)
 
 					for pixel = 1, length do
-						local color = love.data.unpack("<I[1]", data, pixel)+1
+						local color = love.data.unpack("<B", data, pixel)+1
 						self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
 
@@ -1441,7 +1441,7 @@ function wad:processPnames()
 	-- if PNAMES found
 	if(pndata ~= "") then
 
-		local count = love.data.unpack("<L", pndata)
+		local count = love.data.unpack("<i4", pndata)
 		for p = 5, count*8, 8 do
 			local index = #self.pnames+1
 			self.pnames[index] = self:removePadding(love.data.unpack("<c8", pndata, p)):upper()
@@ -1470,10 +1470,10 @@ function wad:processTexturesX(num)
 	if(tdata ~= "") then
 
 		-- header
-		local numtextures = love.data.unpack("<l", tdata)
+		local numtextures = love.data.unpack("<i4", tdata)
 		local offsets = {}
 		for i = 5, (numtextures*4)+4, 4 do
-			offsets[#offsets+1] = love.data.unpack("<l", tdata, i)+1
+			offsets[#offsets+1] = love.data.unpack("<i4", tdata, i)+1
 		end
 
 		-- maptexture_t
@@ -1561,7 +1561,7 @@ function wad:processAnimated()
 
 			local last = self:removePadding(love.data.unpack("<c8", tdata, 2+count)):upper()
 			local first = self:removePadding(love.data.unpack("<c8", tdata, 11+count)):upper()
-			local speed = love.data.unpack("<L", tdata, 20+count)
+			local speed = love.data.unpack("<i4", tdata, 20+count)
 
 			local isdup = false
 			for d = 1, #self.animlist do
