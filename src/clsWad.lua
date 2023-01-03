@@ -3,6 +3,42 @@
 	run away, its awful
 --]]
 
+function getOS()
+	-- ask LuaJIT first
+	if jit then
+		return jit.os
+	end
+	-- Unix, Linux variants
+	local fh,err = assert(io.popen("uname -o 2>/dev/null","r"))
+	if fh then
+		osname = fh:read()
+	end
+	return osname or "Windows"
+end
+
+osname = getOS()
+print("OS: "..osname)
+mac = osname=="OSX"
+
+local zwadconv, deleteCommand, runScriptCommand, moveCommand, scriptName, mkDirCommand
+
+if(mac) then
+	zwadconv="zwadconv-CSharp"
+	deleteCommand="rm -rf"
+	runScriptCommand="bash -v"
+	moveCommand="mv"
+	scriptName="LexiconWadConverter"
+	mkDirCommand="mkdir -p"
+else
+	zwadconv="zwadconv.bat"
+	deleteCommand="del /q"
+	runScriptCommand="start /wait"
+	moveCommand="move /Y"
+	scriptName="LexiconWadConverter.bat"
+	mkDirCommand="mkdir"
+end
+
+
 animdefsIgnore = {}
 
 
@@ -2813,19 +2849,24 @@ function wad:extractMapinfo()
 end
 
 function wad:convertDoomToHexen()
+
 	if(self.base ~= self) then
 
 		local waitfile = io.open(string.format("%s/MAPS/wait.txt", self.pk3path), "w")
 		waitfile:close()
 
 		-- create a new bat file
-		local file, err = io.open(string.format("%s/zwadconv.bat", self.toolspath), "w")
+		local file, err = io.open(string.format("%s/"..scriptName, self.toolspath), "w")
+
+		if(mac) then
+			file:write("#!/bin/bash\n")
+		end
 
 		-- Move current directory to where zwadconv is located.
 		file:write("cd tools\n")
 
 		-- Make sure the logs directory exists.
-		file:write("mkdir .\\logs\n")
+		file:write(mkDirCommand.." ./logs\n")
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
@@ -2835,24 +2876,29 @@ function wad:convertDoomToHexen()
 			-- that has the .DM extention
 			if(v:sub(-3) == ".DM") then
 				-- write a command to the bat file
-				file:write(string.format("%s/zwadconv %s/MAPS/%s %s/MAPS/%s.HM\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
-				file:write(string.format('move /Y "convlog.txt" "./logs/%s_convlog.txt"\n', v))
+				file:write(string.format("%s/"..zwadconv.." \"%s/MAPS/%s\" \"%s/MAPS/%s.HM\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+				file:write(string.format(moveCommand..' "convlog.txt" "./logs/%s_convlog.txt"\n', v))
 			end
 		end
 
 		-- file:write("pause\n")
 
 		-- delete .dm files
-		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
-		file:write(string.format('del "*.DM" /q\n', self.pk3path))
-		file:write(string.format('del "wait.txt"\n', self.pk3path))
+		file:write(string.format('cd "%s/MAPS/"\n', self.pk3path))
+		file:write(string.format(deleteCommand..' "*.DM"\n', self.pk3path))
+		file:write(string.format(deleteCommand..' "wait.txt"\n', self.pk3path))
 		file:write(string.format('exit', self.pk3path))
 
 		-- close bat file
 		file:close()
 
 		-- run bat file
-		io.popen(string.format("start /wait %s/zwadconv.bat", self.toolspath))
+		if(mac) then
+			io.popen(string.format("chmod +x \"%s/"..scriptName.."\"", self.toolspath))
+		end
+
+		print("Command: "..string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath))
+		io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath))
 
 		-- wait for zwadconv
 		self:printf(1, "\tWaiting for zwadconv...")

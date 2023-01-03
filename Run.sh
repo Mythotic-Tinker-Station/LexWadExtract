@@ -2,11 +2,10 @@
 mkdir logs
 
 rm -rf pk3
-mkdir pk3
-mkdir pk3/FLATS
-mkdir pk3/PATCHES
-mkdir pk3/MAPS
-mkdir pk3/SOUNDS
-mkdir pk3/TEXTURES
+mkdir -p pk3/FLATS
+mkdir -p pk3/PATCHES
+mkdir -p pk3/MAPS
+mkdir -p pk3/SOUNDS
+mkdir -p pk3/TEXTURES
 
 Love2D/love "src" "$@"
