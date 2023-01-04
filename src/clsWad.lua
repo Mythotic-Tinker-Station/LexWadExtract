@@ -25,7 +25,7 @@ local zwadconv, deleteCommand, runScriptCommand, moveCommand, scriptName, mkDirC
 if(mac) then
 	zwadconv="zwadconv-CSharp"
 	deleteCommand="rm -rf"
-	runScriptCommand="bash -v"
+	runScriptCommand="bash"
 	moveCommand="mv"
 	scriptName="LexiconWadConverter"
 	mkDirCommand="mkdir -p"
@@ -2877,7 +2877,10 @@ function wad:convertDoomToHexen()
 			if(v:sub(-3) == ".DM") then
 				-- write a command to the bat file
 				file:write(string.format("%s/"..zwadconv.." \"%s/MAPS/%s\" \"%s/MAPS/%s.HM\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
-				file:write(string.format(moveCommand..' "convlog.txt" "./logs/%s_convlog.txt"\n', v))
+
+				if( not mac ) then
+					file:write(string.format(moveCommand..' "./logs/convlog.txt" "./logs/%s_convlog.txt"\n', v))
+				end
 			end
 		end
 
@@ -2892,24 +2895,22 @@ function wad:convertDoomToHexen()
 		-- close bat file
 		file:close()
 
-		-- run bat file
+		--If mac, make script executable
 		if(mac) then
 			io.popen(string.format("chmod +x \"%s/"..scriptName.."\"", self.toolspath))
 		end
 
 		print("Command: "..string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath))
-		io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath))
 
-		-- wait for zwadconv
-		self:printf(1, "\tWaiting for zwadconv...")
-		local wait = true
-		while(wait) do
-			info = love.filesystem.getInfo('maps/wait.txt')
-			if(info == nil) then
-				wait = false
-			end
-		end
 
+		self:printf(1, "\tWaiting for zwadconv (if this takes longer than a few seconds, close me) ...")
+
+		-- run bat file and wait for zwadconv
+		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
+		cmd:flush()
+		local output = cmd:read('*all')
+		cmd:close()
+		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
 		self:printf(1, "\tDone.\n")
 
 	end

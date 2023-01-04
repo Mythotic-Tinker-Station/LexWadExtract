@@ -1,4 +1,3 @@
-doom2.wad
 maps.zip
 *.png
 *.wad*
@@ -17,3 +16,5 @@ tools/tools/logs/
 tools//logs/
 logs/extract.txt
 logs
+LexiconWadConverter
+LexiconWadConverter.bat
