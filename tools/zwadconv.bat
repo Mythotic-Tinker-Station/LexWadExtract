@@ -31,7 +31,7 @@ E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/MAPS/GON
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/MAPS/GOND30.WAD.DM" "E:/GitHub/LexWadExtract/pk3/MAPS/GOND30.WAD.HM"
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/MAPS/GOND31.WAD.DM" "E:/GitHub/LexWadExtract/pk3/MAPS/GOND31.WAD.HM"
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/MAPS/GOND32.WAD.DM" "E:/GitHub/LexWadExtract/pk3/MAPS/GOND32.WAD.HM"
-cd "E:/GitHub/LexWadExtract/pk3/MAPS/"
+cd E:/GitHub/LexWadExtract/pk3/MAPS/
 del /q "*.DM"
 del /q "wait.txt"
 exit
