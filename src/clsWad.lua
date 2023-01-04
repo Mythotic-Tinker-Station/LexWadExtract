@@ -2900,16 +2900,13 @@ function wad:convertDoomToHexen()
 			io.popen(string.format("chmod +x \"%s/"..scriptName.."\"", self.toolspath))
 		end
 
-		print("Command: "..string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath))
-
-
 		self:printf(1, "\tWaiting for zwadconv (if this takes longer than a few seconds, close me) ...")
 
 		-- run bat file and wait for zwadconv
 		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
 		cmd:flush()
 		local output = cmd:read('*all')
-		cmd:close()
+		--cmd:close()
 		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
 		self:printf(1, "\tDone.\n")
 
