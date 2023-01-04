@@ -2431,7 +2431,7 @@ function wad:extractMaps()
 				end
 
 				-- header
-				local header = love.data.pack("string", "<c4LL", "PWAD", #order+1, 12+#lumpchunk)
+				local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
 
 				-- directory
 				local dir = love.data.pack("string", "<i4i4c8", 10, 10, "MAP01")
