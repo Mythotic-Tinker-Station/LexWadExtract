@@ -30,11 +30,11 @@ if(mac) then
 	scriptName="LexiconWadConverter"
 	mkDirCommand="mkdir -p"
 else
-	zwadconv="zwadconv.bat"
+	zwadconv="zwadconv.exe"
 	deleteCommand="del /q"
-	runScriptCommand="start /wait"
+	runScriptCommand="cmd /c"
 	moveCommand="move /Y"
-	scriptName="LexiconWadConverter.bat"
+	scriptName="zwadconv.bat"
 	mkDirCommand="mkdir"
 end
 
