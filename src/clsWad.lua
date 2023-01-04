@@ -3372,7 +3372,7 @@ function wad:convertHexenToUDMF()
 				end
 
 				-- header
-				local header = love.data.pack("string", "<c4LL", "PWAD", #order+1, 12+#lumpchunk)
+				local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
 
 				-- directory
 				local dir = love.data.pack("string", "<i4i4c8", 10, 0, "MAP01")
@@ -3529,7 +3529,7 @@ function wad:findTexture(data, texture, tbl, pos)
 end
 
 function wad:insertGRAB(data, xoff, yoff)
-	local grAb = love.data.pack("data", ">Lc4llL", 8, "grAb", xoff, yoff, self:crc(data))
+	local grAb = love.data.pack("data", ">I4c4i4i4I4", 8, "grAb", xoff, yoff, self:crc(data))
 	return data:sub(1, 37) .. grAb .. data:sub(38)
 end
 
