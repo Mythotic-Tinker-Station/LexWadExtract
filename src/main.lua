@@ -64,7 +64,8 @@ function love.load(arg)
     timeTaken = timeTaken .. string.format("%d %s", seconds, s)
 
 	logfile:close()
-
+    love.window.close()
+    love.event.quit()
 end
 
 

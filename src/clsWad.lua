@@ -621,7 +621,6 @@ local wad = class("wad",
 -- Main Functions
 ---------------------------------------------------------
 function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites)
-
     self.verbose = tonumber(verbose)
 
 	self.base = base or self
@@ -761,10 +760,10 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:printf(0, "Extracting SNDSEQ...")
 	self:extractSNDSEQ()
 
-	self:printf(0, "Converting Doom>Hexen...")
+	self:printf(0, "Converting Doom>Hexen (If this takes more than a few seconds, something went wrong)...")
 	self:convertDoomToHexen()
 
-	self:printf(0, "Converting Hexen>UDMF...")
+	printNoNewLine("Converting Hexen>UDMF ...")
 	self:convertHexenToUDMF()
 
 	self:printf(0, "Removing Unused Textures")
@@ -2905,7 +2904,7 @@ function wad:convertDoomToHexen()
 			io.popen(string.format("chmod +x \"%s/"..scriptName.."\"", self.toolspath))
 		end
 
-		-- run bat file and wait for zwadconv
+		-- run script and wait for zwadconv
 		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
 		cmd:flush()
 		local output = cmd:read('*all')
@@ -2921,11 +2920,14 @@ function wad:convertHexenToUDMF()
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
+		local count = 1
 
 		-- for each map file
 		for k, v in pairs(maplist) do
 			if(v:sub(-3) == ".HM") then
-
+				local percent = tonumber(string.format("%.1f", (count) / (table.getn(maplist)/2) * 100))
+				printSameLine(percent.."%")
+				count = count + 1
 				self:printf(1, "\tConverting Map " .. v)
 
 				-- open the map
@@ -3442,6 +3444,8 @@ function wad:convertHexenToUDMF()
 			end
 		end
 	end
+
+	newLine()
 end
 
 function wad:removeUnusedTextures()
@@ -3619,15 +3623,32 @@ function wad:checkFormat(data, magic, offset, bigendian)
 	return false
 end
 
+local lastString
+
+function printNoNewLine(str)
+	deleteLine()
+	io.write(str)
+	io.flush()
+end
+
+function printSameLine(str)
+	deleteLine()
+	io.write(str)
+	io.flush()
+	lastString = str
+end
+
+function deleteLine()
+	if not (lastString == nil) then
+		io.write(("\b"):rep(#lastString)..(" "):rep(#lastString)..("\b"):rep(#lastString))
+		io.flush()
+		lastString = nil
+	end
+end
+
+function newLine()
+	io.write("\n")
+	io.flush()
+end
+
 return wad
-
-
-
-
-
-
-
-
-
-
-
