@@ -1495,9 +1495,6 @@ function wad:buildSprites()
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
 			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
 
-            love.graphics.setCanvas(self.debugcanvas)
-            love.graphics.draw(self.sprites[s].image)
-            love.graphics.setCanvas()
 		else
 
 			filedata = love.filesystem.newFileData(self.sprites[s].data, "-")
