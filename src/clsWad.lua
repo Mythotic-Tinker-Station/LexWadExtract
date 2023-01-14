@@ -3431,7 +3431,7 @@ function wad:convertHexenToUDMF()
 				if(SCRIPTS ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad, err = io.open(string.format("%s/MAPS/%s", self.pk3path, v:sub(1, -3)), "w+b")
+				local wad, err = io.open(string.format("%s/MAPS/%s", self.pk3path, v:sub(1, -4)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
