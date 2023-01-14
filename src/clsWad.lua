@@ -1252,7 +1252,6 @@ function wad:organizeNamespace(name)
 end
 
 function wad:organizeMaps()
-	print("organizeMaps: "..#self.namespaces["MM"].lumps )
 	if(self.base ~= self) then
 		local found = false
 		local namespace = ""
@@ -1947,7 +1946,6 @@ function wad:buildAnimdefs()
 end
 
 function wad:buildMapinfo()
-	print("buildMapInfo: "..#self.maps)
 	if(self.base ~= self) then
 
 		for s = 1, #self.namespaces["SP"].lumps do
@@ -1996,7 +1994,6 @@ function wad:buildMapinfo()
 end
 
 function wad:processMaps()
-	print("processMaps: "..#self.maps)
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
 			self:printf(2, "\tProcessing Map: %d, %s", m, self.maps[m].name)
@@ -2164,7 +2161,6 @@ function wad:processMaps()
 end
 
 function wad:ModifyMaps()
-	print("ModifyMaps: "..#self.maps)
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
 			self:printf(2, "\tModifying Map: %d", m)
@@ -2444,8 +2440,6 @@ end
 
 
 function wad:extractMaps()
-	print("extractMaps: "..#self.maps)
-
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
 
