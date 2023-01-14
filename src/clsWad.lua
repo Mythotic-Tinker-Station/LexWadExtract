@@ -2909,7 +2909,7 @@ function wad:convertDoomToHexen()
 		cmd:flush()
 		local output = cmd:read('*all')
 		--cmd:close()
-		--io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
+		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
 		self:printf(1, "\tDone.\n")
 
 	end
