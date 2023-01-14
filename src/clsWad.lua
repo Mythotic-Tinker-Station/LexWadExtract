@@ -65,6 +65,7 @@ local wad = class("wad",
 	flats = {},
 	patches = {},
 	graphics = {},
+    sprites = {},
 	doomsounds = {},
 	oggsounds = {},
 	wavesounds = {},
@@ -74,6 +75,8 @@ local wad = class("wad",
 	dups = {},
 	doomdups = {},
 	animdefs = {},
+
+    debugcanvas = love.graphics.newCanvas(1024, 1024),
 
     maplumps =
     {
@@ -653,6 +656,9 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:printf(0, "Organizing Patches...")
 	self:organizeNamespace("PP")
 
+	self:printf(0, "Organizing Sprites...")
+	self:organizeNamespace("SS")
+
 	self:printf(0, "Organizing Graphics...")
 	self:organizeNamespace("GF")
 
@@ -688,6 +694,9 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 
 	self:printf(0, "Processing Flats...")
 	self:buildFlats()
+
+	self:printf(0, "Processing Sprites...")
+	self:buildSprites()
 
 	self:printf(0, "Processing PNAMES...")
 	self:processPnames()
@@ -742,6 +751,10 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	else
 		self:printf(0, "Skipping Patches...")
 	end
+
+	self:printf(0, "Extracting Sprites...")
+	self:extractSprites()
+
 	self:printf(0, "Extracting Maps...")
 	self:extractMaps()
 
@@ -1433,6 +1446,80 @@ function wad:buildFlats()
 	self:printf(1, "\tDone.\n")
 end
 
+-- a copy of build patches
+function wad:buildSprites()
+
+	for s = 1, #self.sprites do
+
+		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
+			self:printf(2, "\t%s", self.sprites[s].name)
+			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
+			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
+			self.sprites[s].xoffset = love.data.unpack("<h", self.sprites[s].data, 5)
+			self.sprites[s].yoffset = love.data.unpack("<h", self.sprites[s].data, 7)
+			self.sprites[s].imagedata = love.image.newImageData(self.sprites[s].width, self.sprites[s].height)
+			self.sprites[s].columns = {}
+
+			for c = 1, self.sprites[s].width do
+
+				self.sprites[s].columns[c] = love.data.unpack("<i4", self.sprites[s].data, 9+((c-1)*4))
+
+				local topdelta = 0
+				local post = self.sprites[s].columns[c]+1
+
+				while(topdelta ~= 0xFF) do
+
+					local topdelta_prev = topdelta
+
+					topdelta = love.data.unpack("<B", self.sprites[s].data, post)
+					if(topdelta == 0xFF) then break end
+
+					-- tall sprites
+					if(topdelta <= topdelta_prev) then
+						topdelta = topdelta+topdelta_prev
+					end
+
+					local length = love.data.unpack("<B", self.sprites[s].data, post+1)
+					local data = self.sprites[s].data:sub(post+3, post+3+length)
+
+					for pixel = 1, length do
+						local color = love.data.unpack("<B", data, pixel)+1
+						self.sprites[s].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+					end
+
+					post = post+4+length
+				end
+			end
+
+			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
+			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
+			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
+
+            love.graphics.setCanvas(self.debugcanvas)
+            love.graphics.draw(self.sprites[s].image)
+            love.graphics.setCanvas()
+		else
+
+			filedata = love.filesystem.newFileData(self.sprites[s].data, "-")
+			self.sprites[s].imagedata = love.image.newImageData(filedata)
+
+			self.sprites[s].width = self.sprites[s].imagedata:getWidth()
+			self.sprites[s].height = self.sprites[s].imagedata:getHeight()
+			self.sprites[s].xoffset = 0
+			self.sprites[s].yoffset = 0
+
+			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
+			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
+			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
+
+			self.sprites[s].notdoompatch = true
+		end
+
+		self.sprites[self.sprites[s].name] = self.sprites[s]
+	end
+	collectgarbage()
+	self:printf(1, "\tDone.\n")
+end
 
 function wad:processPalette()
 	-- find PLAYPAL
@@ -2438,6 +2525,23 @@ function wad:extractPatches()
 	end
 end
 
+function wad:extractSprites()
+	if(self.base ~= self) then
+		for s = 1, #self.sprites do
+			if(not self.sprites[s].isdoomdup) then
+				local png, err = io.open(string.format("%s/sprites/%s.PNG", self.pk3path, self.sprites[s].name), "w+b")
+				if err then error("[ERROR] " .. err) end
+				png:write(self.sprites[s].png)
+				png:close()
+			end
+		end
+
+		collectgarbage()
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad sprites.\n")
+	end
+end
 
 function wad:extractMaps()
 	if(self.base ~= self) then

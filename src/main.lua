@@ -43,6 +43,7 @@ function love.load(arg)
 	l.PHYSFS_mount(string.format("%s/textures", pk3path), 'textures', 1)
 	l.PHYSFS_mount(string.format("%s/flats", pk3path), 'flats', 1)
 	l.PHYSFS_mount(string.format("%s/patches", pk3path), 'patches', 1)
+    l.PHYSFS_mount(string.format("%s/sprites", pk3path), 'sprites', 1)
 	-----------------------------------------
 
     -- do all the things
