@@ -15,7 +15,7 @@
 ### Mac/Linux
 2) Run Run.sh or Run-Mac.sh, whichever is applicable to you
 3) Arguments are:
-        Run.sh <WadToConvert> <NewWadName4Chars> [DebugLevel]
+        Run.sh < WadToConvert > < NewWadName4Chars > [DebugLevel]
 
 #### All OSes
 4) Watch it do the thing.
