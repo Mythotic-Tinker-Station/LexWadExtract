@@ -9,4 +9,4 @@ mkdir pk3\TEXTURES
 mkdir pk3\SPRITES
 
 cd Love2D
-love.exe "../src" "gd.wad" "GOND" 3
+love.exe %*

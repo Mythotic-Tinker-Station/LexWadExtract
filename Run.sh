@@ -7,5 +7,6 @@ mkdir -p pk3/PATCHES
 mkdir -p pk3/MAPS
 mkdir -p pk3/SOUNDS
 mkdir -p pk3/TEXTURES
+mkdir -p pk3/SPRITES
 
 Love2D/love "src" "$@"
