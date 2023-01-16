@@ -20,4 +20,4 @@
 #### All OSes
 4) Watch it do the thing.
 5) Once its done, the \pk3\ folder should have all the mapset assets set and ready along with the rest
-6) Just copy all that stuff to your pack pk3 folder, then setup the MAPINFO, LAUNAGE, and ACS Script
+6) Just copy all that stuff to your pack pk3 folder, then setup the MAPINFO, LANGUAGE, and ACS Script
