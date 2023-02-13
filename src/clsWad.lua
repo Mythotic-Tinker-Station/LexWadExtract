@@ -620,9 +620,11 @@ local wad = class("wad",
 
 
 
----------------------------------------------------------
+--------------------------------------------------------------
 -- Main Functions
----------------------------------------------------------
+-- if you're wondering why this is a class
+-- its because we need to load doom2.wad and wad of choice
+-------------------------------------------------------------
 function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites)
     self.verbose = tonumber(verbose)
 
@@ -634,19 +636,35 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self.spritesname = sprites
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
 
+    -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
 	self:printf(0, "Loading Wad '%s'...", path)
 	self:open(path)
 
+    -- read and save the wad header
 	self:printf(0, "Gathering Header...")
 	self:gatherHeader()
 
+    -- Run through the in memory wad data and add extra markers to help ID certain file types
+    -- it does the following:
+    -- read through all the lumps, ignoring markers
+    -- add markers for everything, place lumps accordingly, makes old and new markers such as MM_START MM_END which all maps are placed in
+    -- rebuilds the header and directory of the in memory wad
 	self:printf(0, "Adding Extra Namespace Markers...")
 	self:addExtraMarkers()
 
-	self:printf(0, "Gathering Namespaces...")
+    -- run through the in memory wad data
+    -- find the markers
+    -- put all lump data within each _START _END into their own namespace table
+    -- so texture lumps for example, which are between TX_START and TX_END
+    -- would be in self.namespace[textures].lumps[#] = { name=name, size=size, pos=filepos, data=filedata }
+	self:printf(0, "Building Namespaces...")
 	self:buildNamespaces()
 
+    -- all of these organizers run through a specific namespace
+    -- it sets certain lumps to be ignored
+    -- and puts all the data into their own table outside the self.namespace table
+    -- so you get self.textures, self.patches, self.flats, ect
 	self:printf(0, "Organizing Zdoom Textures...")
 	self:organizeNamespace("TX")
 
@@ -677,68 +695,101 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:printf(0, "Organizing Music...")
 	self:organizeNamespace("MS")
 
+    -- maps needed special organization code
 	self:printf(0, "Organizing Maps...")
 	self:organizeMaps()
 
+    -- read the palette, save each color into a table
+    -- self.palette[entry] = { r, g, b }
 	self:printf(0, "Processing Palette...")
 	self:processPalette()
 
+    -- process the boom ANIMATED binary lump
+    -- which stores all the texture animation definitions
 	self:printf(0, "Processing Boom Animations...")
 	self:processAnimated()
 
+    -- process the boom SWITCHES binary lump
+    -- which stores all the switch animation definitions
 	self:printf(0, "Processing Boom Switches...")
 	self:processSwitches()
 
+    -- read doom's patch image format, with the loaded palette
+    -- turn patches into pngs
 	self:printf(0, "Processing Patches...")
 	self:buildPatches()
 
+    
+    -- read doom's patch image format, with the loaded palette
+    -- turn flats into pngs
 	self:printf(0, "Processing Flats...")
 	self:buildFlats()
 
+    -- read doom's patch image format, with the loaded palette
+    -- turn sprites into pngs
 	self:printf(0, "Processing Sprites...")
 	self:buildSprites()
 
+    -- read doom's PNAMES definition lump
 	self:printf(0, "Processing PNAMES...")
 	self:processPnames()
 
+    -- read through doom's TEXTUREx lump
+    -- this lump makes new images in memory by stacking patches on top of each other
+    -- we do the same, but then extract the result as a png
 	self:printf(0, "Processing TEXTUREx...")
 	self:processTexturesX(1)
 	self:processTexturesX(2)
 	self:printf(1, "\tDone.\n")
 
+    -- simply just extract png files
 	self:printf(0, "Processing Zdoom Textures...")
 	self:moveZDoomTextures()
 
+    -- find and remove duplicate files by md5 hash
 	self:printf(0, "Processing Duplicates...")
 	self:filterDuplicates()
 
+    -- rename all flats in this wad with a number system
 	self:printf(0, "Rename Flats...")
 	self:renameFlats()
 
+    -- rename all composites in TEXTUREx with a number system
 	self:printf(0, "Rename Composites...")
 	self:renameTextures()
 
+    -- rename all patches in this wad with a number system
 	self:printf(0, "Rename Patches...")
 	self:renamePatches()
 
+    -- rename all sounds in this wad with a number system
 	self:printf(0, "Rename Sounds...")
 	self:renameSounds()
 
+    -- read zdoom's textures.txt (there is no code for this yet)
 	self:printf(0, "Processing TEXTURES...")
 	self.textures.original = self:processTextLump("TEXTURES")
 
+    -- read zdoom's animdefs.txt file
 	self:printf(0, "Processing ANIMDEFS...")
 	self.animdefs.original = self:processTextLump("ANIMDEFS")
 
+    -- this reads raw doom and hexen map data into tables
 	self:printf(0, "Processing Maps...")
 	self:processMaps()
 
+    -- this modifies maps in a number of ways
+    -- renames all textures on the map with the newly renamed ones
+    -- rebuilds sidedefs and sectors back into their binary form
+    -- does this for doom hexen and udmf formats
 	self:printf(0, "Modifying Maps...")
 	self:ModifyMaps()
 
+    -- builds an animdefs.txt files for boom's ANIMATED and SWITCHES definitions
 	self:printf(0, "Processing ANIMDEFS for Doom/Boom...")
 	self:buildAnimdefs()
 
+    -- all the extracting ones should be self explanatory
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
 
@@ -773,18 +824,21 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:printf(0, "Extracting SNDSEQ...")
 	self:extractSNDSEQ()
 
+    -- convert Doom maps to hexen maps with zwadconv
 	self:printf(0, "Converting Doom>Hexen (If this takes more than a few seconds, something went wrong)...")
 	self:convertDoomToHexen()
 
+    -- convert hexen maps to udmf
 	printNoNewLine("Converting Hexen>UDMF ...")
 	self:convertHexenToUDMF()
 
+    -- removed any unused textures found
 	self:printf(0, "Removing Unused Textures")
 	self:removeUnusedTextures()
 
+    -- we're done!
 	self:printf(0, "Complete.\n")
-
-    ::endit::
+    
 	collectgarbage()
 end
 
@@ -1344,6 +1398,38 @@ function wad:organizeMaps()
 	self:printf(1, "\tDone.\n")
 end
 
+
+function wad:processPalette()
+	-- find PLAYPAL
+	local paldata = ""
+	for l = 1, #self.namespaces["SP"].lumps do
+		if(self.namespaces["SP"].lumps[l].name == "PLAYPAL") then
+			paldata = self.namespaces["SP"].lumps[l].data
+			break;
+		end
+	end
+
+	-- if playpal found
+	if(paldata ~= "") then
+		for c = 1, 256*3, 3 do
+			local r, g, b = love.data.unpack("<BBB", paldata, c)
+			local index = #self.palette+1
+			local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
+			self.palette[index] =
+			{
+				r2,
+				g2,
+				b2,
+			}
+		end
+	else
+		self.palette = self.base.palette
+		self:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
+	end
+	collectgarbage()
+	self:printf(1, "\tDone.\n")
+end
+
 function wad:buildPatches()
 
 	for p = 1, #self.patches do
@@ -1513,37 +1599,6 @@ function wad:buildSprites()
 		end
 
 		self.sprites[self.sprites[s].name] = self.sprites[s]
-	end
-	collectgarbage()
-	self:printf(1, "\tDone.\n")
-end
-
-function wad:processPalette()
-	-- find PLAYPAL
-	local paldata = ""
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == "PLAYPAL") then
-			paldata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
-
-	-- if playpal found
-	if(paldata ~= "") then
-		for c = 1, 256*3, 3 do
-			local r, g, b = love.data.unpack("<BBB", paldata, c)
-			local index = #self.palette+1
-			local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
-			self.palette[index] =
-			{
-				r2,
-				g2,
-				b2,
-			}
-		end
-	else
-		self.palette = self.base.palette
-		self:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
 	end
 	collectgarbage()
 	self:printf(1, "\tDone.\n")
