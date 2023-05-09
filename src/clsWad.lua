@@ -2522,13 +2522,13 @@ function wad:extractTextures()
 			for c = 1, #self.composites do
 				if(not self.composites[c].iszdoom) then
 					if(not self.composites[c].isdoomdup) then
-						local png, err = io.open(string.format("%s/TEXTURES/%s.PNG", self.pk3path, self.composites[c].newname), "w+b")
+						local png, err = io.open(string.format("%s/textures/%s.png", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
 						if err then error("[ERROR] " .. err) end
 						png:write(self.composites[c].png)
 						png:close()
 					end
 				else
-					local png, err = io.open(string.format("%s/TEXTURES/%s.raw", self.pk3path, self.composites[c].newname), "w+b")
+					local png, err = io.open(string.format("%s/textures/%s.raw", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
 					if err then error("[ERROR] " .. err) end
 					png:write(self.composites[c].raw)
 					png:close()
@@ -2546,7 +2546,7 @@ function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
-				local png, err = io.open(string.format("%s/FLATS/%s.PNG", self.pk3path, self.flats[f].newname), "w+b")
+				local png, err = io.open(string.format("%s/flats/%s.png", self.pk3path, string.lower(self.flats[f].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.flats[f].png)
 				png:close()
@@ -2563,7 +2563,7 @@ function wad:extractPatches()
 	if(self.base ~= self) then
 		for p = 1, #self.patches do
 			if(not self.patches[p].isdoomdup) then
-				local png, err = io.open(string.format("%s/PATCHES/%s.PNG", self.pk3path, self.patches[p].newname), "w+b")
+				local png, err = io.open(string.format("%s/patches/%s.png", self.pk3path, string.lower(self.patches[p].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.patches[p].png)
 				png:close()
@@ -2581,7 +2581,7 @@ function wad:extractSprites()
 	if(self.base ~= self) then
 		for s = 1, #self.sprites do
 			if(not self.sprites[s].isdoomdup) then
-				local png, err = io.open(string.format("%s/sprites/%s.PNG", self.pk3path, self.sprites[s].name), "w+b")
+				local png, err = io.open(string.format("%s/sprites/%s.png", self.pk3path, string.lower(self.sprites[s].name)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.sprites[s].png)
 				png:close()
@@ -2644,11 +2644,11 @@ function wad:extractMaps()
 
 				local wad
 				if(self.maps[m].format == "DM") then
-					wad, err = io.open(string.format("%s/MAPS/%s.WAD.DM", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.WAD.DM", self.pk3path, self.maps[m].name), "w+b")
 				elseif(self.maps[m].format == "HM") then
-					wad, err = io.open(string.format("%s/MAPS/%s.WAD.HM", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.WAD.HM", self.pk3path, self.maps[m].name), "w+b")
 				else
-					wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
 				end
 
 				if err then error("[ERROR] " .. err) end
@@ -2693,7 +2693,7 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad, err = io.open(string.format("%s/MAPS/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
+				local wad, err = io.open(string.format("%s/maps/%s.WAD", self.pk3path, string.lower(self.maps[m].name)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
@@ -2750,7 +2750,7 @@ function wad:extractAnimdefs()
 			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
 		end
 
-		local file, err = io.open(string.format("%s/ANIMDEFS.%s", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(anim)
 		file:write("\n")
@@ -2791,10 +2791,9 @@ function wad:extractSNDINFO()
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
 		end
 
-		local file, err = io.open(string.format("%s/SNDINFO.%s", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(txt)
-		--file:write(self.animdefs.original)
 		file:close()
 
 		self:printf(1, "\tDone.\n")
@@ -2914,7 +2913,7 @@ function wad:extractSNDSEQ()
 
 		txt[#txt+1] = string.format("end\n\n")
 
-		local file, err = io.open(string.format("%s/SNDSEQ.%s", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/sndseq.%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(table.concat(txt))
 		file:close()
@@ -2930,7 +2929,7 @@ function wad:extractSounds()
 
 		--DMX
 		for s = 1, #self.doomsounds do
-			local snd, err = io.open(string.format("%s/SOUNDS/%s.DMX", self.pk3path, self.doomsounds[s].newname), "w+b")
+			local snd, err = io.open(string.format("%s/sounds/%s.dmx", self.pk3path, string.lower(self.doomsounds[s].newname)), "w+b")
 			if err then error("[ERROR] " .. err) end
 			snd:write(self.doomsounds[s].data)
 			snd:close()
@@ -2938,7 +2937,7 @@ function wad:extractSounds()
 
 		--WAV
 		for s = 1, #self.wavesounds do
-			local snd, err = io.open(string.format("%s/SOUNDS/%s.WAV", self.pk3path, self.wavesounds[s].newname), "w+b")
+			local snd, err = io.open(string.format("%s/sounds/%s.wav", self.pk3path, string.lower(self.wavesounds[s].newname)), "w+b")
 			if err then error("[ERROR] " .. err) end
 			snd:write(self.wavesounds[s].data)
 			snd:close()
@@ -2946,7 +2945,7 @@ function wad:extractSounds()
 
 		--OGG
 		for s = 1, #self.oggsounds do
-			local snd, err = io.open(string.format("%s/SOUNDS/%s.OGG", self.pk3path, self.oggsounds[s].newname), "w+b")
+			local snd, err = io.open(string.format("%s/sounds/%s.ogg", self.pk3path, string.lower(self.oggsounds[s].newname)), "w+b")
 			if err then error("[ERROR] " .. err) end
 			snd:write(self.oggsounds[s].data)
 			snd:close()
@@ -2954,7 +2953,7 @@ function wad:extractSounds()
 
 		--FLAC
 		for s = 1, #self.flacsounds do
-			local snd, err = io.open(string.format("%s/SOUNDS/%s.FLAC", self.pk3path, self.flacsounds[s].newname), "w+b")
+			local snd, err = io.open(string.format("%s/sounds/%s.flac", self.pk3path, string.lower(self.flacsounds[s].newname)), "w+b")
 			if err then error("[ERROR] " .. err) end
 			snd:write(self.flacsounds[s].data)
 			snd:close()
@@ -2970,7 +2969,7 @@ end
 function wad:extractTexturesLump()
 	if(self.base ~= self) then
 
-		local file, err = io.open(string.format("%s/TEXTURES.%s", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(self.textures.original)
 		file:close()
@@ -2984,18 +2983,18 @@ end
 function wad:extractMapinfo()
 	if(self.base ~= self) then
 
-		local file, err = io.open(string.format("%s/MAPINFO/%s.TXT", self.pk3path, self.acronym), "w")
+		local file, err = io.open(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(self.mapinfo)
 		file:close()
 
-		file, err = io.open(string.format("%s/MAPINFO.TXT", self.pk3path), "r")
+		file, err = io.open(string.format("%s/mapinfo.txt", self.pk3path), "r")
 		if err then error("[ERROR] " .. err) end
 		local mapinfo = file:read("*all")
 		file:close()
 
-		mapinfo = string.format('%s\ninclude "MAPINFO/%s.TXT"', mapinfo, self.acronym)
-		file, err = io.open(string.format("%s/MAPINFO.TXT", self.pk3path), "w")
+		mapinfo = string.format('%s\ninclude "mapinfo/%s.txt"', mapinfo, self.acronym)
+		file, err = io.open(string.format("%s/mapinfo.txt", self.pk3path), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(mapinfo)
 		file:close()
@@ -3010,7 +3009,7 @@ function wad:convertDoomToHexen()
 
 	if(self.base ~= self) then
 
-		local waitfile = io.open(string.format("%s/MAPS/wait.txt", self.pk3path), "w")
+		local waitfile = io.open(string.format("%s/maps/wait.txt", self.pk3path), "w")
 		waitfile:close()
 
 		-- create a new bat file
@@ -3036,7 +3035,7 @@ function wad:convertDoomToHexen()
 			if(v:sub(-3) == ".DM") then
 
 				-- write a command to the bat file
-				file:write(string.format("%s/"..zwadconv.." \"%s/MAPS/%s\" \"%s/MAPS/%s.HM\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+				file:write(string.format("%s/"..zwadconv.." \"%s/maps/%s\" \"%s/maps/%s.hm\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
 
 				--if( not mac ) then
 				--	file:write(string.format(moveCommand..' "./logs/convlog.txt" "./logs/%s_convlog.txt"\n', v))
@@ -3047,8 +3046,8 @@ function wad:convertDoomToHexen()
 		-- file:write("pause\n")
 
 		-- delete .dm files
-		file:write(string.format('cd %s/MAPS/\n', self.pk3path))
-		file:write(string.format(deleteCommand..' "*.DM"\n', self.pk3path))
+		file:write(string.format('cd %s/maps/\n', self.pk3path))
+		file:write(string.format(deleteCommand..' "*.dm"\n', self.pk3path))
 		file:write(string.format(deleteCommand..' "wait.txt"\n', self.pk3path))
 		file:write(string.format('exit', self.pk3path))
 
@@ -3080,14 +3079,14 @@ function wad:convertHexenToUDMF()
 
 		-- for each map file
 		for k, v in pairs(maplist) do
-			if(v:sub(-3) == ".HM") then
+			if(v:sub(-3) == ".hm") then
 				local percent = tonumber(string.format("%.1f", (count) / (table.getn(maplist)/2) * 100))
 				printSameLine(percent.."%")
 				count = count + 1
 				self:printf(1, "\tConverting Map " .. v)
 
 				-- open the map
-				local file = assert(io.open(string.format("%s/MAPS/%s", self.pk3path, v), "rb"))
+				local file = assert(io.open(string.format("%s/maps/%s", self.pk3path, v), "rb"))
 				local raw = file:read("*all")
 				file:close()
 
@@ -3587,7 +3586,7 @@ function wad:convertHexenToUDMF()
 				if(SCRIPTS ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad, err = io.open(string.format("%s/MAPS/%s", self.pk3path, v:sub(1, -4)), "w+b")
+				local wad, err = io.open(string.format("%s/maps/%s", self.pk3path, string.lower(v:sub(1, -4))), "w+b")
 				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
@@ -3595,7 +3594,7 @@ function wad:convertHexenToUDMF()
 				wad:close()
 
 				self:printf(1, "\tClean up...")
-				os.remove(string.format("%s/MAPS/%s", self.pk3path, v))
+				os.remove(string.format("%s/maps/%s", self.pk3path, v))
 				self:printf(1, "\tDone.\n")
 			end
 		end
@@ -3612,21 +3611,21 @@ function wad:removeUnusedTextures()
 	for c = 1, #self.composites do
 		if(not self.composites[c].used and animdefsIgnore[self.composites[c].newname] == nil) then
 			tex = tex + 1
-			os.remove(string.format("%s/TEXTURES/%s.png", self.pk3path, self.composites[c].newname))
+			os.remove(string.format("%s/textures/%s.png", self.pk3path, self.composites[c].newname))
 		end
 	end
 
 	for f = 1, #self.flats do
 		if(not self.flats[f].used and animdefsIgnore[self.flats[f].newname] == nil) then
 			flats = flats + 1
-			os.remove(string.format("%s/FLATS/%s.png", self.pk3path, self.flats[f].newname))
+			os.remove(string.format("%s/flats/%s.png", self.pk3path, self.flats[f].newname))
 		end
 	end
 
 	for p = 1, #self.patches do
 		if(not self.patches[p].used and animdefsIgnore[self.patches[p].newname] == nil) then
 			patches = patches + 1
-			os.remove(string.format("%s/PATCHES/%s.png", self.pk3path, self.patches[p].newname))
+			os.remove(string.format("%s/patches/%s.png", self.pk3path, self.patches[p].newname))
 		end
 	end
 

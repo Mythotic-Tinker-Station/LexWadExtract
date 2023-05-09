@@ -18,3 +18,4 @@ logs/extract.txt
 logs
 LexiconWadConverter
 LexiconWadConverter.bat
+tools/zwadconv.bat
