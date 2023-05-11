@@ -1,6 +1,20 @@
 @echo off
-set /p "acronym=Enter 4 letter acronym(must be all CAPS): "
+
+echo Mapset Acronym:
+echo 	Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
+echo 	Acronym will automaticly be ALL CAPS.
+set /p "acronym=Enter 4 letter mapset acronym: "
+
+echo Sprite Acronym:
+echo 	Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
+echo 	Acronym will automaticly be ALL CAPS.
+echo	Can be left blank if the mapset has no sprites.
+set /p "acronym_sprite=Enter 2 letter sprite acronym: "
+
+echo Wad File Name:
+echo 	Wad files can be placed in same folder, just the filename is required.
 set /p "wad=Enter wad to convert: "
+
 echo Verbose settings
 echo 	0 = Basic.
 echo 	1 = Detailed.
@@ -20,9 +34,15 @@ mkdir pk3\maps
 mkdir pk3\sounds
 mkdir pk3\textures
 mkdir pk3\sprites
-mkdir pk3\music
 
-Love2D\love.exe src %wad% %acronym% %verbose%
+mkdir pk3\flats\%acronym%
+mkdir pk3\patches\%acronym%
+mkdir pk3\maps
+mkdir pk3\sounds\%acronym%
+mkdir pk3\textures\%acronym%
+mkdir pk3\sprites\%acronym%
+
+Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite%
 goto 30
 
 :20

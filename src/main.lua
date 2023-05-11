@@ -29,6 +29,7 @@ function love.load(arg)
     local acronym = arg[2]
     local pwad = apppath .. "/" .. arg[1]
     local verbose = arg[3]
+    local acronym_sprites = arg[4]
 
 	-- read doom2.wad
     local doom2 = wad(verbose, apppath .. "/doom2.wad")
@@ -47,7 +48,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, acronym, true, doom2, pk3path, toolspath, sprites)
+    mapset = wad(verbose, pwad, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites)
 
     local endTime = os.time();
 

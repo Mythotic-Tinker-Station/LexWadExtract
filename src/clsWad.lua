@@ -52,6 +52,7 @@ local wad = class("wad",
 	texturecount = 0,
 	soundcount = 0,
 	acronym = "DOOM",
+    acronym_sprite = "XX",
 	base = false,
 	extractpatches = false;
 
@@ -625,11 +626,24 @@ local wad = class("wad",
 -- if you're wondering why this is a class
 -- its because we need to load doom2.wad and wad of choice
 -------------------------------------------------------------
-function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites)
+function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
     self.verbose = tonumber(verbose)
 
 	self.base = base or self
-	self.acronym = acronym
+
+    if(acronym ~= nil) then 
+        if(#acronym < 4) then
+            error("Error: Acronym must be 4 letters.")
+        end
+        self.acronym = string.upper(acronym:sub(1, 4)) 
+
+    end
+    if(acronym_sprite ~= nil) then 
+        if(#acronym_sprite < 2) then
+            error("Error: Sprite acronym must be 2 letters.")
+         end
+        self.acronym_sprite = string.upper(acronym_sprite:sub(1, 2)) 
+    end
 	self.pk3path = pk3path
 	self.toolspath = toolspath
 	self.extractpatches = patches or false
@@ -754,6 +768,10 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:printf(0, "Rename Flats...")
 	self:renameFlats()
 
+    -- rename all flats in this wad with a number system
+	self:printf(0, "Rename Sprites...")
+	self:renameSprites()
+   
     -- rename all composites in TEXTUREx with a number system
 	self:printf(0, "Rename Composites...")
 	self:renameTextures()
@@ -1941,6 +1959,29 @@ function wad:renameFlats()
     collectgarbage()
 end
 
+function wad:renameSprites()
+	if(self.base ~= self) then
+
+        local spritesets = {}
+        local setcount = 0
+        for s = 1, #self.sprites do
+            local set = self.sprites[s].name:sub(1, 4)
+            if(spritesets[set] == nil) then 
+                spritesets[set] = {} 
+                setcount = setcount + 1
+                self:printf(1, "\tFound Sprite Set: %s", set)
+            end
+            self.sprites[s].newname = string.format("%s%02d%s", self.acronym_sprite, setcount, self.sprites[s].name:sub(5))
+            self:printf(2, "\tRenamed %s to %s", self.sprites[s].name, self.sprites[s].newname)
+        end
+
+        self:printf(1, "\tFound %d Sprite Sets.", setcount)
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot renaming base wad patches.\n")
+	end
+    collectgarbage()
+end
 
 function wad:renameSounds()
 	if(self.base ~= self) then
@@ -2532,14 +2573,14 @@ function wad:extractTextures()
 				if(not self.composites[c].iszdoom) then
 					if(not self.composites[c].isdoomdup) then
                         self:printf(2, "\tExtracting: %s", self.composites[c].newname)
-						local png, err = io.open(string.format("%s/textures/%s.png", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
+						local png, err = io.open(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
 						if err then error("[ERROR] " .. err) end
 						png:write(self.composites[c].png)
 						png:close()
 					end
 				else
                     self:printf(2, "\tExtracting Texture: %s", self.composites[c].newname)
-					local png, err = io.open(string.format("%s/textures/%s.raw", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
+					local png, err = io.open(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
 					if err then error("[ERROR] " .. err) end
 					png:write(self.composites[c].raw)
 					png:close()
@@ -2558,7 +2599,7 @@ function wad:extractFlats()
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
                 self:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
-				local png, err = io.open(string.format("%s/flats/%s.png", self.pk3path, string.lower(self.flats[f].newname)), "w+b")
+				local png, err = io.open(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.flats[f].png)
 				png:close()
@@ -2576,7 +2617,7 @@ function wad:extractPatches()
 		for p = 1, #self.patches do
 			if(not self.patches[p].isdoomdup) then
                 self:printf(2, "\tExtracting Patch: %s", self.patches[p].newname)
-				local png, err = io.open(string.format("%s/patches/%s.png", self.pk3path, string.lower(self.patches[p].newname)), "w+b")
+				local png, err = io.open(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(self.patches[p].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.patches[p].png)
 				png:close()
@@ -2595,7 +2636,7 @@ function wad:extractSprites()
 		for s = 1, #self.sprites do
 			if(not self.sprites[s].isdoomdup) then
                 self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
-				local png, err = io.open(string.format("%s/sprites/%s.png", self.pk3path, string.lower(self.sprites[s].name)), "w+b")
+				local png, err = io.open(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.sprites[s].png)
 				png:close()
@@ -2727,7 +2768,7 @@ function wad:extractAnimdefs()
 
 		local anim = ""
 		for a = 1, #self.animdefs.anims do
-			anim = string.format("%s\n%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
+			anim = string.format("%s%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
 
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
@@ -2758,7 +2799,7 @@ function wad:extractAnimdefs()
 
 		local switch = ""
 		for s = 1, #self.animdefs.switches do
-			switch = string.format("%s\nswitch %s on pic %s tics 0", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
+			switch = string.format("%sswitch %s on pic %s tics 0", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
 
 			animdefsIgnore[self.animdefs.switches[s].text1] = "not nil";
 			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
@@ -2767,9 +2808,7 @@ function wad:extractAnimdefs()
 		local file, err = io.open(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(anim)
-		file:write("\n")
 		file:write(switch)
-		file:write("\n\n")
 		file:write(self.animdefs.original)
 		file:close()
 
