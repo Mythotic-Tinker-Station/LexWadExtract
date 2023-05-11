@@ -2575,7 +2575,7 @@ function wad:extractPatches()
 	if(self.base ~= self) then
 		for p = 1, #self.patches do
 			if(not self.patches[p].isdoomdup) then
-                self:printf(2, "\tExtracting Patch: %s", self.flats[f].newname)
+                self:printf(2, "\tExtracting Patch: %s", self.patches[p].newname)
 				local png, err = io.open(string.format("%s/patches/%s.png", self.pk3path, string.lower(self.patches[p].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.patches[p].png)
@@ -3625,7 +3625,6 @@ function wad:convertHexenToUDMF()
                 self:printf(2, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
                 self:printf(2, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
                 self:printf(2, "\tMemory Usage: %.2dkb", collectgarbage("count"))
-				self:printf(2, "\tDone.\n")
                 collectgarbage()
 			end
 		end
