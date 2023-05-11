@@ -1229,7 +1229,7 @@ function wad:addExtraMarkers()
     for lump = 1, #lumplist_new do
         dir = dir .. love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplist_new[lump].data, lumplist_new[lump].name)
     end
---[[
+--[[ This was for debugging.
     local wad, err = io.open(string.format("%s.wad",  self.acronym), "w+b")
     if err then error("[ERROR] " .. err) end
     wad:write(header)
@@ -1330,11 +1330,12 @@ function wad:organizeMaps()
 
 		-- if any maps were found
 		if(#self.namespaces["MM"].lumps > 0) then
-
+            
 			-- for each lump in the maps namespace
 			for l = 1, #self.namespaces["MM"].lumps do
 
 				local v = self.namespaces["MM"].lumps[l]
+                
 
 				-- end namespace
 				if(v.name == string.format("%s_END", namespace)) then
@@ -1357,6 +1358,7 @@ function wad:organizeMaps()
 
 			-- structure map data
 			for m = 1, #self.maps do
+                self:printf(2, "\tFound %s", self.maps[m].name)
 				for l = self.maps[m].pos[1], self.maps[m].pos[2] do
 					if(self.namespaces["MM"].lumps[l].name == "THINGS") then 	self.maps[m].raw.things 		= self.namespaces["MM"].lumps[l].data end
 					if(self.namespaces["MM"].lumps[l].name == "LINEDEFS") then 	self.maps[m].raw.linedefs 		= self.namespaces["MM"].lumps[l].data end
@@ -1435,7 +1437,7 @@ function wad:buildPatches()
 	for p = 1, #self.patches do
 
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
-			self:printf(2, "\t%s", self.patches[p].name)
+			self:printf(2, "\tBuilding Patch: %s", self.patches[p].name)
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
 			self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
@@ -1504,6 +1506,7 @@ function wad:buildFlats()
 
 	for f = 1, #self.flats do
 		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
+            self:printf(2, "\tBuilding Flat: %s", self.flats[f].name)
 			self.flats[f].image = love.image.newImageData(64, 64)
 			self.flats[f].rows = {}
 
@@ -1538,7 +1541,7 @@ function wad:buildSprites()
 	for s = 1, #self.sprites do
 
 		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
-			self:printf(2, "\t%s", self.sprites[s].name)
+			self:printf(2, "\tBuilding Sprite: %s", self.sprites[s].name)
 			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
 			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
 			self.sprites[s].xoffset = love.data.unpack("<h", self.sprites[s].data, 5)
@@ -1622,8 +1625,9 @@ function wad:processPnames()
 		for p = 5, count*8, 8 do
 			local index = #self.pnames+1
 			self.pnames[index] = self:removePadding(love.data.unpack("<c8", pndata, p)):upper()
+            self:printf(2, "\tFound PNAMES Patch: %s", self.pnames[index])
 		end
-		self:printf(1, "\tFound '%d' patches.", #self.pnames)
+		self:printf(1, "\tFound '%d' PNAMES patches.", #self.pnames)
 	else
 		self.pnames = self.base.pnames
 		self:printf(1, "\tNo PNAMES found. Using base wad PNAMES.")
@@ -1673,7 +1677,7 @@ function wad:processTexturesX(num)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
 
-			self:printf(2, "\t%s", self.composites[c].name)
+			self:printf(2, "\tFound Composit Texture: %s", self.composites[c].name)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
@@ -1709,7 +1713,7 @@ function wad:processTexturesX(num)
 			self.composites[c].md5 = love.data.hash("md5", self.composites[c].png)
 
 		end
-	self:printf(1, "\tFound '%d' textures.", numtextures)
+	self:printf(1, "\tFound '%d' composite textures.", numtextures)
 	else
 		--self.composites = self.base.composites
 		self:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
@@ -1757,7 +1761,7 @@ function wad:processAnimated()
 
 				self.animlist[index][2] = first
 				self.animlist[index][3] = last
-
+                self:printf(2, "\tFound ANIMATED define: %s to %s with speed %s", first, last, speed)
 			end
 
 			count = count + 23
@@ -1798,8 +1802,7 @@ function wad:processSwitches()
 					end
 				end
 			end
-			print(off, on, t, isdup)
-
+            self:printf(2, "\tFound SWITCH define: %s, %s, %s", off, on, t)
 			if(isdup == false) then
 				local index = #self.switchlist+1
 				self.switchlist[index] = {}
@@ -1887,9 +1890,9 @@ function wad:filterDuplicates()
 		end
 	end
 
-	collectgarbage()
 	self:printf(1, "\tFound '%d' doom duplicates", count)
 	self:printf(1, "\tDone.\n")
+    collectgarbage()
 end
 
 function wad:renamePatches()
@@ -1898,12 +1901,14 @@ function wad:renamePatches()
 		for p = 1, #self.patches do
 			self.texturecount = self.texturecount + 1
 			self.patches[p].newname = string.format("%s%.4d", self.acronym, self.texturecount)
+            self:printf(2, "\tRenamed %s to %s", self.patches[p].name, self.patches[p].newname)
 		end
-		collectgarbage()
+		
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot renaming base wad patches.\n")
 	end
+    collectgarbage()
 end
 
 function wad:renameTextures()
@@ -1912,12 +1917,13 @@ function wad:renameTextures()
 		for c = 1, #self.composites do
 			self.texturecount = self.texturecount + 1
 			self.composites[c].newname = string.format("%s%.4d", self.acronym, self.texturecount)
+            self:printf(2, "\tRenamed %s to %s", self.composites[c].name, self.composites[c].newname)
 		end
-		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot renaming base wad textures.\n")
 	end
+    collectgarbage()
 end
 
 function wad:renameFlats()
@@ -1926,12 +1932,13 @@ function wad:renameFlats()
 		for f = 1, #self.flats do
 			self.texturecount = self.texturecount + 1
 			self.flats[f].newname = string.format("%s%.4d", self.acronym, self.texturecount)
+            self:printf(2, "\tRenamed %s to %s", self.flats[f].name, self.flats[f].newname)
 		end
-		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot renaming base wad flats.\n")
 	end
+    collectgarbage()
 end
 
 
@@ -1942,27 +1949,29 @@ function wad:renameSounds()
 		for s = 1, #self.doomsounds do
 			self.soundcount = self.soundcount + 1
 			self.doomsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+            self:printf(2, "\tRenamed %s to %s", self.doomsounds[s].name, self.doomsounds[s].newname)
 		end
 
 		--WAV
 		for s = 1, #self.wavesounds do
 			self.soundcount = self.soundcount + 1
 			self.wavesounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+            self:printf(2, "\tRenamed %s to %s", self.wavesounds[s].name, self.wavesounds[s].newname)
 		end
 
 		--OGG
 		for s = 1, #self.oggsounds do
 			self.soundcount = self.soundcount + 1
 			self.oggsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+            self:printf(2, "\tRenamed %s to %s", self.oggsounds[s].name, self.oggsounds[s].newname)
 		end
 
 		--FLAC
 		for s = 1, #self.flacsounds do
 			self.soundcount = self.soundcount + 1
 			self.flacsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
+            self:printf(2, "\tRenamed %s to %s", self.flacsounds[s].name, self.flacsounds[s].newname)
 		end
-
-		collectgarbage()
 		self:printf(1, "\tDone.\n")
 	end
 	collectgarbage()
@@ -2522,12 +2531,14 @@ function wad:extractTextures()
 			for c = 1, #self.composites do
 				if(not self.composites[c].iszdoom) then
 					if(not self.composites[c].isdoomdup) then
+                        self:printf(2, "\tExtracting: %s", self.composites[c].newname)
 						local png, err = io.open(string.format("%s/textures/%s.png", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
 						if err then error("[ERROR] " .. err) end
 						png:write(self.composites[c].png)
 						png:close()
 					end
 				else
+                    self:printf(2, "\tExtracting Texture: %s", self.composites[c].newname)
 					local png, err = io.open(string.format("%s/textures/%s.raw", self.pk3path, string.lower(self.composites[c].newname)), "w+b")
 					if err then error("[ERROR] " .. err) end
 					png:write(self.composites[c].raw)
@@ -2546,6 +2557,7 @@ function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
+                self:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
 				local png, err = io.open(string.format("%s/flats/%s.png", self.pk3path, string.lower(self.flats[f].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.flats[f].png)
@@ -2563,6 +2575,7 @@ function wad:extractPatches()
 	if(self.base ~= self) then
 		for p = 1, #self.patches do
 			if(not self.patches[p].isdoomdup) then
+                self:printf(2, "\tExtracting Patch: %s", self.flats[f].newname)
 				local png, err = io.open(string.format("%s/patches/%s.png", self.pk3path, string.lower(self.patches[p].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.patches[p].png)
@@ -2581,6 +2594,7 @@ function wad:extractSprites()
 	if(self.base ~= self) then
 		for s = 1, #self.sprites do
 			if(not self.sprites[s].isdoomdup) then
+                self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
 				local png, err = io.open(string.format("%s/sprites/%s.png", self.pk3path, string.lower(self.sprites[s].name)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				png:write(self.sprites[s].png)
@@ -2598,10 +2612,10 @@ end
 function wad:extractMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
-
+            
 			-- doom/hexen
 			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
-
+                self:printf(2, "\tExtracting DM/HM Map: %d", m)
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.things
@@ -2644,11 +2658,11 @@ function wad:extractMaps()
 
 				local wad
 				if(self.maps[m].format == "DM") then
-					wad, err = io.open(string.format("%s/maps/%s.WAD.DM", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.wad.dm", self.pk3path, self.maps[m].name), "w+b")
 				elseif(self.maps[m].format == "HM") then
-					wad, err = io.open(string.format("%s/maps/%s.WAD.HM", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.wad.hm", self.pk3path, self.maps[m].name), "w+b")
 				else
-					wad, err = io.open(string.format("%s/maps/%s.WAD", self.pk3path, self.maps[m].name), "w+b")
+					wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
 				end
 
 				if err then error("[ERROR] " .. err) end
@@ -2659,7 +2673,7 @@ function wad:extractMaps()
 
 			-- udmf
 			elseif(self.maps[m].format == "UM") then
-
+                self:printf(2, "\tExtracting UM Map: %d", m)
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.textmap
@@ -2693,7 +2707,7 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad, err = io.open(string.format("%s/maps/%s.WAD", self.pk3path, string.lower(self.maps[m].name)), "w+b")
+				local wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
 				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
@@ -3023,7 +3037,7 @@ function wad:convertDoomToHexen()
 		file:write("cd tools\n")
 
 		-- Make sure the logs directory exists.
-		-- file:write(mkDirCommand.." ./logs\n")
+		file:write(mkDirCommand.." ./logs\n")
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
@@ -3032,7 +3046,7 @@ function wad:convertDoomToHexen()
 		for k, v in pairs(maplist) do
 
 			-- that has the .DM extention
-			if(v:sub(-3) == ".DM") then
+			if(v:sub(-3) == ".dm") then
 
 				-- write a command to the bat file
 				file:write(string.format("%s/"..zwadconv.." \"%s/maps/%s\" \"%s/maps/%s.hm\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
