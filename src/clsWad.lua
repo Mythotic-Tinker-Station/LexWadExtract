@@ -3080,6 +3080,7 @@ function wad:convertDoomToHexen()
 		end
 
 		-- run script and wait for zwadconv
+        self:printf(1, "Running zwadconv...")
 		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
 		cmd:flush()
 
@@ -3091,7 +3092,6 @@ function wad:convertDoomToHexen()
         self:printf(2, "End Zwadconv output.\n")
 		--cmd:close()
 		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
-		self:printf(1, "\tDone.\n")
 
 	end
 end
@@ -3702,10 +3702,17 @@ function wad:flagsEx(v, ...)
 end
 
 function wad:printf(verbose, ...)
-	if(verbose <= self.verbose) then
-		print(string.format(...))
-		logfile:write(string.format(...) .. "\n")
-	end
+    if(self.base ~= self) then
+        if(verbose <= self.verbose) then
+            print(string.format(...))
+            logfile:write(string.format(...) .. "\n")
+        end
+    else
+        if(verbose <= self.verbose and self.verbose >= 3) then
+            print(string.format(...))
+            logfile:write(string.format(...) .. "\n")
+        end
+    end
 end
 
 function wad:printTable(tbl, indent)
