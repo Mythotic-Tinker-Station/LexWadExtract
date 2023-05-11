@@ -3037,7 +3037,7 @@ function wad:convertDoomToHexen()
 		file:write("cd tools\n")
 
 		-- Make sure the logs directory exists.
-		file:write(mkDirCommand.." ./logs\n")
+		--file:write(mkDirCommand.." ./logs\n")
 
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
@@ -3087,12 +3087,19 @@ end
 function wad:convertHexenToUDMF()
 	if(self.base ~= self) then
 
+        -- benchmark
+        local totaltime = love.timer.getTime()
+
 		-- get a list of all mapfiles
 		local maplist = love.filesystem.getDirectoryItems('maps')
 		local count = 1
 
 		-- for each map file
 		for k, v in pairs(maplist) do
+
+            -- benchmark
+            local maptime = love.timer.getTime()
+
 			if(v:sub(-3) == ".hm") then
 				local percent = tonumber(string.format("%.1f", (count) / (table.getn(maplist)/2) * 100))
 				printSameLine(percent.."%")
@@ -3276,12 +3283,6 @@ function wad:convertHexenToUDMF()
 					end
 				end
 
-				self:printf(1, "\tThings: %d", #THINGS)
-				self:printf(1, "\tLinedefs: %d", #LINEDEFS)
-				self:printf(1, "\tSidedefs: %d", #SIDEDEFS)
-				self:printf(1, "\tVertices: %d", #VERTEXES)
-				self:printf(1, "\tSectors: %d", #SECTORS)
-
 				-- build the udmf textmap
 				local textmap = {}
                 textmap[1] = 'namespace="zdoom";'
@@ -3290,7 +3291,6 @@ function wad:convertHexenToUDMF()
 				for s = 1, #VERTEXES do
 					textmap[#textmap+1] = string.format("vertex{x=%d;y=%d;}", VERTEXES[s].x, VERTEXES[s].y)
 				end
-				collectgarbage()
 
 				-- sidedefs
 				for s = 1, #SIDEDEFS do
@@ -3310,8 +3310,6 @@ function wad:convertHexenToUDMF()
 
 					textmap[#textmap+1] = string.format("}")
 				end
-				collectgarbage()
-
 
 				local door_tags = {}
 				local floor_tags = {}
@@ -3438,7 +3436,6 @@ function wad:convertHexenToUDMF()
 
 					textmap[#textmap+1] = string.format("}")
 				end
-				collectgarbage()
 
 				-- sectors
 				for s = 1, #SECTORS do
@@ -3517,7 +3514,6 @@ function wad:convertHexenToUDMF()
 					end
 					textmap[#textmap+1] = string.format("}")
 				end
-				collectgarbage()
 
 				textmap[#textmap+1] = "\n"
 
@@ -3572,7 +3568,6 @@ function wad:convertHexenToUDMF()
 						textmap[#textmap+1] = string.format("}")
 					end
 				end
-				collectgarbage()
 
 				-- lumps
 				local order = {}
@@ -3607,14 +3602,27 @@ function wad:convertHexenToUDMF()
 				wad:write(dir)
 				wad:close()
 
-				self:printf(1, "\tClean up...")
 				os.remove(string.format("%s/maps/%s", self.pk3path, v))
+                local maptime_end = love.timer.getTime()
+                self:printf(1, "\tThings: %d", #THINGS)
+				self:printf(1, "\tLinedefs: %d", #LINEDEFS)
+				self:printf(1, "\tSidedefs: %d", #SIDEDEFS)
+				self:printf(1, "\tVertices: %d", #VERTEXES)
+				self:printf(1, "\tSectors: %d", #SECTORS)
+                self:printf(1, "\tTime: %.2dms", (maptime_end-maptime)*1000)
+                self:printf(1, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
+                self:printf(1, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
+                self:printf(1, "\tMemory Usage: %.2dkb", collectgarbage("count"))
 				self:printf(1, "\tDone.\n")
+                collectgarbage()
 			end
 		end
+        local totaltime_end = love.timer.getTime()
+        self:printf(1, "\tTotal Time for all maps: %.2dms\n", (totaltime_end-totaltime)*1000)        
 	end
 
 	newLine()
+    collectgarbage()
 end
 
 function wad:removeUnusedTextures()
