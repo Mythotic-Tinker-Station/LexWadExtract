@@ -1677,7 +1677,7 @@ function wad:processTexturesX(num)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
 
-			self:printf(2, "\tFound Composit Texture: %s", self.composites[c].name)
+			self:printf(2, "\tFound Composite Texture: %s", self.composites[c].name)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
