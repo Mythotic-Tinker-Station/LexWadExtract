@@ -7,7 +7,7 @@ echo 	1 = Detailed.
 echo 	2 = Spam all the things.
 echo 	3 = Same as 2, but includes logging of loading the doom2.wad.
 echo 	Blank = Same as 0
-set /p "verbose=Enter verbosity(0-3): "
+set /p "verbose=Enter verbosity(0-3 or blank): "
 
 if not exist %cd%\%wad% goto 20
 
