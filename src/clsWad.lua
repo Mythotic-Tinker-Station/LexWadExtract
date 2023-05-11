@@ -825,7 +825,7 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self:extractSNDSEQ()
 
     -- convert Doom maps to hexen maps with zwadconv
-	self:printf(0, "Converting Doom>Hexen (If this takes more than a few seconds, something went wrong)...")
+	self:printf(0, "Converting Doom>Hexen")
 	self:convertDoomToHexen()
 
     -- convert hexen maps to udmf
@@ -3026,15 +3026,13 @@ function wad:convertDoomToHexen()
 		local waitfile = io.open(string.format("%s/maps/wait.txt", self.pk3path), "w")
 		waitfile:close()
 
-		-- create a new bat file
-		local file, err = io.open(string.format("%s/"..scriptName, self.toolspath), "w")
-
+        local batfile = {}
 		if(mac) then
-			file:write("#!/bin/bash\n")
+            batfile[#batfile+1] = "#!/bin/bash\n"
 		end
 
 		-- Move current directory to where zwadconv is located.
-		file:write("cd tools\n")
+		batfile[#batfile+1] = "cd tools\n"
 
 		-- Make sure the logs directory exists.
 		--file:write(mkDirCommand.." ./logs\n")
@@ -3049,24 +3047,32 @@ function wad:convertDoomToHexen()
 			if(v:sub(-3) == ".dm") then
 
 				-- write a command to the bat file
-				file:write(string.format("%s/"..zwadconv.." \"%s/maps/%s\" \"%s/maps/%s.hm\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4)))
+				batfile[#batfile+1] = string.format("%s/"..zwadconv.." \"%s/maps/%s\" \"%s/maps/%s.hm\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4))
 
 				--if( not mac ) then
-				--	file:write(string.format(moveCommand..' "./logs/convlog.txt" "./logs/%s_convlog.txt"\n', v))
+				--	batfile[#batfile+1] = string.format(moveCommand..' "./logs/convlog.txt" "./logs/%s_convlog.txt"\n', v)
 				--end
 			end
 		end
 
-		-- file:write("pause\n")
+		-- batfile[#batfile+1] = "pause\n"
 
 		-- delete .dm files
-		file:write(string.format('cd %s/maps/\n', self.pk3path))
-		file:write(string.format(deleteCommand..' "*.dm"\n', self.pk3path))
-		file:write(string.format(deleteCommand..' "wait.txt"\n', self.pk3path))
-		file:write(string.format('exit', self.pk3path))
+		batfile[#batfile+1] = string.format('cd %s/maps/\n', self.pk3path)
+		batfile[#batfile+1] = string.format(deleteCommand..' "*.dm"\n', self.pk3path)
+		batfile[#batfile+1] = string.format(deleteCommand..' "wait.txt"\n', self.pk3path)
+		batfile[#batfile+1] = string.format('exit', self.pk3path)
 
-		-- close bat file
+        -- create a new bat file
+		local file, err = io.open(string.format("%s/"..scriptName, self.toolspath), "w")
+        file:write(table.concat(batfile))
 		file:close()
+
+        self:printf(2, "Bat file contents:")
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "%s", table.concat(batfile))
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "End Bat file contents.\n")
 
 		--If mac, make script executable
 		if(mac) then
@@ -3076,7 +3082,13 @@ function wad:convertDoomToHexen()
 		-- run script and wait for zwadconv
 		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
 		cmd:flush()
+
 		local output = cmd:read('*all')
+        self:printf(2, "Zwadconv output:")
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "%s", output)
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "End Zwadconv output.\n")
 		--cmd:close()
 		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
 		self:printf(1, "\tDone.\n")
@@ -3604,16 +3616,16 @@ function wad:convertHexenToUDMF()
 
 				os.remove(string.format("%s/maps/%s", self.pk3path, v))
                 local maptime_end = love.timer.getTime()
-                self:printf(1, "\tThings: %d", #THINGS)
-				self:printf(1, "\tLinedefs: %d", #LINEDEFS)
-				self:printf(1, "\tSidedefs: %d", #SIDEDEFS)
-				self:printf(1, "\tVertices: %d", #VERTEXES)
-				self:printf(1, "\tSectors: %d", #SECTORS)
-                self:printf(1, "\tTime: %.2dms", (maptime_end-maptime)*1000)
-                self:printf(1, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
-                self:printf(1, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
-                self:printf(1, "\tMemory Usage: %.2dkb", collectgarbage("count"))
-				self:printf(1, "\tDone.\n")
+                self:printf(2, "\tThings: %d", #THINGS)
+				self:printf(2, "\tLinedefs: %d", #LINEDEFS)
+				self:printf(2, "\tSidedefs: %d", #SIDEDEFS)
+				self:printf(2, "\tVertices: %d", #VERTEXES)
+				self:printf(2, "\tSectors: %d", #SECTORS)
+                self:printf(2, "\tTime: %.2dms", (maptime_end-maptime)*1000)
+                self:printf(2, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
+                self:printf(2, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
+                self:printf(2, "\tMemory Usage: %.2dkb", collectgarbage("count"))
+				self:printf(2, "\tDone.\n")
                 collectgarbage()
 			end
 		end

@@ -1,5 +1,4 @@
 cd tools
-mkdir ./logs
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/maps/PIZZ01.wad.dm" "E:/GitHub/LexWadExtract/pk3/maps/PIZZ01.wad.hm"
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/maps/PIZZ02.wad.dm" "E:/GitHub/LexWadExtract/pk3/maps/PIZZ02.wad.hm"
 E:/GitHub/LexWadExtract/tools/zwadconv.exe "E:/GitHub/LexWadExtract/pk3/maps/PIZZ03.wad.dm" "E:/GitHub/LexWadExtract/pk3/maps/PIZZ03.wad.hm"
