@@ -3614,7 +3614,9 @@ function wad:convertHexenToUDMF()
 				wad:write(dir)
 				wad:close()
 
+                -- remove hexen map
 				os.remove(string.format("%s/maps/%s", self.pk3path, v))
+
                 local maptime_end = love.timer.getTime()
                 self:printf(2, "\tThings: %d", #THINGS)
 				self:printf(2, "\tLinedefs: %d", #LINEDEFS)
@@ -3625,6 +3627,7 @@ function wad:convertHexenToUDMF()
                 self:printf(2, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
                 self:printf(2, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
                 self:printf(2, "\tMemory Usage: %.2dkb", collectgarbage("count"))
+                self:printf(2, "\n")
                 collectgarbage()
 			end
 		end
