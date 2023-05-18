@@ -2,6 +2,15 @@
 log = {}
 timeTaken = ""
 
+function removePadding(str)
+	local newstr = ""
+	for i = 1, #str do
+		if str:sub(i,i) == "\0" then break end
+		newstr = string.format("%s%s", newstr, str:sub(i,i))
+	end
+	return newstr
+end
+
 function love.load(arg)
 
     print(arg[1], arg[2])
@@ -30,9 +39,41 @@ function love.load(arg)
     local pwad = apppath .. "/" .. arg[1]
     local verbose = arg[3]
     local acronym_sprites = arg[4]
+    local palette = nil
+
+    -- get pawd palette
+    local file = assert(io.open(pwad, "rb"))
+	local raw = file:read("*all")
+	file:close()
+    local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", raw, 1)
+
+	lumpcount = lumpcount-1
+	dirpos = dirpos+1
+
+	if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
+
+    for lump = 0, lumpcount do
+        local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(lump*16))
+        if(removePadding(name) == "PLAYPAL") then
+            palette = {}
+            local data = love.data.unpack(string.format("<c%d", size), raw, filepos+1)
+            for c = 1, 256*3, 3 do
+                local r, g, b = love.data.unpack("<BBB", data, c)
+                local index = #palette+1
+                local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
+                palette[index] =
+                {
+                    r2,
+                    g2,
+                    b2,
+                }
+            end
+        end
+    end
+
 
 	-- read doom2.wad
-    local doom2 = wad(verbose, apppath .. "/doom2.wad")
+    local doom2 = wad(verbose, apppath .. "/doom2.wad", palette)
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -48,7 +89,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites)
+    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites)
 
     local endTime = os.time();
 

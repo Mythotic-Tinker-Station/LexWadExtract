@@ -626,9 +626,9 @@ local wad = class("wad",
 -- if you're wondering why this is a class
 -- its because we need to load doom2.wad and wad of choice
 -------------------------------------------------------------
-function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
+function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
     self.verbose = tonumber(verbose)
-
+    print(palette)
 	self.base = base or self
 
     if(acronym ~= nil) then 
@@ -649,6 +649,7 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 	self.extractpatches = patches or false
 	self.spritesname = sprites
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
+    self.palette = palette
 
     -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
@@ -715,8 +716,13 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
 
     -- read the palette, save each color into a table
     -- self.palette[entry] = { r, g, b }
-	self:printf(0, "Processing Palette...")
-	self:processPalette()
+	
+    if(self.palette == nil) then
+        self:printf(0, "Processing Palette...")
+	    self:processPalette()
+    else
+        self:printf(0, "Skipping Palette...")
+    end
 
     -- process the boom ANIMATED binary lump
     -- which stores all the texture animation definitions
@@ -859,6 +865,28 @@ function wad:init(verbose, path, acronym, patches, base, pk3path, toolspath, spr
     
 	collectgarbage()
 end
+
+function wad:initPalette(verbose, path)
+    self.verbose = tonumber(verbose)
+
+	self.base = base or self
+	self.pk3path = pk3path
+	self.toolspath = toolspath
+	self.extractpatches = patches or false
+	self.spritesname = sprites
+	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
+
+    -- we are loading the raw wad data in to memory
+	self:printf(0, "------------------------------------------------------------------------------------------")
+	self:printf(0, "Loading palette from mapset...", path)
+    self:printf(0, "------------------------------------------------------------------------------------------")
+
+    if(self.palette ~= nil) then
+        return self.palette
+    end
+end
+
+
 
 function wad:open(path)
 	local file = assert(io.open(path, "rb"))
@@ -1455,7 +1483,6 @@ function wad:buildPatches()
 	for p = 1, #self.patches do
 
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
-			self:printf(2, "\tBuilding Patch: %s", self.patches[p].name)
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
 			self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
@@ -1513,6 +1540,7 @@ function wad:buildPatches()
 
 			self.patches[p].notdoompatch = true
 		end
+        self:printf(2, "\tBuilding Patch: %s; Checksum: %s", self.patches[p].name, love.data.encode("string", "hex", self.patches[p].md5))
 
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
@@ -1524,7 +1552,7 @@ function wad:buildFlats()
 
 	for f = 1, #self.flats do
 		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
-            self:printf(2, "\tBuilding Flat: %s", self.flats[f].name)
+            
 			self.flats[f].image = love.image.newImageData(64, 64)
 			self.flats[f].rows = {}
 
@@ -1545,7 +1573,7 @@ function wad:buildFlats()
 			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
 			self.flats[f].notdoomflat = true
 		end
-
+        self:printf(2, "\tBuilding Flat: %s; Checksum: %s", self.flats[f].name, love.data.encode("string", "hex", self.flats[f].md5))
 		self.flats[self.flats[f].name] = self.flats[f]
 	end
 
@@ -1559,7 +1587,6 @@ function wad:buildSprites()
 	for s = 1, #self.sprites do
 
 		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
-			self:printf(2, "\tBuilding Sprite: %s", self.sprites[s].name)
 			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
 			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
 			self.sprites[s].xoffset = love.data.unpack("<h", self.sprites[s].data, 5)
@@ -1601,7 +1628,6 @@ function wad:buildSprites()
 			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
 			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
-
 		else
 
 			filedata = love.filesystem.newFileData(self.sprites[s].data, "-")
@@ -1618,6 +1644,7 @@ function wad:buildSprites()
 
 			self.sprites[s].notdoompatch = true
 		end
+        self:printf(2, "\tBuilding Sprite: %s, Checksum: %s", self.sprites[s].name, love.data.encode("string", "hex", self.sprites[s].md5))
 
 		self.sprites[self.sprites[s].name] = self.sprites[s]
 	end
@@ -1903,6 +1930,17 @@ function wad:filterDuplicates()
 					count = count + 1
 					self.patches[p].isdoomdup = true
 					self.patches[p].doomdup = self.base.patches[p2].name
+				end
+			end
+		end
+		-- sprites
+		for s = 1, #self.sprites do
+			for s2 = 1, #self.base.sprites do
+				if(self.sprites[s].md5 == self.base.sprites[s2].md5) then
+					count = count + 1
+					self.sprites[s].isdoomdup = true
+					self.sprites[s].doomdup = self.base.sprites[s2].name
+                    self:printf(1, "\tFound pwad:'%s' and base:'%s' duplicates.", self.sprites[s].name, self.base.sprites[s2].name)
 				end
 			end
 		end
@@ -2640,6 +2678,8 @@ function wad:extractSprites()
 				if err then error("[ERROR] " .. err) end
 				png:write(self.sprites[s].png)
 				png:close()
+            else
+                self:printf(2, "\tNot Extracting Duplicate Sprite: %s", self.sprites[s].name) 
 			end
 		end
 
