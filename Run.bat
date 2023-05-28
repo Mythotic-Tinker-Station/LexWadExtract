@@ -42,7 +42,7 @@ mkdir pk3\sounds\%acronym%
 mkdir pk3\textures\%acronym%
 mkdir pk3\sprites\%acronym%
 
-Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite%
+Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% 1
 goto 30
 
 :20

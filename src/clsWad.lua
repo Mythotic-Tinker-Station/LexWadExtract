@@ -626,9 +626,8 @@ local wad = class("wad",
 -- if you're wondering why this is a class
 -- its because we need to load doom2.wad and wad of choice
 -------------------------------------------------------------
-function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
+function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, nodelete)
     self.verbose = tonumber(verbose)
-    print(palette)
 	self.base = base or self
 
     if(acronym ~= nil) then 
@@ -650,6 +649,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self.spritesname = sprites
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
     self.palette = palette
+    self.nodelete = nodelete
 
     -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
@@ -717,7 +717,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- read the palette, save each color into a table
     -- self.palette[entry] = { r, g, b }
 	
-    if(self.palette == nil) then
+    if(palette == nil) then
         self:printf(0, "Processing Palette...")
 	    self:processPalette()
     else
@@ -1481,6 +1481,7 @@ end
 function wad:buildPatches()
 
 	for p = 1, #self.patches do
+        self:printf(2, "\tBuilding Patch: %s", self.patches[p].name)
 
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
@@ -1540,7 +1541,6 @@ function wad:buildPatches()
 
 			self.patches[p].notdoompatch = true
 		end
-        self:printf(2, "\tBuilding Patch: %s; Checksum: %s", self.patches[p].name, love.data.encode("string", "hex", self.patches[p].md5))
 
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
@@ -3137,11 +3137,12 @@ function wad:convertDoomToHexen()
 		-- batfile[#batfile+1] = "pause\n"
 
 		-- delete .dm files
-		batfile[#batfile+1] = string.format('cd %s/maps/\n', self.pk3path)
-		batfile[#batfile+1] = string.format(deleteCommand..' "*.dm"\n', self.pk3path)
-		batfile[#batfile+1] = string.format(deleteCommand..' "wait.txt"\n', self.pk3path)
-		batfile[#batfile+1] = string.format('exit', self.pk3path)
-
+        if(not self.nodelete) then
+            batfile[#batfile+1] = string.format('cd %s/maps/\n', self.pk3path)
+            batfile[#batfile+1] = string.format(deleteCommand..' "*.dm"\n', self.pk3path)
+            batfile[#batfile+1] = string.format(deleteCommand..' "wait.txt"\n', self.pk3path)
+            batfile[#batfile+1] = string.format('exit', self.pk3path)
+        end
         -- create a new bat file
 		local file, err = io.open(string.format("%s/"..scriptName, self.toolspath), "w")
         file:write(table.concat(batfile))

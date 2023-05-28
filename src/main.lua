@@ -89,7 +89,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites)
+    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites, arg[5])
 
     local endTime = os.time();
 
