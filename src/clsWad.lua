@@ -620,12 +620,15 @@ local wad = class("wad",
 })
 
 
-
+--[[
 --------------------------------------------------------------
 -- Main Functions
 -- if you're wondering why this is a class
 -- its because we need to load doom2.wad and wad of choice
+    @param verbose
+    @return string
 -------------------------------------------------------------
+]]
 function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, nodelete)
     self.verbose = tonumber(verbose)
 	self.base = base or self
@@ -982,7 +985,7 @@ function wad:addExtraMarkers()
     for l, lump in ipairs(lumplist) do
 
         -- find markers
-        if(lump.size == 0) then
+        --if(lump.size == 0) then
 
             -- make sure we wont hit the end of the list
             if l+10 <= #lumplist then
@@ -1045,8 +1048,8 @@ function wad:addExtraMarkers()
                     self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
                 end
                 
-            end
-        end
+           end
+        --end
     end
     -- make the MM_END marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_END", data = ""} 
