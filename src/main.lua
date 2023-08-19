@@ -13,7 +13,7 @@ end
 
 function love.load(arg)
 
-    print(arg[1], arg[2])
+    print(arg[1], arg[2], arg[3], arg[4], arg[5], arg[6])
 
 -------------------------------------------------
     local startTime = os.time()
@@ -21,6 +21,10 @@ function love.load(arg)
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setDefaultFilter("nearest", "nearest", 0)
+
+    -- these are global because apparently the class library i use only allows 10 args for a method
+    nodelete = arg[5]
+    ctf = arg[6]
 
     class = require("mod30log")
     wad = require("clsWad")
@@ -39,6 +43,7 @@ function love.load(arg)
     local pwad = apppath .. "/" .. arg[1]
     local verbose = arg[3]
     local acronym_sprites = arg[4]
+
     local palette = nil
 
     -- get pawd palette
@@ -89,7 +94,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites, arg[5])
+    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites, nodelete, ctf)
 
     local endTime = os.time();
 

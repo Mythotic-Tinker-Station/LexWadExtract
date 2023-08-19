@@ -532,6 +532,12 @@ local wad = class("wad",
 		255,
 	},
 
+    ctf_filter =
+    {
+        {5, 5130},  -- blue key to zandronum blue flag
+        {13, 5131}, -- red key to zandronum red flag
+    },
+
 	door_sounds =
 	{
 		"DSDOROPN",
@@ -629,7 +635,7 @@ local wad = class("wad",
     @return string
 -------------------------------------------------------------
 ]]
-function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, nodelete)
+function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
     self.verbose = tonumber(verbose)
 	self.base = base or self
 
@@ -653,6 +659,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
     self.palette = palette
     self.nodelete = nodelete
+    self.ctf = ctf
 
     -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
@@ -3627,6 +3634,17 @@ function wad:convertHexenToUDMF()
 						-- angle
 						if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;", THINGS[s].angle) end
 
+                        if(self.ctf == "1") then
+                            self:printf(0, "1")
+                            for i = 1, #self.ctf_filter do
+                                self:printf(0, "2")
+                                if(THINGS[s].typ == self.ctf_filter[i][1]) then
+                                    self:printf(0, "3")
+                                    THINGS[s].typ = self.ctf_filter[i][2]
+                                end
+                            end
+                        end
+
 						-- type
 						if(self:find_thing(THINGS[s].typ)) then
 							textmap[#textmap+1] = string.format("type=31999;")
@@ -3634,6 +3652,8 @@ function wad:convertHexenToUDMF()
 						else
 							textmap[#textmap+1] = string.format("type=%d;", THINGS[s].typ)
 						end
+
+
 
 						-- flags
 						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;skill2=true;" end
