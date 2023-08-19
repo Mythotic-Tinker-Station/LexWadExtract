@@ -5,6 +5,7 @@ maps.zip
 *.ogg
 *.wav
 *.mp3
+*.dbs
 *animdefs*
 *sndinfo*
 *textures*
