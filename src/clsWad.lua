@@ -3649,11 +3649,11 @@ function wad:convertHexenToUDMF()
 						if(self:find_thing(THINGS[s].typ)) then
 							textmap[#textmap+1] = string.format("type=31999;")
 							textmap[#textmap+1] = string.format("score=%d;", THINGS[s].typ)
+                            textmap[#textmap+1] = string.format("arg4=9%03d%04d;", THINGS[s].a5, THINGS[s].typ)
 						else
 							textmap[#textmap+1] = string.format("type=%d;", THINGS[s].typ)
+                            if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", THINGS[s].a5) end
 						end
-
-
 
 						-- flags
 						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;skill2=true;" end
@@ -3678,8 +3678,7 @@ function wad:convertHexenToUDMF()
 						if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;", THINGS[s].a2) end
 						if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;", THINGS[s].a3) end
 						if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;", THINGS[s].a4) end
-						if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", THINGS[s].a5) end
-
+						
 						textmap[#textmap+1] = string.format("}")
 					end
 				end
