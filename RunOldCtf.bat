@@ -9,7 +9,6 @@ echo ---------------------------------------------------------------------------
 echo Sprite Acronym:
 echo 	Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-echo 	Can be left blank if the mapset has no sprites.
 set /p "acronym_sprite=Enter 2 letter sprite acronym: "
 echo ---------------------------------------------------------------------------------------------
 
@@ -22,7 +21,7 @@ echo Verbose settings
 echo 	0 = Basic.
 echo 	1 = Detailed.
 echo 	2 = Spam all the things.
-echo 	3 = Same as 2, but includes logging of loading the doom2.wad.
+echo 	3 = Same as 2, but includes logging of loading the iwad.
 echo 	Blank = Same as 0
 set /p "verbose=Enter verbosity(0-3 or blank): "
 echo ---------------------------------------------------------------------------------------------
