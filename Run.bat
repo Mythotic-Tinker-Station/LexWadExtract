@@ -12,6 +12,12 @@ echo 	Acronym will automaticly be ALL CAPS.
 set /p "acronym_sprite=Enter 2 letter sprite acronym: "
 echo ---------------------------------------------------------------------------------------------
 
+::echo SNDSEQ Value:
+::echo 	Must be a numerical value of 0-255. Any other setting will default to 0.
+::echo 	Look at Lexicon's SNDSEQ lump for a list of sound sequences.
+::set /p "sndseq=Enter a number from 0-255: "
+::echo ---------------------------------------------------------------------------------------------
+
 echo Wad File Name:
 echo 	Wad files can be placed in same folder, just the filename is required.
 set /p "wad=Enter wad to convert: "

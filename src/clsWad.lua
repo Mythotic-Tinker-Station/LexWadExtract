@@ -536,6 +536,21 @@ local wad = class("wad",
         {13, 5131}, -- red key to zandronum red flag
     },
 
+	door_sounds =
+	{
+		"DSDOROPN",
+		"DSDORCLS",
+		"DSBDOPN",
+		"DSBDCLS",
+	},
+
+	platform_sounds =
+	{
+		"DSPSTART",
+		"DSPSTOP",
+		"DSSTNMOV",
+	},
+
 	ignorelist =
 	{
 		"F_SKY1",
@@ -837,7 +852,18 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 
 	self:printf(0, "Extracting SNDINFO...")
 	self:extractSNDINFO()
+--[[
+	self:printf(0, "Extracting SNDSEQ...")
+	self:extractSNDSEQ()
 
+    -- convert Doom maps to hexen maps with zwadconv
+	self:printf(0, "Converting Doom>Hexen")
+	self:convertDoomToHexen()
+
+    -- convert hexen maps to udmf
+	printNoNewLine("Converting Hexen>UDMF ...")
+	self:convertHexenToUDMF()
+--]]
     -- removed any unused textures found
 	self:printf(0, "Removing Unused Textures")
 	self:removeUnusedTextures()
@@ -2840,6 +2866,128 @@ function wad:extractAnimdefs()
 	end
 end
 
+function wad:extractSNDSEQ()
+	if(self.base ~= self) then
+
+		local txt = {}
+
+		self.dsdoropn = false
+		self.dsdorcls = false
+		self.dsbdopn = false
+		self.dsbdcls = false
+
+		for i, v in ipairs(self.snddefs) do
+			if(v[2] == "DSDOROPN") then self.dsdoropn = true end
+			if(v[2] == "DSDORCLS") then self.dsdorcls = true end
+			if(v[2] == "DSBDOPN") then self.dsbdopn = true end
+			if(v[2] == "DSBDCLS") then self.dsbdcls = true end
+		end
+
+		-- doors
+		local used_doors = {}
+		for i, v in ipairs(self.snddefs) do
+			for i2, v2 in ipairs(self.door_sounds) do
+				if(v[2] == v2) then
+					txt[#txt+1] = string.format(":%s%s\n", self.acronym, v2)
+					txt[#txt+1] = string.format('\tplay %s\n', v[1])
+					txt[#txt+1] = string.format("\tnostopcutoff\n")
+					txt[#txt+1] = string.format("end\n\n")
+					used_doors[i2] = { true, string.format("%s%s", self.acronym, v2) }
+				end
+			end
+		end
+
+		txt[#txt+1] = string.format("[%sDoor\n", self.acronym)
+
+		if(used_doors[1] ~= nil) then
+			txt[#txt+1] = string.format("\t0 %s\n", used_doors[1][2])
+		else
+			txt[#txt+1] = string.format("\t0 %s\n", self.door_sounds[1])
+		end
+
+		if(used_doors[2] ~= nil) then
+			txt[#txt+1] = string.format("\t1 %s\n", used_doors[2][2])
+		else
+			txt[#txt+1] = string.format("\t1 %s\n", self.door_sounds[2])
+		end
+
+		if(used_doors[3] ~= nil) then
+			txt[#txt+1] = string.format("\t2 %s\n", used_doors[3][2])
+		else
+			txt[#txt+1] = string.format("\t2 %s\n", self.door_sounds[3])
+		end
+
+		if(used_doors[4] ~= nil) then
+			txt[#txt+1] = string.format("\t3 %s\n", used_doors[4][2])
+		else
+			txt[#txt+1] = string.format("\t3 %s\n", self.door_sounds[4])
+		end
+
+		txt[#txt+1] = string.format("]\n\n")
+
+		self.dspstart = false
+		self.dspstop = false
+		self.dsstnmov = false
+
+		for i, v in ipairs(self.snddefs) do
+			if(v[2] == "DSPSTART") then self.dspstart = true end
+			if(v[2] == "DSPSTOP") then self.dspstop = true end
+			if(v[2] == "DSSTNMOV") then self.dsstnmov = true end
+		end
+
+		-- platform
+		txt[#txt+1] = string.format(":%sPlatform\n", self.acronym)
+		if(self.dspstart == true) then
+			txt[#txt+1] = string.format("\tplayuntildone %s/DSPSTART\n", self.acronym)
+		else
+			txt[#txt+1] = string.format("\tplayuntildone plats/pt1_strt\n", self.acronym)
+		end
+
+		if(self.dspstop == true) then
+			txt[#txt+1] = string.format("\tstopsound %s/DSPSTOP\n", self.acronym)
+		else
+			txt[#txt+1] = string.format("\tstopsound plats/pt1_stop\n", self.acronym)
+		end
+
+		txt[#txt+1] = string.format("end\n\n")
+
+		-- floor
+		txt[#txt+1] = string.format(":%sFloor\n", self.acronym)
+		if(self.dsstnmov == true) then
+			txt[#txt+1] = string.format("\tplayrepeat %s/DSSTNMOV\n", self.acronym)
+		else
+			txt[#txt+1] = string.format("\tplayrepeat plats/pt1_mid\n", self.acronym)
+		end
+
+		if(self.dspstop == true) then
+			txt[#txt+1] = string.format("\tstopsound %s/DSPSTOP\n", self.acronym)
+		else
+			txt[#txt+1] = string.format("\tstopsound plats/pt1_stop\n", self.acronym)
+		end
+
+		txt[#txt+1] = string.format("end\n\n")
+
+		-- ceiling
+		txt[#txt+1] = string.format(":%sCeiling\n", self.acronym)
+		if(self.dsstnmov == true) then
+			txt[#txt+1] = string.format("\tplayrepeat %s/DSSTNMOV\n", self.acronym)
+		else
+			txt[#txt+1] = string.format("\tplayrepeat plats/pt1_mid\n", self.acronym)
+		end
+
+		txt[#txt+1] = string.format("end\n\n")
+
+		local file, err = io.open(string.format("%s/sndseq.%s.txt", self.pk3path, self.acronym), "w")
+		if err then error("[ERROR] " .. err) end
+		file:write(table.concat(txt))
+		file:close()
+
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot extracting base wad sndseq\n")
+	end
+end
+
 function wad:extractSNDINFO()
 	if(self.base ~= self) then
 
@@ -2957,6 +3105,641 @@ function wad:extractMapinfo()
 		self:printf(1, "\tNot extracting mapinfo for base wad.\n")
 	end
 end
+
+--[[
+function wad:convertDoomToHexen()
+
+	if(self.base ~= self) then
+
+		local waitfile = io.open(string.format("%s/maps/wait.txt", self.pk3path), "w")
+		waitfile:close()
+
+        local batfile = {}
+		if(mac) then
+            batfile[#batfile+1] = "#!/bin/bash\n"
+		end
+
+		-- Move current directory to where zwadconv is located.
+		batfile[#batfile+1] = "cd tools\n"
+
+		-- Make sure the logs directory exists.
+		--file:write(mkDirCommand.." ./logs\n")
+
+		-- get a list of all mapfiles
+		local maplist = love.filesystem.getDirectoryItems('maps')
+
+		-- for each map file
+		for k, v in pairs(maplist) do
+
+			-- that has the .DM extention
+			if(v:sub(-3) == ".dm") then
+
+				-- write a command to the bat file
+				batfile[#batfile+1] = string.format("%s/"..zwadconv.." \"%s/maps/%s\" \"%s/maps/%s.hm\"\n", self.toolspath, self.pk3path, v, self.pk3path, v:sub(1, -4))
+
+				--if( not mac ) then
+				--	batfile[#batfile+1] = string.format(moveCommand..' "./logs/convlog.txt" "./logs/%s_convlog.txt"\n', v)
+				--end
+			end
+		end
+
+		-- batfile[#batfile+1] = "pause\n"
+
+		-- delete .dm files
+        if(not self.nodelete) then
+            batfile[#batfile+1] = string.format('cd %s/maps/\n', self.pk3path)
+            batfile[#batfile+1] = string.format(deleteCommand..' "*.dm"\n', self.pk3path)
+            batfile[#batfile+1] = string.format(deleteCommand..' "wait.txt"\n', self.pk3path)
+            batfile[#batfile+1] = string.format('exit', self.pk3path)
+        end
+        -- create a new bat file
+		local file, err = io.open(string.format("%s/"..scriptName, self.toolspath), "w")
+        file:write(table.concat(batfile))
+		file:close()
+
+        self:printf(2, "Bat file contents:")
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "%s", table.concat(batfile))
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "End Bat file contents.\n")
+
+		--If mac, make script executable
+		if(mac) then
+			io.popen(string.format("chmod +x \"%s/"..scriptName.."\"", self.toolspath))
+		end
+
+		-- run script and wait for zwadconv
+        self:printf(1, "Running zwadconv...")
+		cmd = assert(io.popen(string.format(runScriptCommand.." \"%s/"..scriptName.."\"", self.toolspath)))
+		cmd:flush()
+
+		local output = cmd:read('*all')
+        self:printf(2, "Zwadconv output:")
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "%s", output)
+        self:printf(2, "----------------------------------------------------------")
+        self:printf(2, "End Zwadconv output.\n")
+		--cmd:close()
+		io.popen(deleteCommand.." "..self.toolspath.."/"..scriptName)
+
+	end
+end
+
+function wad:convertHexenToUDMF()
+	if(self.base ~= self) then
+
+        -- benchmark
+        local totaltime = love.timer.getTime()
+
+		-- get a list of all mapfiles
+		local maplist = love.filesystem.getDirectoryItems('maps')
+		local count = 1
+
+		-- for each map file
+		for k, v in pairs(maplist) do
+
+            -- benchmark
+            local maptime = love.timer.getTime()
+
+			if(v:sub(-3) == ".hm") then
+				local percent = tonumber(string.format("%.1f", (count) / (table.getn(maplist)/2) * 100))
+				printSameLine(percent.."%")
+				count = count + 1
+				self:printf(1, "\tConverting Map " .. v)
+
+				-- open the map
+				local file = assert(io.open(string.format("%s/maps/%s", self.pk3path, v), "rb"))
+				local raw = file:read("*all")
+				file:close()
+
+				-- gather header
+				local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", raw, 1)
+
+				-- dammit lua
+				lumpcount = lumpcount-1
+				dirpos = dirpos+1
+
+				-- check if valid(this shouldnt be necessary)
+				if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
+
+				local THINGS = {}
+				local LINEDEFS = {}
+				local SIDEDEFS = {}
+				local VERTEXES = {}
+				local SECTORS = {}
+				local BEHAVIOR = ""
+				local SCRIPTS = ""
+
+				-- for each lump
+				for l = 0, lumpcount do
+
+					-- get file meta data
+					local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(l*16))
+					name = self:removePadding(name)
+					filepos = filepos+1
+
+					-- get file data
+					local filedata = love.data.unpack(string.format("<c%d", size), raw, filepos)
+
+					-- gather thing information
+					if(name == "THINGS") then
+						local count = 0
+						for s = 1, #filedata, 20 do
+							count = count + 1
+							THINGS[count] = {}
+							THINGS[count].id = love.data.unpack("<H", filedata, s)
+							THINGS[count].x = love.data.unpack("<h", filedata, s+2)
+							THINGS[count].y = love.data.unpack("<h", filedata, s+4)
+							THINGS[count].z = love.data.unpack("<h", filedata, s+6)
+							THINGS[count].angle = love.data.unpack("<H", filedata, s+8)
+							THINGS[count].typ = love.data.unpack("<H", filedata, s+10)
+							THINGS[count].flags = love.data.unpack("<H", filedata, s+12)
+							THINGS[count].special = love.data.unpack("<B", filedata, s+14)
+							THINGS[count].a1 = love.data.unpack("<B", filedata, s+15)
+							THINGS[count].a2 = love.data.unpack("<B", filedata, s+16)
+							THINGS[count].a3 = love.data.unpack("<B", filedata, s+17)
+							THINGS[count].a4 = love.data.unpack("<B", filedata, s+18)
+							THINGS[count].a5 = love.data.unpack("<B", filedata, s+19)
+						end
+					end
+
+					-- gather linedef information
+					if(name == "LINEDEFS") then
+						local count = 0
+						for s = 1, #filedata, 16 do
+							count = count + 1
+							LINEDEFS[count] = {}
+							LINEDEFS[count].v1 = love.data.unpack("<H", filedata, s)
+							LINEDEFS[count].v2 = love.data.unpack("<H", filedata, s+2)
+							LINEDEFS[count].flags = love.data.unpack("<H", filedata, s+4)
+							LINEDEFS[count].special = love.data.unpack("<B", filedata, s+6)
+							LINEDEFS[count].a1 = love.data.unpack("<B", filedata, s+7)
+							LINEDEFS[count].a2 = love.data.unpack("<B", filedata, s+8)
+							LINEDEFS[count].a3 = love.data.unpack("<B", filedata, s+9)
+							LINEDEFS[count].a4 = love.data.unpack("<B", filedata, s+10)
+							LINEDEFS[count].a5 = love.data.unpack("<B", filedata, s+11)
+							LINEDEFS[count].front_sidedef = love.data.unpack("<H", filedata, s+12)
+							LINEDEFS[count].back_sidedef = love.data.unpack("<H", filedata, s+14)
+						end
+					end
+
+					-- gather sidedef information
+					if(name == "SIDEDEFS") then
+						local count = 0
+						for s = 1, #filedata, 30 do
+							count = count + 1
+							SIDEDEFS[count] = {}
+							SIDEDEFS[count].xoffset = love.data.unpack("<h", filedata, s)
+							SIDEDEFS[count].yoffset = love.data.unpack("<h", filedata, s+2)
+							SIDEDEFS[count].upper_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+							SIDEDEFS[count].lower_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+							SIDEDEFS[count].middle_texture = self:removePadding(love.data.unpack("<c8", filedata, s+20))
+							SIDEDEFS[count].sector = love.data.unpack("<H", filedata, s+28)
+
+						end
+					end
+
+					-- gather vertex information
+					if(name == "VERTEXES") then
+						local count = 0
+						for s = 1, #filedata, 4 do
+							count = count + 1
+							VERTEXES[count] = {}
+							VERTEXES[count].x = love.data.unpack("<h", filedata, s)
+							VERTEXES[count].y = love.data.unpack("<h", filedata, s+2)
+							VERTEXES[count].newref = count-1
+						end
+					end
+
+					-- gather sector information
+					if(name == "SECTORS") then
+						local count = 0
+						for s = 1, #filedata, 26 do
+							count = count + 1
+							SECTORS[count] = {}
+							SECTORS[count].floor_height = love.data.unpack("<h", filedata, s)
+							SECTORS[count].ceiling_height = love.data.unpack("<h", filedata, s+2)
+							SECTORS[count].floor_texture = self:removePadding(love.data.unpack("<c8", filedata, s+4))
+							SECTORS[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", filedata, s+12))
+							SECTORS[count].light = love.data.unpack("<h", filedata, s+20)
+							SECTORS[count].special = love.data.unpack("<H", filedata, s+22)
+							SECTORS[count].tag = love.data.unpack("<H", filedata, s+24)
+							SECTORS[count].hassound = false -- special extractor var for sound sequences
+							if(SECTORS[count] == nil) then
+								print(count)
+							end
+						end
+					end
+
+					-- copy the behavior lump
+					if(name == "BEHAVIOR") then
+						BEHAVIOR = filedata
+					end
+
+					-- copy the scripts lump
+					if(name == "SCRIPTS") then
+						SCRIPTS = filedata
+					end
+				end
+
+				-- scan for vestigial vertices
+				local cont = true
+				while(cont) do
+					cont = false
+					local refcount = 0
+					for v = 1, #VERTEXES do
+						local used = false
+						for l = 1, #LINEDEFS do
+							if(LINEDEFS[l].v1 == v-1 or LINEDEFS[l].v2 == v-1) then
+								used = true
+							end
+						end
+
+						if(used == false) then
+							cont = true
+							refcount = refcount + 1
+						end
+						VERTEXES[v].newref = VERTEXES[v].newref-refcount
+					end
+
+					-- remove vestigial vertices
+					for v = 1, #VERTEXES do
+						local used = false
+						for l = 1, #LINEDEFS do
+							if(LINEDEFS[l].v1 == v-1 or LINEDEFS[l].v2 == v-1) then
+								used = true
+							end
+						end
+
+						if(used == false) then
+							cont = true
+							table.remove(VERTEXES, v)
+						end
+					end
+
+					-- rereference linedefs vertices
+					for l = 1, #LINEDEFS do
+						LINEDEFS[l].v1 = VERTEXES[LINEDEFS[l].v1+1].newref
+						LINEDEFS[l].v2 = VERTEXES[LINEDEFS[l].v2+1].newref
+					end
+				end
+
+				-- build the udmf textmap
+				local textmap = {}
+                textmap[1] = 'namespace="zdoom";'
+
+				-- vertices
+				for s = 1, #VERTEXES do
+					textmap[#textmap+1] = string.format("vertex{x=%d;y=%d;}", VERTEXES[s].x, VERTEXES[s].y)
+				end
+
+				-- sidedefs
+				for s = 1, #SIDEDEFS do
+					textmap[#textmap+1] = string.format("sidedef{")
+
+					-- offsets
+					if(SIDEDEFS[s].xoffset ~= 0) then textmap[#textmap+1] = string.format("offsetx=%d;", SIDEDEFS[s].xoffset) end
+					if(SIDEDEFS[s].yoffset ~= 0) then textmap[#textmap+1] = string.format("offsety=%d;", SIDEDEFS[s].yoffset) end
+
+					-- textures
+					if(SIDEDEFS[s].upper_texture ~= "-") then textmap[#textmap+1] = string.format('texturetop="%s";', SIDEDEFS[s].upper_texture) end
+					if(SIDEDEFS[s].middle_texture ~= "-") then textmap[#textmap+1] = string.format('texturemiddle="%s";', SIDEDEFS[s].middle_texture) end
+					if(SIDEDEFS[s].lower_texture ~= "-") then textmap[#textmap+1] = string.format('texturebottom="%s";', SIDEDEFS[s].lower_texture) end
+
+					-- sector
+					textmap[#textmap+1] = string.format("sector=%d;", SIDEDEFS[s].sector)
+
+					textmap[#textmap+1] = string.format("}")
+				end
+
+				local door_tags = {}
+				local floor_tags = {}
+				local ceiling_tags = {}
+				local platform_tags = {}
+
+				-- linedefs
+				for s = 1, #LINEDEFS do
+					textmap[#textmap+1] = string.format("linedef{", s-1)
+
+					-- vertices
+					textmap[#textmap+1] = string.format("v1=%d;", LINEDEFS[s].v1)
+					textmap[#textmap+1] = string.format("v2=%d;", LINEDEFS[s].v2)
+
+					-- specials
+					-- if the special is 0, assume lineid
+					if(LINEDEFS[s].special == 0) then
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("id=%d;", LINEDEFS[s].a1) end
+
+					-- Line_SetIdentification conversion
+					elseif(LINEDEFS[s].special == 121) then
+						-- set line id
+						textmap[#textmap+1] = string.format("id=%d;", LINEDEFS[s].a1+(LINEDEFS[s].a5*256))
+
+						-- set line flags
+						if(self:flags(LINEDEFS[s].a2, 0x0001)) then textmap[#textmap+1] = "zoneboundary=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0002)) then textmap[#textmap+1] = "jumpover=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0004)) then textmap[#textmap+1] = "blockfloaters=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0008)) then textmap[#textmap+1] = "clipmidtex=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0010)) then textmap[#textmap+1] = "wrapmidtex=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0020)) then textmap[#textmap+1] = "midtex3d=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0040)) then textmap[#textmap+1] = "checkswitchrange=true;" end
+						if(self:flags(LINEDEFS[s].a2, 0x0080)) then textmap[#textmap+1] = "firstsideonly=true;" end
+
+					else
+						textmap[#textmap+1] = string.format("special=%d;", LINEDEFS[s].special)
+						if(LINEDEFS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;", LINEDEFS[s].a1) end
+						if(LINEDEFS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;", LINEDEFS[s].a2) end
+						if(LINEDEFS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;", LINEDEFS[s].a3) end
+						if(LINEDEFS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;", LINEDEFS[s].a4) end
+						if(LINEDEFS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", LINEDEFS[s].a5) end
+
+						-- look for door actions
+						for d = 1, #self.door_actions do
+							if(LINEDEFS[s].special == self.door_actions[d]) then
+								if(LINEDEFS[s].a1 ~= 0) then
+									door_tags[LINEDEFS[s].a1] = { true, true }
+								else
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										door_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
+								end
+							end
+						end
+
+						-- look for floor actions
+						for f = 1, #self.floor_actions do
+							if(LINEDEFS[s].special == self.floor_actions[f]) then
+								if(LINEDEFS[s].a1 ~= 0) then
+									floor_tags[LINEDEFS[s].a1] = { true, true }
+								else
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										floor_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
+								end
+							end
+						end
+
+						-- look for ceiling actions
+						for c = 1, #self.ceiling_actions do
+							if(LINEDEFS[s].special == self.ceiling_actions[c]) then
+								if(LINEDEFS[s].a1 ~= 0) then
+									ceiling_tags[LINEDEFS[s].a1] = { true, true }
+								else
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										ceiling_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
+								end
+							end
+						end
+
+						-- look for platform actions
+						for p = 1, #self.platform_actions do
+							if(LINEDEFS[s].special == self.platform_actions[p]) then
+								if(LINEDEFS[s].a1 ~= 0) then
+									platform_tags[LINEDEFS[s].a1] = { true, true }
+								else
+									if(LINEDEFS[s].back_sidedef ~= 65535) then
+										platform_tags[SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector] = { false, SIDEDEFS[LINEDEFS[s].back_sidedef+1].sector }
+									end
+								end
+							end
+						end
+					end
+
+					-- sidedefs
+					if(LINEDEFS[s].front_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sidefront=%d;", LINEDEFS[s].front_sidedef) end
+					if(LINEDEFS[s].back_sidedef ~= 0xFFFF) then textmap[#textmap+1] = string.format("sideback=%d;", LINEDEFS[s].back_sidedef) end
+
+					-- flags
+					if(self:flags(LINEDEFS[s].flags, 0x0001)) then textmap[#textmap+1] = "blocking=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0002)) then textmap[#textmap+1] = "blockmonsters=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0004)) then textmap[#textmap+1] = "twosided=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0008)) then textmap[#textmap+1] = "dontpegtop=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0010)) then textmap[#textmap+1] = "dontpegbottom=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0020)) then textmap[#textmap+1] = "secret=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0040)) then textmap[#textmap+1] = "blocksound=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0080)) then textmap[#textmap+1] = "dontdraw=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0100)) then textmap[#textmap+1] = "mapped=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x0200)) then textmap[#textmap+1] = "repeatspecial=true;" end
+
+					-- linedef activation is special
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x0) then textmap[#textmap+1] = "playercross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x400) then textmap[#textmap+1] = "playeruse=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x800) then textmap[#textmap+1] = "monstercross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0xC00) then textmap[#textmap+1] = "impact=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1000) then textmap[#textmap+1] = "playerpush=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1400) then textmap[#textmap+1] = "missilecross=true;" end
+					if(self:flagsEx(LINEDEFS[s].flags, 0x1C00) == 0x1800) then textmap[#textmap+1] = "passuse=true;" end -- ???
+
+					if(self:flags(LINEDEFS[s].flags, 0x2000)) then textmap[#textmap+1] = "monsteractivate=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x4000)) then textmap[#textmap+1] = "blockplayers=true;" end
+					if(self:flags(LINEDEFS[s].flags, 0x8000)) then textmap[#textmap+1] = "blockeverything=true;" end
+
+					textmap[#textmap+1] = string.format("}")
+				end
+
+				-- sectors
+				for s = 1, #SECTORS do
+					textmap[#textmap+1] = string.format("sector{", s-1)
+
+					-- heights
+					if(SECTORS[s].floor_height ~= 0) then textmap[#textmap+1] = string.format("heightfloor=%d;", SECTORS[s].floor_height) end
+					if(SECTORS[s].ceiling_height ~= 0) then textmap[#textmap+1] = string.format("heightceiling=%d;", SECTORS[s].ceiling_height) end
+
+					-- texture
+					textmap[#textmap+1] = string.format('texturefloor="%s";', SECTORS[s].floor_texture)
+					textmap[#textmap+1] = string.format('textureceiling="%s";', SECTORS[s].ceiling_texture)
+
+					-- light
+					if(SECTORS[s].light ~= 160) then textmap[#textmap+1] = string.format("lightlevel=%d;", SECTORS[s].light) end
+
+					-- special
+					if(SECTORS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;", SECTORS[s].special) end
+					if(SECTORS[s].tag ~= 0) then textmap[#textmap+1] = string.format("id=%d;", SECTORS[s].tag) end
+
+
+					-- look for door sectors
+					if(self.dsdoropn or self.dsdorcls or self.dsbdopn or self.dsbdclr) then
+						for k, v in pairs(door_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Door")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Door")
+								end
+							end
+						end
+                    end
+
+					-- look for floor sectors
+					for k, v in pairs(floor_tags) do
+						if(v[1] == true) then
+							if(SECTORS[s].tag == k) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
+							end
+						else
+							if(s-1 == v[2]) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Floor")
+							end
+						end
+					end
+
+					-- look for ceiling sectors
+					for k, v in pairs(ceiling_tags) do
+						if(v[1] == true) then
+							if(SECTORS[s].tag == k) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
+							end
+						else
+							if(s-1 == v[2]) then
+								textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Ceiling")
+							end
+						end
+					end
+
+						-- look for platform sectors
+                    if(self.dspstart or self.dspstop or self.dsstnmov) then
+						for k, v in pairs(platform_tags) do
+							if(v[1] == true) then
+								if(SECTORS[s].tag == k) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Platform")
+								end
+							else
+								if(s-1 == v[2]) then
+									textmap[#textmap+1] = string.format('soundsequence="%s%s";', self.acronym, "Platform")
+								end
+							end
+						end
+					end
+					textmap[#textmap+1] = string.format("}")
+				end
+
+				textmap[#textmap+1] = "\n"
+
+				-- things
+				for s = 1, #THINGS do
+					if(not self:ignore_thing(THINGS[s].typ)) then
+						textmap[#textmap+1] = string.format("thing{", s-1)
+
+						if(THINGS[s].id ~= 0) then textmap[#textmap+1] = string.format("id=%d;", THINGS[s].id) end
+
+						-- position
+						textmap[#textmap+1] = string.format("x=%d;", THINGS[s].x)
+						textmap[#textmap+1] = string.format("y=%d;", THINGS[s].y)
+						if(THINGS[s].z ~= 0) then textmap[#textmap+1] = string.format("height=%d;", THINGS[s].z) end
+
+						-- angle
+						if(THINGS[s].angle ~= 0) then textmap[#textmap+1] = string.format("angle=%d;", THINGS[s].angle) end
+
+                        if(self.ctf == "1") then
+                            self:printf(0, "1")
+                            for i = 1, #self.ctf_filter do
+                                self:printf(0, "2")
+                                if(THINGS[s].typ == self.ctf_filter[i][1]) then
+                                    self:printf(0, "3")
+                                    THINGS[s].typ = self.ctf_filter[i][2]
+                                end
+                            end
+                        end
+
+						-- type
+						if(self:find_thing(THINGS[s].typ)) then
+							textmap[#textmap+1] = string.format("type=31999;")
+							textmap[#textmap+1] = string.format("score=%d;", THINGS[s].typ)
+                            textmap[#textmap+1] = string.format("arg4=9%03d%04d;", THINGS[s].a5, THINGS[s].typ)
+						else
+							textmap[#textmap+1] = string.format("type=%d;", THINGS[s].typ)
+                            if(THINGS[s].a5 ~= 0) then textmap[#textmap+1] = string.format("arg4=%d;", THINGS[s].a5) end
+						end
+
+						-- flags
+						if(self:flags(THINGS[s].flags, 0x0001)) then textmap[#textmap+1] = "skill1=true;skill2=true;" end
+						if(self:flags(THINGS[s].flags, 0x0002)) then textmap[#textmap+1] = "skill3=true;" end
+						if(self:flags(THINGS[s].flags, 0x0004)) then textmap[#textmap+1] = "skill4=true;skill5=true;" end
+						if(self:flags(THINGS[s].flags, 0x0008)) then textmap[#textmap+1] = "ambush=true;" end
+						if(self:flags(THINGS[s].flags, 0x0010)) then textmap[#textmap+1] = "dormant=true;" end
+						if(self:flags(THINGS[s].flags, 0x0020)) then textmap[#textmap+1] = "class1=true;" end
+						if(self:flags(THINGS[s].flags, 0x0040)) then textmap[#textmap+1] = "class2=true;" end
+						if(self:flags(THINGS[s].flags, 0x0080)) then textmap[#textmap+1] = "class3=true;" end
+						if(self:flags(THINGS[s].flags, 0x0100)) then textmap[#textmap+1] = "single=true;" end
+						if(self:flags(THINGS[s].flags, 0x0200)) then textmap[#textmap+1] = "coop=true;" end
+						if(self:flags(THINGS[s].flags, 0x0400)) then textmap[#textmap+1] = "dm=true;" end
+						if(self:flags(THINGS[s].flags, 0x0800)) then textmap[#textmap+1] = "translucent=true;" end
+						if(self:flags(THINGS[s].flags, 0x1000)) then textmap[#textmap+1] = "invisible=true;" end
+						if(self:flags(THINGS[s].flags, 0x2000)) then textmap[#textmap+1] = "strifeally=true;" end
+						if(self:flags(THINGS[s].flags, 0x4000)) then textmap[#textmap+1] = "standing=true;" end
+
+						-- special
+						if(THINGS[s].special ~= 0) then textmap[#textmap+1] = string.format("special=%d;", THINGS[s].special) end
+						if(THINGS[s].a1 ~= 0) then textmap[#textmap+1] = string.format("arg0=%d;", THINGS[s].a1) end
+						if(THINGS[s].a2 ~= 0) then textmap[#textmap+1] = string.format("arg1=%d;", THINGS[s].a2) end
+						if(THINGS[s].a3 ~= 0) then textmap[#textmap+1] = string.format("arg2=%d;", THINGS[s].a3) end
+						if(THINGS[s].a4 ~= 0) then textmap[#textmap+1] = string.format("arg3=%d;", THINGS[s].a4) end
+						
+						textmap[#textmap+1] = string.format("}")
+					end
+				end
+
+				-- lumps
+				local order = {}
+				order[#order+1] = table.concat(textmap)
+				if(BEHAVIOR ~= "") then order[#order+1] = BEHAVIOR end
+				if(SCRIPTS ~= "") then order[#order+1] = SCRIPTS end
+				order[#order+1] = ""
+
+				local pos = {}
+				local lumpchunk = ""
+				for o = 1, #order do
+					pos[o] = #lumpchunk
+					lumpchunk = lumpchunk .. order[o]
+				end
+
+				-- header
+				local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
+
+				-- directory
+				local dir = love.data.pack("string", "<i4i4c8", 10, 0, "MAP01")
+				local count = 1
+
+				dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "TEXTMAP")
+				if(BEHAVIOR ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "BEHAVIOR") end
+				if(SCRIPTS ~= "") then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
+				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
+
+				local wad, err = io.open(string.format("%s/maps/%s", self.pk3path, string.lower(v:sub(1, -4))), "w+b")
+				if err then error("[ERROR] " .. err) end
+				wad:write(header)
+				wad:write(lumpchunk)
+				wad:write(dir)
+				wad:close()
+
+                -- remove hexen map
+				os.remove(string.format("%s/maps/%s", self.pk3path, v))
+
+                local maptime_end = love.timer.getTime()
+                self:printf(2, "\tThings: %d", #THINGS)
+				self:printf(2, "\tLinedefs: %d", #LINEDEFS)
+				self:printf(2, "\tSidedefs: %d", #SIDEDEFS)
+				self:printf(2, "\tVertices: %d", #VERTEXES)
+				self:printf(2, "\tSectors: %d", #SECTORS)
+                self:printf(2, "\tTime: %.2dms", (maptime_end-maptime)*1000)
+                self:printf(2, "\tSize Before: %.2dkb", math.ceil(#raw/1024))
+                self:printf(2, "\tSize After: %.2dkb", math.ceil((#header + #lumpchunk + #dir)/1024))
+                self:printf(2, "\tMemory Usage: %.2dkb", collectgarbage("count"))
+                self:printf(2, "\n")
+                collectgarbage()
+			end
+		end
+        local totaltime_end = love.timer.getTime()
+        self:printf(1, "\tTotal Time for all maps: %.2dms\n", (totaltime_end-totaltime)*1000)        
+	end
+
+	newLine()
+    collectgarbage()
+end
+--]]
 
 function wad:removeUnusedTextures()
 	local tex = 0
