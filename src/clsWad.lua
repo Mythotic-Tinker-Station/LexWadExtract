@@ -635,22 +635,25 @@ local wad = class("wad",
     @return string
 -------------------------------------------------------------
 ]]
-function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite)
+function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, sndseq, things)
     self.verbose = tonumber(verbose)
+	self.sndseq = tonumber(sndseq)
 	self.base = base or self
 
     if(acronym ~= nil) then 
         if(#acronym < 4) then
             error("Error: Acronym must be 4 letters.")
         end
-        self.acronym = string.upper(acronym:sub(1, 4)) 
-
+        self.acronym = string.upper(acronym:sub(1, 4))
     end
     if(acronym_sprite ~= nil) then 
         if(#acronym_sprite < 2) then
             error("Error: Sprite acronym must be 2 letters.")
          end
-        self.acronym_sprite = string.upper(acronym_sprite:sub(1, 2)) 
+        self.acronym_sprite = string.upper(acronym_sprite:sub(1, 2))
+    end
+    if(things ~= nil) then 
+        self.things = string.upper(things:sub(1, 1))
     end
 	self.pk3path = pk3path
 	self.toolspath = toolspath
@@ -659,7 +662,6 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
     self.palette = palette
     self.nodelete = nodelete
-    self.actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/src/actorlist.txt")
 
     -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
@@ -780,10 +782,6 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self:printf(0, "Processing Duplicates...")
 	self:filterDuplicates()
 
-    -- rename all thing ids in this wad with a number system
-	--self:printf(0, "Replace Things...")
-	--self:replaceThings()
-
     -- rename all flats in this wad with a number system
 	self:printf(0, "Rename Flats...")
 	self:renameFlats()
@@ -861,14 +859,6 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 --[[
 	self:printf(0, "Extracting SNDSEQ...")
 	self:extractSNDSEQ()
-
-    -- convert Doom maps to hexen maps with zwadconv
-	self:printf(0, "Converting Doom>Hexen")
-	self:convertDoomToHexen()
-
-    -- convert hexen maps to udmf
-	printNoNewLine("Converting Hexen>UDMF ...")
-	self:convertHexenToUDMF()
 --]]
     -- removed any unused textures found
 	self:printf(0, "Removing Unused Textures")
@@ -1965,22 +1955,6 @@ function wad:filterDuplicates()
     collectgarbage()
 end
 
-function wad:replaceThings()
-	if(self.base ~= self) then
-
-		for p = 1, #self.things do
-			self.thingcount = self.thingcount + 1
-			self.things[p].newname = string.format("%s%.4d", self.acronym, self.thingcount)
-            self:printf(2, "\tRenamed %s to %s", self.things[p].name, self.things[p].newname)
-		end
-		
-		self:printf(1, "\tDone.\n")
-	else
-		self:printf(1, "\tNot replacing base wad things.\n")
-	end
-    collectgarbage()
-end
-
 function wad:renamePatches()
 	if(self.base ~= self) then
 
@@ -2421,14 +2395,35 @@ function wad:ModifyMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
 			self:printf(2, "\tModifying Map: %d", m)
+			
+			local actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/actorlist.txt")
+			actorlist:read("*line")
+			actorlist:read("*line")
+			actorlist:read("*line")
+			local line = actorlist:read("*line")
 
 			-- doom/hexen
 			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
 
 				-- thing replacement
-				for t = 1, #self.maps[m].things do
-					self.maps[m].things[t].typ = 0
-					self.maps[m].things[t].used = true
+				if(self.things == "Y") then
+					while line ~= nil do
+						
+						-- actor replacement stuff
+						local actornewspace = string.find(line, " ")
+						local actor1 = string.sub(line, 1, actornewspace)
+						local actor2 = string.sub(line, actornewspace+1)
+						actor1 = actor1 + 0
+						actor2 = actor2 + 0
+						for t = 1, #self.maps[m].things do
+							if(self.maps[m].things[t].typ == actor1) then
+								self.maps[m].things[t].typ = actor2
+							end
+						end
+						
+						line = actorlist:read("*line")
+					end
+					actorlist:close()
 				end
 
 				-- find textures and rename
