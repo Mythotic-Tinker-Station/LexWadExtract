@@ -50,6 +50,7 @@ local wad = class("wad",
 	texturecount = 0,
 	soundcount = 0,
 	sndseq = 0,
+	things = "N",
 	acronym = "DOOM",
     acronym_sprite = "XX",
 	base = false,
@@ -658,7 +659,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
     self.palette = palette
     self.nodelete = nodelete
-    self.ctf = ctf
+    self.actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/src/actorlist.txt")
 
     -- we are loading the raw wad data in to memory
 	self:printf(0, "------------------------------------------------------------------------------------------")
@@ -778,6 +779,10 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- find and remove duplicate files by md5 hash
 	self:printf(0, "Processing Duplicates...")
 	self:filterDuplicates()
+
+    -- rename all thing ids in this wad with a number system
+	--self:printf(0, "Replace Things...")
+	--self:replaceThings()
 
     -- rename all flats in this wad with a number system
 	self:printf(0, "Rename Flats...")
@@ -1960,6 +1965,22 @@ function wad:filterDuplicates()
     collectgarbage()
 end
 
+function wad:replaceThings()
+	if(self.base ~= self) then
+
+		for p = 1, #self.things do
+			self.thingcount = self.thingcount + 1
+			self.things[p].newname = string.format("%s%.4d", self.acronym, self.thingcount)
+            self:printf(2, "\tRenamed %s to %s", self.things[p].name, self.things[p].newname)
+		end
+		
+		self:printf(1, "\tDone.\n")
+	else
+		self:printf(1, "\tNot replacing base wad things.\n")
+	end
+    collectgarbage()
+end
+
 function wad:renamePatches()
 	if(self.base ~= self) then
 
@@ -2404,6 +2425,12 @@ function wad:ModifyMaps()
 			-- doom/hexen
 			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
 
+				-- thing replacement
+				for t = 1, #self.maps[m].things do
+					self.maps[m].things[t].typ = 0
+					self.maps[m].things[t].used = true
+				end
+
 				-- find textures and rename
 				for c = 1, #self.composites do
 					if not self.composites[c].isdoomdup then
@@ -2572,10 +2599,24 @@ function wad:ModifyMaps()
 					end
 				end
 
+				-- build raw things back
+				count = 0
+				self.maps[m].raw.things = ""
+				local t = {}
+				for s = 1, #self.maps[m].things do
+					count = count + 1
+					if(self.maps[m].format == "DM") then
+						t[s] = love.data.pack("string", "<hhHHH", self.maps[m].things[s].x, self.maps[m].things[s].y, self.maps[m].things[s].angle, self.maps[m].things[s].typ, self.maps[m].things[s].flags)
+					elseif(self.maps[m].format == "HM") then
+						t[s] = love.data.pack("string", "<HhhhHHHBBBBBB", self.maps[m].things[s].id, self.maps[m].things[s].x, self.maps[m].things[s].y, self.maps[m].things[s].z, self.maps[m].things[s].angle, self.maps[m].things[s].typ, self.maps[m].things[s].flags, self.maps[m].things[s].special, self.maps[m].things[s].a1, self.maps[m].things[s].a2, self.maps[m].things[s].a3, self.maps[m].things[s].a4, self.maps[m].things[s].a5)
+						end
+				end
+				self.maps[m].raw.things = table.concat(t)
+
 				-- build raw sidedefs back
 				count = 0
 				self.maps[m].raw.sidedefs = ""
-				local t = {}
+				t = {}
 				for s = 1, #self.maps[m].sidedefs do
 					count = count + 1
 					t[s] = love.data.pack("string", "<hhc8c8c8H", self.maps[m].sidedefs[s].xoffset, self.maps[m].sidedefs[s].yoffset, self.maps[m].sidedefs[s].upper_texture, self.maps[m].sidedefs[s].lower_texture, self.maps[m].sidedefs[s].middle_texture, self.maps[m].sidedefs[s].sector)
