@@ -2411,7 +2411,7 @@ function wad:ModifyMaps()
 				-- thing replacement
 				if(self.things == "Y") then
 					while line ~= nil do
-						
+
 						-- actor replacement stuff
 						local actornewspace = string.find(line, " ")
 						local actor1 = string.sub(line, 1, actornewspace)
@@ -2423,7 +2423,7 @@ function wad:ModifyMaps()
 								self.maps[m].things[t].typ = actor2
 							end
 						end
-						
+
 						line = actorlist:read("*line")
 					end
 					actorlist:close()
@@ -2541,7 +2541,7 @@ function wad:ModifyMaps()
 					end
 				end
 
-				-- find ptches and rename
+				-- find patches and rename
 				for p = 1, #self.patches do
 					if not self.patches[p].isdoomdup then
 
@@ -2633,6 +2633,25 @@ function wad:ModifyMaps()
 
 			--udmf
 			elseif(self.maps[m].format == "UM") then
+
+				if(self.things == "Y") then
+					while line ~= nil do
+
+						-- actor replacement stuff
+						local actornewspace = string.find(line, " ")
+						local actor1 = string.sub(line, 1, actornewspace)
+						local actor2 = string.sub(line, actornewspace+1)
+						actor1 = actor1 + 0
+						actor2 = actor2 + 0
+						for t = 1, #self.things do
+							self.maps[m].raw.textmap = self.maps[m].raw.textmap:gsub(actor1, actor2)
+						end
+
+						line = actorlist:read("*line")
+					end
+					actorlist:close()
+				end
+
 				for c = 1, #self.composites do
 					self.maps[m].raw.textmap = self.maps[m].raw.textmap:gsub(self.composites[c].name, self.composites[c].newname)
 				end
