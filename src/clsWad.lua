@@ -1014,7 +1014,7 @@ function wad:addExtraMarkers()
                 end
             end
 
-            if l < #lumplist then
+            if l+1 < #lumplist then
                 if lumplist[l+1].name == "TEXTMAP" then
                     for ll = l, #lumplist do
                         if lumplist[ll].name == "ENDMAP" then 
