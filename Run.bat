@@ -12,12 +12,6 @@ echo 	Acronym will automaticly be ALL CAPS.
 set /p "acronym_sprite=Enter 2 letter sprite acronym: "
 echo ---------------------------------------------------------------------------------------------
 
-echo SNDSEQ Value:
-echo 	Must be a numerical value of 0-255. Any other setting will default to 0.
-echo 	Look at Lexicon's SNDSEQ lump for a list of sound sequences.
-set /p "sndseq=Enter a number from 0-255: "
-echo ---------------------------------------------------------------------------------------------
-
 echo Actor replacement:
 echo 	Must be either Y or N. Any other setting will default to N.
 echo 	Actor replacement will follow actorlist.txt.
@@ -57,7 +51,7 @@ mkdir pk3\sounds\%acronym%
 mkdir pk3\textures\%acronym%
 mkdir pk3\sprites\%acronym%
 
-Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% %sndseq% %things% 1
+Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% %things% 1
 goto 30
 
 :20
