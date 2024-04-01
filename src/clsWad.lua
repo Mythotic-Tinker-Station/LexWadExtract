@@ -1012,13 +1012,17 @@ function wad:addExtraMarkers()
 
                     self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
                 end
-                if lumplist[l+1].name == "TEXTMAP" then 
+            end
+
+            if l < #lumplist then
+                if lumplist[l+1].name == "TEXTMAP" then
                     for ll = l, #lumplist do
                         if lumplist[ll].name == "ENDMAP" then 
                             lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_START", data = ""}
                             for lll = l, ll do
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
+                            self:printf(5)
                             lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_END", data = ""}
                             t = "UDMF"
                             break;
@@ -1026,8 +1030,7 @@ function wad:addExtraMarkers()
                     end
                     self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
                 end
-                
-           end
+            end
         --end
     end
     -- make the MM_END marker
