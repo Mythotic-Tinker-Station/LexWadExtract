@@ -1271,7 +1271,7 @@ function wad:addExtraMarkers()
             for ll = l, #lumplist do
                 if lumplist[ll].name == "P_END" or lumplist[ll].name == "PP_END" then
                     for lll = l+1, ll-1 do
-                        if lumplist[lll].name:sub(1,2) ~= "P1" and lumplist[lll].name:sub(1,2) ~= "P2" and lumplist[lll].name:sub(1,2) ~= "P3" and lumplist[lll].name:sub(1,2) ~= "P4" then
+                        if lumplist[lll].name:sub(1,8) ~= "P1_START" and lumplist[lll].name:sub(1,8) ~= "P2_START" and lumplist[lll].name:sub(1,8) ~= "P3_START" then
                             self:printf(2, "\t\tFound Patch: %s", lumplist[lll].name)
                             lumplist_new[#lumplist_new+1] = lumplist[lll]
                         end
