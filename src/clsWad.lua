@@ -2770,6 +2770,7 @@ function wad:extractSprites()
                 self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
 				local png, err = io.open(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
+                self.sprites[s].png = self:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
 				png:write(self.sprites[s].png)
 				png:close()
             else
@@ -3206,10 +3207,13 @@ function wad:findTexture(data, texture, tbl, pos)
 	return tbl
 end
 
+
 function wad:insertGRAB(data, xoff, yoff)
-	local grAb = love.data.pack("data", ">I4c4i4i4I4", 8, "grAb", xoff, yoff, self:crc(data))
-	return data:sub(1, 37) .. grAb .. data:sub(38)
+    local offsetdata = love.data.pack("string", ">c4i4i4", "grAb", xoff, yoff)
+    local grAb = love.data.pack("string", ">I4c4i4i4I4", 8, "grAb", xoff, yoff, self:crc(offsetdata))
+    return data:sub(1, 33) .. grAb .. data:sub(34)
 end
+
 
 -- CRC code found: https://stackoverflow.com/questions/34120322/converting-a-c-checksum-function-to-lua
 function wad:crc(data)
