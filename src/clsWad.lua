@@ -928,6 +928,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- we're done!
 	self:printf(0, "Complete.\n")
     
+    -- free up memory
 	collectgarbage()
 end
 
@@ -942,9 +943,7 @@ function wad:initPalette(verbose, path)
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
 
     -- we are loading the raw wad data in to memory
-	self:printf(0, "------------------------------------------------------------------------------------------")
 	self:printf(0, "Loading palette from mapset...", path)
-    self:printf(0, "------------------------------------------------------------------------------------------")
 
     if(self.palette ~= nil) then
         return self.palette
@@ -1344,14 +1343,7 @@ function wad:addExtraMarkers()
     for lump = 1, #lumplist_new do
         dir = dir .. love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplist_new[lump].data, lumplist_new[lump].name)
     end
---[[ This was for debugging.
-    local wad, err = io.open(string.format("%s.wad",  self.acronym), "w+b")
-    if err then error("[ERROR] " .. err) end
-    wad:write(header)
-    wad:write(lumpchunk)
-    wad:write(dir)
-    wad:close()
-]]
+
     collectgarbage()
     self.raw = header .. lumpchunk .. dir
     self:gatherHeader()
@@ -1607,7 +1599,7 @@ function wad:buildPatches()
 
 			self.patches[p].notdoompatch = true
 		end
-
+        self:printf(2, "\tBuilding Patch: %s; Checksum: %s", self.patches[p].name, love.data.encode("string", "hex", self.patches[p].md5))
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
 	collectgarbage()
@@ -1788,8 +1780,6 @@ function wad:processTexturesX(num)
 			self.composites[c].dups = {}
 			self.composites[c].isdoomdup = false
 
-			self:printf(2, "\tFound Composite Texture: %s", self.composites[c].name)
-
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
 				for p = 1, self.composites[c].patchcount do
@@ -1822,11 +1812,13 @@ function wad:processTexturesX(num)
 			self.composites[c].png = self.composites[c].canvas:newImageData():encode("png"):getString()
 			self.composites[c].md5 = love.data.hash("md5", self.composites[c].png)
 
+            self:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", self.composites[c].name, love.data.encode("string", "hex", self.composites[c].md5))
+
 		end
 	self:printf(1, "\tFound '%d' composite textures.", numtextures)
 	else
 		--self.composites = self.base.composites
-		self:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
+		--self:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
 	end
 	collectgarbage()
 end
