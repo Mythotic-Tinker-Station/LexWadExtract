@@ -103,3 +103,5 @@
 
         Zandronum.exe -file "lexicon\pk3" -file "lexicon-base\pk3" 
    
+# Disclaimer
+This tool will allow one to extract full mapsets including most of their resources such as textures, sounds, sprites etc to be able to be placed in a mapset compliation easily. Please note that we are not resposible should you decide to use this tool in a way where you infringe on peoples permissions of a mapset. Some people may not give you permission to add their works into a compilation or to put it bluntly, to rip peoples work. Always get permission from the author before you extract their work!!!
