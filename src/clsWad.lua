@@ -1537,10 +1537,7 @@ function wad:processPalette()
 end
 
 function wad:buildPatches()
-
 	for p = 1, #self.patches do
-        self:printf(2, "\tBuilding Patch: %s", self.patches[p].name)
-
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
