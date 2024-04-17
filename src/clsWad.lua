@@ -2787,6 +2787,7 @@ function wad:extractSprites()
 		for s = 1, #self.sprites do
 			if(not self.sprites[s].isdoomdup) then
                 self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
+                self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
 				local png, err = io.open(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
 				if err then error("[ERROR] " .. err) end
                 self.sprites[s].png = self:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
