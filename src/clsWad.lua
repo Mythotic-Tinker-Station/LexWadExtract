@@ -711,18 +711,24 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
         end
         self.acronym = string.upper(acronym:sub(1, 4))
     end
+    
     if(acronym_sprite ~= nil) then 
         if(#acronym_sprite < 2) then
             error("Error: Sprite acronym must be 2 letters.")
          end
         self.acronym_sprite = string.upper(acronym_sprite:sub(1, 2))
     end
-    if(things ~= nil) then 
+
+    if(things ~= nil) then
         self.things = string.upper(things:sub(1, 1))
     end
+
+    if patches ~= nil then
+        self.extractpatches = string.upper(patches)
+    end
+
 	self.pk3path = pk3path
 	self.toolspath = toolspath
-	self.extractpatches = patches or false
 	self.spritesname = sprites
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
     self.palette = palette
@@ -896,7 +902,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self:printf(0, "Extracting Composites...")
 	self:extractTextures()
 
-	if(self.extractpatches) then
+	if(self.extractpatches == "Y") then
 		self:printf(0, "Extracting Patches...")
 		self:extractPatches()
 	else

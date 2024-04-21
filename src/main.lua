@@ -47,9 +47,17 @@ function removePadding(str)
 end
 
 function love.load(arg)
+    class = require("mod30log")
+    wad = require("clsWad")
 
-    print(arg[1], arg[2], arg[3], arg[4], arg[5], arg[6])
-
+    -- path stuff
+    local apppath = love.filesystem.getSourceBaseDirectory()
+    local pk3path = apppath ..  "/pk3"
+    local toolspath = apppath .. "/tools"
+    
+	-- start logging
+	local logpath = apppath .. "/logs/extract.txt"
+	logfile = io.open(logpath, "w+")
 -------------------------------------------------
     local startTime = os.time()
 
@@ -58,26 +66,22 @@ function love.load(arg)
 	love.graphics.setDefaultFilter("nearest", "nearest", 0)
 
     -- these are global because apparently the class library i use only allows 10 args for a method
-    nodelete = arg[5]
-    ctf = arg[6]
-
-    class = require("mod30log")
-    wad = require("clsWad")
-
-    -- some stuff
-    local apppath = love.filesystem.getSourceBaseDirectory()
-    local pk3path = apppath ..  "/pk3"
-    local toolspath = apppath .. "/tools"
-
-	-- start logging
-	local logpath = apppath .. "/logs/extract.txt"
-	logfile = io.open(logpath, "w+")
 
     -- get command line args
-    local acronym = arg[2]
     local pwad = apppath .. "/" .. arg[1]
+    local acronym = arg[2]
     local verbose = arg[3]
     local acronym_sprites = arg[4]
+    local things = arg[5]
+    local patches = arg[6]
+
+    wad:printf(0, "Options: ")
+    wad:printf(0, "\tpwad: %s", tostring(arg[i]))
+    wad:printf(0, "\tacronym: %s", tostring(acronym))
+    wad:printf(0, "\tverbose: %s", tostring(verbose))
+    wad:printf(0, "\tacronym_sprites: %s", tostring(acronym_sprites))
+    wad:printf(0, "\tthings: %s", tostring(things))
+    wad:printf(0, "\tpatches: %s", tostring(patches))
 
     local palette = nil
 
@@ -129,7 +133,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, palette, acronym, true, doom2, pk3path, toolspath, sprites, acronym_sprites, nodelete, ctf)
+    mapset = wad(verbose, pwad, palette, acronym, patches, doom2, pk3path, toolspath, sprites, acronym_sprites, things)
 
     local endTime = os.time();
 
