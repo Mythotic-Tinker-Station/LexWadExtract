@@ -1544,6 +1544,7 @@ end
 
 function wad:buildPatches()
 	for p = 1, #self.patches do
+        local t = "Patch"
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
@@ -1587,14 +1588,15 @@ function wad:buildPatches()
 			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
 			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
 		else
-
+            t = "PNG"
 			filedata = love.filesystem.newFileData(self.patches[p].data, "-")
 			self.patches[p].imagedata = love.image.newImageData(filedata)
 
 			self.patches[p].width = self.patches[p].imagedata:getWidth()
 			self.patches[p].height = self.patches[p].imagedata:getHeight()
-			self.patches[p].xoffset = 0
-			self.patches[p].yoffset = 0
+            local offx, offy = self:readGRAB(self.sprites[s].data) 
+			self.sprites[s].xoffset = offx or 0
+			self.sprites[s].yoffset = offy or 0
 
 			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
 			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
@@ -1602,7 +1604,7 @@ function wad:buildPatches()
 
 			self.patches[p].notdoompatch = true
 		end
-        self:printf(2, "\tBuilding Patch: %s; Checksum: %s", self.patches[p].name, love.data.encode("string", "hex", self.patches[p].md5))
+        self:printf(2, "\tBuilding Patch: %s; Type: %s; Size: %d, %d; Offsets: %d, %d; Checksum: %s", self.patches[p].name, t, self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset, love.data.encode("string", "hex", self.patches[p].md5))
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
 	collectgarbage()
@@ -1612,6 +1614,7 @@ end
 function wad:buildFlats()
 
 	for f = 1, #self.flats do
+        local t = "Flat"
 		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
             
 			self.flats[f].image = love.image.newImageData(64, 64)
@@ -1629,12 +1632,13 @@ function wad:buildFlats()
 			self.flats[f].png = self.flats[f].image:encode("png"):getString()
 			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
 		else
+            t = "PNG"
 			self.flats[f].png = self.flats[f].data
 			self.flats[f].image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(self.flats[f].png)))
 			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
 			self.flats[f].notdoomflat = true
 		end
-        self:printf(2, "\tBuilding Flat: %s; Checksum: %s", self.flats[f].name, love.data.encode("string", "hex", self.flats[f].md5))
+        self:printf(2, "\tBuilding Flat: %s; Type: %s; Checksum: %s", self.flats[f].name, t, love.data.encode("string", "hex", self.flats[f].md5))
 		self.flats[self.flats[f].name] = self.flats[f]
 	end
 
@@ -1646,7 +1650,7 @@ end
 function wad:buildSprites()
 
 	for s = 1, #self.sprites do
-
+        local t = "Sprite"
 		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
 			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
 			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
@@ -1690,14 +1694,15 @@ function wad:buildSprites()
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
 			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
 		else
-
+            t = "PNG"
 			filedata = love.filesystem.newFileData(self.sprites[s].data, "-")
 			self.sprites[s].imagedata = love.image.newImageData(filedata)
-
 			self.sprites[s].width = self.sprites[s].imagedata:getWidth()
 			self.sprites[s].height = self.sprites[s].imagedata:getHeight()
-			self.sprites[s].xoffset = 0
-			self.sprites[s].yoffset = 0
+
+            local offx, offy = self:readGRAB(self.sprites[s].data) 
+			self.sprites[s].xoffset = offx or 0
+			self.sprites[s].yoffset = offy or 0
 
 			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
@@ -1705,7 +1710,7 @@ function wad:buildSprites()
 
 			self.sprites[s].notdoompatch = true
 		end
-        self:printf(2, "\tBuilding Sprite: %s, Checksum: %s", self.sprites[s].name, love.data.encode("string", "hex", self.sprites[s].md5))
+        self:printf(2, "\tBuilding Sprite: %s; Type: %s; Size: %d, %d; Offsets: %d, %d;  Checksum: %s", self.sprites[s].name, t, self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset, love.data.encode("string", "hex", self.sprites[s].md5))
 
 		self.sprites[self.sprites[s].name] = self.sprites[s]
 	end
@@ -2729,7 +2734,7 @@ function wad:extractTextures()
 			for c = 1, #self.composites do
 				if(not self.composites[c].iszdoom) then
 					if(not self.composites[c].isdoomdup) then
-                        self:printf(2, "\tExtracting: %s", self.composites[c].newname)
+                        self:printf(2, "\tExtracting Composite: %s", self.composites[c].newname)
 						local png, err = io.open(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
 						if err then error("[ERROR] " .. err) end
 						png:write(self.composites[c].png)
@@ -3234,13 +3239,26 @@ function wad:findTexture(data, texture, tbl, pos)
 	return tbl
 end
 
-
+-- function that insert zdoom's grAb chunk in a png file, with x and y offset
 function wad:insertGRAB(data, xoff, yoff)
     local offsetdata = love.data.pack("string", ">c4i4i4", "grAb", xoff, yoff)
     local grAb = love.data.pack("string", ">I4c4i4i4I4", 8, "grAb", xoff, yoff, self:crc(offsetdata))
     return data:sub(1, 33) .. grAb .. data:sub(34)
 end
 
+-- function that read zdoom's grAb chunk in a png file, and return the x and y offset
+function wad:readGRAB(data)
+    local pos = 9
+    while pos < #data do
+        local size, chunk = love.data.unpack(">i4c4", data, pos)
+        if chunk == "grAb" then
+            local xoff = love.data.unpack(">i4", data, pos+8)
+            local yoff = love.data.unpack(">i4", data, pos+12)
+            return xoff, yoff
+        end
+        pos = pos + size + 12
+    end
+end
 
 -- CRC code found: https://stackoverflow.com/questions/34120322/converting-a-c-checksum-function-to-lua
 function wad:crc(data)

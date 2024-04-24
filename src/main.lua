@@ -76,7 +76,7 @@ function love.load(arg)
     local patches = arg[6]
 
     wad:printf(0, "Options: ")
-    wad:printf(0, "\tpwad: %s", tostring(arg[i]))
+    wad:printf(0, "\tpwad: %s", tostring(pwad))
     wad:printf(0, "\tacronym: %s", tostring(acronym))
     wad:printf(0, "\tverbose: %s", tostring(verbose))
     wad:printf(0, "\tacronym_sprites: %s", tostring(acronym_sprites))
