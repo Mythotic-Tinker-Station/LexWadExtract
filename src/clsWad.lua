@@ -2928,7 +2928,7 @@ function wad:extractAnimdefs()
 
 		local anim = ""
 		for a = 1, #self.animdefs.anims do
-			anim = string.format("%s%s %s range %s tics 8\n", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
+			anim = string.format("%s%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
 
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
@@ -2955,6 +2955,7 @@ function wad:extractAnimdefs()
 			if(self.animdefs.anims[a].decal) then
 				anim = string.format("%s %s", anim, self.animdefs.anims[a].decal)
 			end
+            anim = string.format("%s\n", anim)
 		end
 
 		local switch = ""
