@@ -1594,9 +1594,9 @@ function wad:buildPatches()
 
 			self.patches[p].width = self.patches[p].imagedata:getWidth()
 			self.patches[p].height = self.patches[p].imagedata:getHeight()
-            local offx, offy = self:readGRAB(self.sprites[s].data) 
-			self.sprites[s].xoffset = offx or 0
-			self.sprites[s].yoffset = offy or 0
+            local offx, offy = self:readGRAB(self.patches[p].data) 
+			self.patches[p].xoffset = offx or 0
+			self.patches[p].yoffset = offy or 0
 
 			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
 			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
@@ -1710,7 +1710,7 @@ function wad:buildSprites()
 
 			self.sprites[s].notdoompatch = true
 		end
-        self:printf(2, "\tBuilding Sprite: %s; Type: %s; Size: %d, %d; Offsets: %d, %d;  Checksum: %s", self.sprites[s].name, t, self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset, love.data.encode("string", "hex", self.sprites[s].md5))
+        self:printf(2, "\tBuilding Sprite: %s; Type: %s; Size: %d, %d; Offsets: %d, %d; Checksum: %s", self.sprites[s].name, t, self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset, love.data.encode("string", "hex", self.sprites[s].md5))
 
 		self.sprites[self.sprites[s].name] = self.sprites[s]
 	end
@@ -2147,7 +2147,6 @@ function wad:processTextLump(name)
 
 	return data
 end
-
 
 function wad:buildAnimdefs()
 	if(self.base ~= self) then
