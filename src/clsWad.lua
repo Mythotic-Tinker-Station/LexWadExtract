@@ -2970,13 +2970,16 @@ function wad:extractAnimdefs()
 			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
 		end
 
-		local file, err = io.open(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
-		if err then error("[ERROR] " .. err) end
-		file:write(anim)
-		file:write(switch)
-		file:write(self.animdefs.original)
-		file:close()
-
+        if #anim > 0 or #switch > 0 or #self.animdefs.original > 0 then
+            local file, err = io.open(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
+            if err then error("[ERROR] " .. err) end
+            file:write(anim)
+            file:write(switch)
+            file:write(self.animdefs.original)
+            file:close()
+        else
+            self:printf(1, "\tNo animations/switchs to define.\n")
+        end
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot extracting base wad animdefs.\n")
@@ -3009,11 +3012,14 @@ function wad:extractSNDINFO()
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
 		end
 
-		local file, err = io.open(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
-		if err then error("[ERROR] " .. err) end
-		file:write(txt)
-		file:close()
-
+        if #txt > 0 then
+            local file, err = io.open(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
+            if err then error("[ERROR] " .. err) end
+            file:write(txt)
+            file:close()
+        else
+            self:printf(1, "\tNo sounds to define.\n")
+        end
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot extracting base wad sndinfo.\n")
@@ -3065,11 +3071,14 @@ end
 function wad:extractTexturesLump()
 	if(self.base ~= self) then
 
-		local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
-		if err then error("[ERROR] " .. err) end
-		file:write(self.textures.original)
-		file:close()
-
+        if #self.textures.original > 0 then
+            local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
+            if err then error("[ERROR] " .. err) end
+            file:write(self.textures.original)
+            file:close()
+        else
+            self:printf(1, "\tNo textures.txt to define.\n")
+        end
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot extracting base wad TextureX.\n")
@@ -3090,6 +3099,7 @@ function wad:extractMapinfo()
 		file:close()
 
 		mapinfo = string.format('%s\ninclude "mapinfo/%s.txt"', mapinfo, self.acronym)
+
 		file, err = io.open(string.format("%s/mapinfo.txt", self.pk3path), "w")
 		if err then error("[ERROR] " .. err) end
 		file:write(mapinfo)
