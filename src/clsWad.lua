@@ -2486,7 +2486,7 @@ function wad:ModifyMaps()
 						actor2 = actor2 + 0
 						for t = 1, #self.maps[m].things do
 							if(self.maps[m].things[t].typ == actor1) then
-                                self:printf(2, "\t\t\tReplace Actor: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", self.maps[m].things[t].x, self.maps[m].things[t].y, self.maps[m].things[t].angle, self.maps[m].things[t].flags, actor1, actor2)
+                                self:printf(2, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, self.maps[m].things[t].x, self.maps[m].things[t].y, self.maps[m].things[t].angle, self.maps[m].things[t].flags, actor1, actor2)
                                 self.maps[m].things[t].typ = actor2
 							end
 						end
@@ -2505,19 +2505,19 @@ function wad:ModifyMaps()
 						for s = 1, #self.maps[m].sidedefs do
 
 							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.composites[c].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.composites[c].newname)
 								self.maps[m].sidedefs[s].upper_texture = self.composites[c].newname
 								self.composites[c].used = true
 							end
 
 							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.composites[c].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.composites[c].newname)
 								self.maps[m].sidedefs[s].lower_texture = self.composites[c].newname
 								self.composites[c].used = true
 							end
 
 							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.composites[c].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.composites[c].newname)
 								self.maps[m].sidedefs[s].middle_texture = self.composites[c].newname
 								self.composites[c].used = true
 							end
@@ -2526,12 +2526,12 @@ function wad:ModifyMaps()
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.composites[c].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.composites[c].newname)
 								self.maps[m].sectors[ss].floor_texture = self.composites[c].newname
 								self.composites[c].used = true
 							end
 							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.composites[c].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.composites[c].newname)
 								self.maps[m].sectors[ss].ceiling_texture = self.composites[c].newname
 								self.composites[c].used = true
 							end
@@ -2540,15 +2540,15 @@ function wad:ModifyMaps()
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
 							if(self.maps[m].sidedefs[s].upper_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' upper texture %s", s, self.composites[c].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d upper texture %s", s, self.composites[c].doomdup)
 								self.maps[m].sidedefs[s].upper_texture = self.composites[c].doomdup
 							end
 							if(self.maps[m].sidedefs[s].lower_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' lower texture %s", s, self.composites[c].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d lower texture %s", s, self.composites[c].doomdup)
 								self.maps[m].sidedefs[s].lower_texture = self.composites[c].doomdup
 							end
 							if(self.maps[m].sidedefs[s].middle_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' middle texture %s", s, self.composites[c].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d middle texture %s", s, self.composites[c].doomdup)
 								self.maps[m].sidedefs[s].middle_texture = self.composites[c].doomdup
 							end
 						end
@@ -2556,11 +2556,11 @@ function wad:ModifyMaps()
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[ss].floor_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' floor texture %s", ss, self.composites[c].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d floor texture %s", ss, self.composites[c].doomdup)
 								self.maps[m].sectors[ss].floor_texture = self.composites[c].doomdup
 							end
 							if(self.maps[m].sectors[ss].ceiling_texture == self.composites[c].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' ceiling texture %s", ss, self.composites[c].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d ceiling texture %s", ss, self.composites[c].doomdup)
 								self.maps[m].sectors[ss].ceiling_texture = self.composites[c].doomdup
 							end
 						end
@@ -2575,17 +2575,17 @@ function wad:ModifyMaps()
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
 							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.flats[f].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.flats[f].newname)
 								self.maps[m].sidedefs[s].upper_texture = self.flats[f].newname
 								self.flats[f].used = true
 							end
 							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.flats[f].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.flats[f].newname)
 								self.maps[m].sidedefs[s].lower_texture = self.flats[f].newname
 								self.flats[f].used = true
 							end
 							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.flats[f].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.flats[f].newname)
 								self.maps[m].sidedefs[s].middle_texture = self.flats[f].newname
 								self.flats[f].used = true
 							end
@@ -2594,12 +2594,12 @@ function wad:ModifyMaps()
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[ss].floor_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.flats[f].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.flats[f].newname)
 								self.maps[m].sectors[ss].floor_texture = self.flats[f].newname
 								self.flats[f].used = true
 							end
 							if(self.maps[m].sectors[ss].ceiling_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.flats[f].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.flats[f].newname)
 								self.maps[m].sectors[ss].ceiling_texture = self.flats[f].newname
 								self.flats[f].used = true
 							end
@@ -2608,26 +2608,26 @@ function wad:ModifyMaps()
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
 							if(self.maps[m].sidedefs[s].upper_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' upper texture %s", s, self.flats[f].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d upper texture %s", s, self.flats[f].doomdup)
 								self.maps[m].sidedefs[s].upper_texture = self.flats[f].doomdup
 							end
 							if(self.maps[m].sidedefs[s].lower_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' lower texture %s", s, self.flats[f].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d lower texture %s", s, self.flats[f].doomdup)
 								self.maps[m].sidedefs[s].lower_texture = self.flats[f].doomdup
 							end
 							if(self.maps[m].sidedefs[s].middle_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' middle texture %s", s, self.flats[f].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d middle texture %s", s, self.flats[f].doomdup)
 								self.maps[m].sidedefs[s].middle_texture = self.flats[f].doomdup
 							end
 						end
 
 						for ss = 1, #self.maps[m].sectors do
                             if(self.maps[m].sectors[ss].floor_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' floor texture %s", ss, self.flats[f].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d floor texture %s", ss, self.flats[f].doomdup)
                                 self.maps[m].sectors[ss].floor_texture = self.flats[f].doomdup
                             end
                             if(self.maps[m].sectors[ss].ceiling_texture == self.flats[f].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' ceiling texture %s", ss, self.flats[f].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d ceiling texture %s", ss, self.flats[f].doomdup)
                                 self.maps[m].sectors[ss].ceiling_texture = self.flats[f].doomdup
                             end
 						end
@@ -2642,17 +2642,17 @@ function wad:ModifyMaps()
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
 							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.patches[p].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, self.maps[m].sidedefs[s].upper_texture, self.patches[p].newname)
 								self.maps[m].sidedefs[s].upper_texture = self.patches[p].newname
 								self.patches[p].used = true
 							end
 							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.patches[p].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, self.maps[m].sidedefs[s].lower_texture, self.patches[p].newname)
 								self.maps[m].sidedefs[s].lower_texture = self.patches[p].newname
 								self.patches[p].used = true
 							end
 							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tReplacing sidedef '%d' middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.patches[p].newname)
+                                self:printf(2, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, self.maps[m].sidedefs[s].middle_texture, self.patches[p].newname)
 								self.maps[m].sidedefs[s].middle_texture = self.patches[p].newname
 								self.patches[p].used = true
 							end
@@ -2661,12 +2661,12 @@ function wad:ModifyMaps()
 						-- floors
 						for ss = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.patches[p].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, self.maps[m].sectors[ss].floor_texture, self.patches[p].newname)
 								self.maps[m].sectors[ss].floor_texture = self.patches[p].newname
 								self.patches[p].used = true
 							end
 							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tReplacing sector '%d' ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.patches[p].newname)
+                                self:printf(2, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, self.maps[m].sectors[ss].ceiling_texture, self.patches[p].newname)
 								self.maps[m].sectors[ss].ceiling_texture = self.patches[p].newname
 								self.patches[p].used = true
 							end
@@ -2675,26 +2675,26 @@ function wad:ModifyMaps()
 						-- walls
 						for s = 1, #self.maps[m].sidedefs do
 							if(self.maps[m].sidedefs[s].upper_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' upper texture %s", s, self.patches[p].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d upper texture %s", s, self.patches[p].doomdup)
 								self.maps[m].sidedefs[s].upper_texture = self.patches[p].doomdup
 							end
 							if(self.maps[m].sidedefs[s].lower_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' lower texture %s", s, self.patches[p].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d lower texture %s", s, self.patches[p].doomdup)
 								self.maps[m].sidedefs[s].lower_texture = self.patches[p].doomdup
 							end
 							if(self.maps[m].sidedefs[s].middle_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tKeeping sidedef '%d' middle texture %s", s, self.patches[p].doomdup)
+                                self:printf(2, "\t\t\tKeeping sidedef #%d middle texture %s", s, self.patches[p].doomdup)
 								self.maps[m].sidedefs[s].middle_texture = self.patches[p].doomdup
 							end
 						end
 
 						for ss = 1, #self.maps[m].sectors do
 							if(self.maps[m].sectors[ss].floor_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' floor texture %s", ss, self.patches[p].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d floor texture %s", ss, self.patches[p].doomdup)
 								self.maps[m].sectors[ss].floor_texture = self.patches[p].doomdup
 							end
 							if(self.maps[m].sectors[ss].ceiling_texture == self.patches[p].name) then
-                                self:printf(2, "\t\t\tKeeping sector '%d' ceiling texture %s", ss, self.patches[p].doomdup)
+                                self:printf(2, "\t\t\tKeeping sector #%d ceiling texture %s", ss, self.patches[p].doomdup)
 								self.maps[m].sectors[ss].ceiling_texture = self.patches[p].doomdup
 							end
 						end
