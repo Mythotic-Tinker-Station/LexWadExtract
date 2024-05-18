@@ -56,7 +56,12 @@ function love.load(arg)
     local toolspath = apppath .. "/tools"
     
 	-- start logging
-	local logpath = apppath .. "/logs/extract.txt"
+    local date = os.date("%c")
+    date = date:gsub(" ", "_")
+    date = date:gsub(":", "-")
+    date = date:gsub("/", "-")
+	local logpath = apppath .. string.format("/logs/%s_%s.txt", arg[1], date)
+    print("Log path: " .. logpath)
 	logfile = io.open(logpath, "w+")
 -------------------------------------------------
     local startTime = os.time()
