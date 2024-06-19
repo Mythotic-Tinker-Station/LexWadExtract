@@ -3,13 +3,13 @@
 echo Mapset Acronym:
 echo 	Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-set acronym="epic"
+set acronym="TART"
 echo ---------------------------------------------------------------------------------------------
 
 echo Sprite Acronym:
 echo 	Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-set acronym_sprite="ep"
+set acronym_sprite="TT"
 echo ---------------------------------------------------------------------------------------------
 
 echo Actor replacement:
@@ -20,7 +20,7 @@ echo ---------------------------------------------------------------------------
 
 echo Wad File Name:
 echo 	Wad files can be placed in same folder, just the filename is required.
-set wad="epic.wad"
+set wad="Tartaru5.wad"
 echo ---------------------------------------------------------------------------------------------
 
 echo Patch Extraction:

@@ -664,7 +664,7 @@ local wad = class("wad",
 		},
 		["TX"] =
 		{
-			name = "textures",
+			name = "patches",
 			lumps = {},
 		},
 		["PP"] =
@@ -845,8 +845,9 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self:printf(1, "\tDone.\n")
 
     -- simply just extract png files
-	self:printf(0, "Processing Zdoom Textures...")
-	self:moveZDoomTextures()
+    -- we no longer use this as zdoom textures namespace is now merged with patches
+    --self:printf(0, "Processing Zdoom Textures...")
+	--self:moveZDoomTextures()
 
     -- find and remove duplicate files by md5 hash
 	self:printf(0, "Processing Duplicates...")
@@ -2782,7 +2783,7 @@ function wad:extractTextures()
 	if(self.base ~= self) then
 		if(#self.composites > 0) then
 			for c = 1, #self.composites do
-				if(not self.composites[c].iszdoom) then
+			    if(not self.composites[c].iszdoom) then
 					if(not self.composites[c].isdoomdup) then
                         self:printf(2, "\tExtracting Composite: %s", self.composites[c].newname)
 						local png, err = io.open(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
