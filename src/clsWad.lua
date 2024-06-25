@@ -1547,12 +1547,13 @@ function wad:buildPatches()
 	for p = 1, #self.patches do
         local t = "Patch"
 		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
-            self:printf(2, "\tBuilding Patch: %s; Type: %s", self.patches[p].name, t)
+            self:printfNoNewLine(2, "\tBuilding Patch: %s; Type: %s; ", self.patches[p].name, t)
 			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
 			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
 			self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
 			self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
 			self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
+            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset)
 			self.patches[p].columns = {}
 
 			for c = 1, self.patches[p].width do
@@ -1575,9 +1576,13 @@ function wad:buildPatches()
 					end
 
 					local length = love.data.unpack("<B", self.patches[p].data, post+1)
+                    if self.patches[p].height == 256 then
+                        length = 256
+                    end
+                    
 					local data = self.patches[p].data:sub(post+3, post+3+length)
 
-					for pixel = 1, length do
+					for pixel = 1, length-1 do
 						local color = love.data.unpack("<B", data, pixel)+1
 						self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
@@ -1589,9 +1594,10 @@ function wad:buildPatches()
 			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
 			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
 			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.patches[p].md5))
 		else
             t = "PNG"
-            self:printf(2, "\tBuilding Patch: %s; Type: %s", self.patches[p].name, t)
+            self:printfNoNewLine(2, "\tBuilding Patch: %s; Type: %s ", self.patches[p].name, t)
 			filedata = love.filesystem.newFileData(self.patches[p].data, "-")
 			self.patches[p].imagedata = love.image.newImageData(filedata)
 
@@ -1600,14 +1606,14 @@ function wad:buildPatches()
             local offx, offy = self:readGRAB(self.patches[p].data) 
 			self.patches[p].xoffset = offx or 0
 			self.patches[p].yoffset = offy or 0
+            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset) 
 
 			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
 			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
 			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
-
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.patches[p].md5))
 			self.patches[p].notdoompatch = true
 		end
-        self:printf(2, "\t\tPatch Complete: %s; Type: %s; Size: %d, %d; Offsets: %d, %d; Checksum: %s", self.patches[p].name, t, self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset, love.data.encode("string", "hex", self.patches[p].md5))
 		self.patches[self.patches[p].name] = self.patches[p]
 	end
 	collectgarbage()
@@ -1618,7 +1624,7 @@ function wad:buildFlats()
 	for f = 1, #self.flats do
         local t = "Flat"
 		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
-            self:printf(2, "\tBuilding Flat: %s; Type: %s", self.flats[f].name, t)
+            self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", self.flats[f].name, t)
 			self.flats[f].image = love.image.newImageData(64, 64)
 			self.flats[f].rows = {}
 
@@ -1633,15 +1639,16 @@ function wad:buildFlats()
 
 			self.flats[f].png = self.flats[f].image:encode("png"):getString()
 			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.flats[f].md5))
 		else
             t = "PNG"
-            self:printf(2, "\tBuilding Flat: %s; Type: %s", self.flats[f].name, t)
+            self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", self.flats[f].name, t)
 			self.flats[f].png = self.flats[f].data
 			self.flats[f].image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(self.flats[f].png)))
 			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.flats[f].md5))
 			self.flats[f].notdoomflat = true
 		end
-        self:printf(2, "\tFlat Complete: %s; Type: %s; Checksum: %s", self.flats[f].name, t, love.data.encode("string", "hex", self.flats[f].md5))
 		self.flats[self.flats[f].name] = self.flats[f]
 	end
 
@@ -1655,12 +1662,13 @@ function wad:buildSprites()
 	for s = 1, #self.sprites do
         local t = "Sprite"
 		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
-            self:printf(2, "\tBuilding Sprite: %s; Type: %s", self.sprites[s].name, t)
+            self:printfNoNewLine(2, "\tBuilding Sprite: %s; Type: %s ", self.sprites[s].name, t)
 			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
 			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
 			self.sprites[s].xoffset = love.data.unpack("<h", self.sprites[s].data, 5)
 			self.sprites[s].yoffset = love.data.unpack("<h", self.sprites[s].data, 7)
 			self.sprites[s].imagedata = love.image.newImageData(self.sprites[s].width, self.sprites[s].height)
+            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset)
 			self.sprites[s].columns = {}
 
 			for c = 1, self.sprites[s].width do
@@ -1697,6 +1705,7 @@ function wad:buildSprites()
 			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
 			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.sprites[s].md5))
 		else
             t = "PNG"
             self:printf(2, "\tBuilding Sprite: %s; Type: %s", self.sprites[s].name, t)
@@ -1708,15 +1717,13 @@ function wad:buildSprites()
             local offx, offy = self:readGRAB(self.sprites[s].data) 
 			self.sprites[s].xoffset = offx or 0
 			self.sprites[s].yoffset = offy or 0
-
+            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset)
 			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
 			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
 			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
-
+            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.sprites[s].md5))
 			self.sprites[s].notdoompatch = true
 		end
-        self:printf(2, "\tSprite Complete: %s; Type: %s; Size: %d, %d; Offsets: %d, %d; Checksum: %s", self.sprites[s].name, t, self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset, love.data.encode("string", "hex", self.sprites[s].md5))
-
 		self.sprites[self.sprites[s].name] = self.sprites[s]
 	end
 	collectgarbage()
@@ -3226,15 +3233,31 @@ function wad:flagsEx(v, ...)
 end
 
 function wad:printf(verbose, ...)
+    local str = string.format(...) .. "\n"
     if(self.base ~= self) then
         if(verbose <= self.verbose) then
-            print(string.format(...))
-            logfile:write(string.format(...) .. "\n")
+            printNoNewLine(str)
+            logfile:write(str)
         end
     else
         if(verbose <= self.verbose and self.verbose >= 3) then
-            print(string.format(...))
-            logfile:write(string.format(...) .. "\n")
+            printNoNewLine(str)
+            logfile:write(str)
+        end
+    end
+end
+
+function wad:printfNoNewLine(verbose, ...)
+    local str = string.format(...)
+    if(self.base ~= self) then
+        if(verbose <= self.verbose) then
+            printNoNewLine(str)
+            logfile:write(str)
+        end
+    else
+        if(verbose <= self.verbose and self.verbose >= 3) then
+            printNoNewLine(str)
+            logfile:write(str)
         end
     end
 end
