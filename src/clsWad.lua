@@ -1576,6 +1576,8 @@ function wad:buildPatches()
 					end
 
 					local length = love.data.unpack("<B", self.patches[p].data, post+1)
+
+                    -- 256 height fix
                     if self.patches[p].height == 256 then
                         length = 256
                     end
@@ -1691,9 +1693,14 @@ function wad:buildSprites()
 					end
 
 					local length = love.data.unpack("<B", self.sprites[s].data, post+1)
+                    -- 256 height fix
+                    if self.patches[p].height == 256 then
+                        length = 256
+                    end
+
 					local data = self.sprites[s].data:sub(post+3, post+3+length)
 
-					for pixel = 1, length do
+					for pixel = 1, length-1 do
 						local color = love.data.unpack("<B", data, pixel)+1
 						self.sprites[s].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
