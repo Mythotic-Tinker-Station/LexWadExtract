@@ -254,12 +254,11 @@ function love.errorhandler(msg)
 
 	local p = table.concat(err, "\n")
 
-    logfile:write(p)
-    logfile:close()
-
 	p = p:gsub("\t", "")
 	p = p:gsub("%[string \"(.-)\"%]", "%1")
 
+    logfile:write(p)
+    logfile:close()
 	local function draw()
 		if not love.graphics.isActive() then return end
 		local pos = 70
