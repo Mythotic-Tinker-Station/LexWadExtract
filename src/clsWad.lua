@@ -1694,7 +1694,7 @@ function wad:buildSprites()
 
 					local length = love.data.unpack("<B", self.sprites[s].data, post+1)
                     -- 256 height fix
-                    if self.patches[p].height == 256 then
+                    if self.sprites[s].height == 256 then
                         length = 256
                     end
 

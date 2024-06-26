@@ -66,3 +66,4 @@ echo "Error: Connot find %wad%"
 pause
 
 :30
+pause

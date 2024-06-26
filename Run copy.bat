@@ -3,7 +3,7 @@
 echo Mapset Acronym:
 echo 	Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-set acronym="TART"
+set acronym="JPCP"
 echo ---------------------------------------------------------------------------------------------
 
 echo Sprite Acronym:
@@ -20,7 +20,7 @@ echo ---------------------------------------------------------------------------
 
 echo Wad File Name:
 echo 	Wad files can be placed in same folder, just the filename is required.
-set wad="Tartaru5.wad"
+set wad="JPCP.wad"
 echo ---------------------------------------------------------------------------------------------
 
 echo Patch Extraction:
