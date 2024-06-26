@@ -1560,33 +1560,33 @@ function wad:buildPatches()
 
 				self.patches[p].columns[c] = love.data.unpack("<i4", self.patches[p].data, 9+((c-1)*4))
 
-				local topdelta = 0
+				local row = 0
 				local post = self.patches[p].columns[c]+1
 
-				while(topdelta ~= 0xFF) do
+				while(row ~= 0xFF) do
 
-					local topdelta_prev = topdelta
+					local top = row
 
-					topdelta = love.data.unpack("<B", self.patches[p].data, post)
-					if(topdelta == 0xFF) then break end
+					row = love.data.unpack("<B", self.patches[p].data, post)
+					if(row == 0xFF) then break end
 
 					-- tall patches
-					if(topdelta <= topdelta_prev) then
-						topdelta = topdelta+topdelta_prev
+					if(row <= top) then
+						row = row+top
 					end
 
 					local length = love.data.unpack("<B", self.patches[p].data, post+1)
 
                     -- 256 height fix
                     if self.patches[p].height == 256 then
-                        length = 256
+                        length = 255
                     end
                     
 					local data = self.patches[p].data:sub(post+3, post+3+length)
 
-					for pixel = 1, length-1 do
+					for pixel = 1, length do
 						local color = love.data.unpack("<B", data, pixel)+1
-						self.patches[p].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+						self.patches[p].imagedata:setPixel(c-1, row+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
 
 					post = post+4+length
@@ -1677,19 +1677,19 @@ function wad:buildSprites()
 
 				self.sprites[s].columns[c] = love.data.unpack("<i4", self.sprites[s].data, 9+((c-1)*4))
 
-				local topdelta = 0
+				local row = 0
 				local post = self.sprites[s].columns[c]+1
 
-				while(topdelta ~= 0xFF) do
+				while(row ~= 0xFF) do
 
-					local topdelta_prev = topdelta
+					local top = row
 
-					topdelta = love.data.unpack("<B", self.sprites[s].data, post)
-					if(topdelta == 0xFF) then break end
+					row = love.data.unpack("<B", self.sprites[s].data, post)
+					if(row == 0xFF) then break end
 
 					-- tall sprites
-					if(topdelta <= topdelta_prev) then
-						topdelta = topdelta+topdelta_prev
+					if(row <= top) then
+						row = row+top
 					end
 
 					local length = love.data.unpack("<B", self.sprites[s].data, post+1)
@@ -1702,7 +1702,7 @@ function wad:buildSprites()
 
 					for pixel = 1, length-1 do
 						local color = love.data.unpack("<B", data, pixel)+1
-						self.sprites[s].imagedata:setPixel(c-1, topdelta+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+						self.sprites[s].imagedata:setPixel(c-1, row+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
 					end
 
 					post = post+4+length
