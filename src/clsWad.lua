@@ -1556,9 +1556,27 @@ function wad:buildPatches()
             self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset)
 			self.patches[p].columns = {}
 
-			for c = 1, self.patches[p].width do
+            for c = 1, self.patches[p].width do
+				self.patches[p].columns[c] = love.data.unpack("<i4", self.patches[p].data, 9+((c-1)*4))      
+            end
 
-				self.patches[p].columns[c] = love.data.unpack("<i4", self.patches[p].data, 9+((c-1)*4))
+            local pleiadeshack = false
+            if self.patches[p].height == 256 then
+
+                pleiadeshack = true
+                for c = 2, self.patches[p].width do
+
+                    if self.patches[p].columns[c] - self.patches[p].columns[c-1] ~= 261 then
+                        pleiadeshack = false
+                        break;
+                    end
+                end
+                if #self.patches[p].data - self.patches[p].columns[self.patches[p].width] ~= 261 then
+                    pleiadeshack = false;
+                end
+            end
+
+			for c = 1, self.patches[p].width do
 
 				local row = 0
 				local post = self.patches[p].columns[c]+1
@@ -1578,7 +1596,7 @@ function wad:buildPatches()
 					local length = love.data.unpack("<B", self.patches[p].data, post+1)
 
                     -- 256 height fix
-                    if self.patches[p].height == 256 then
+                    if pleiadeshack then
                         length = 255
                     end
                     
@@ -1673,9 +1691,27 @@ function wad:buildSprites()
             self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset)
 			self.sprites[s].columns = {}
 
-			for c = 1, self.sprites[s].width do
+            for c = 1, self.sprites[s].width do
+				self.sprites[s].columns[c] = love.data.unpack("<i4", self.sprites[s].data, 9+((c-1)*4))      
+            end
 
-				self.sprites[s].columns[c] = love.data.unpack("<i4", self.sprites[s].data, 9+((c-1)*4))
+            local pleiadeshack = false
+            if self.sprites[s].height == 256 then
+
+                pleiadeshack = true
+                for c = 2, self.sprites[s].width do
+
+                    if self.sprites[s].columns[s] - self.sprites[s].columns[c-1] ~= 261 then
+                        pleiadeshack = false
+                        break;
+                    end
+                end
+                if #self.sprites[s].data - self.sprites[s].columns[self.sprites[s].width] ~= 261 then
+                    pleiadeshack = false;
+                end
+            end
+            
+			for c = 1, self.sprites[s].width do
 
 				local row = 0
 				local post = self.sprites[s].columns[c]+1
