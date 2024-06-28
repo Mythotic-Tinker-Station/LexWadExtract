@@ -1365,7 +1365,7 @@ function wad:buildNamespaces()
 
 		-- get file meta data
 		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(l*16))
-		name = self:removePadding(name)
+		name = string.upper(self:removePadding(name))
 		filepos = filepos+1
         
 		-- get file data
@@ -2387,9 +2387,9 @@ function wad:processMaps()
 					self.maps[m].sidedefs[count] = {}
 					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
 					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4))
-					self.maps[m].sidedefs[count].lower_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12))
-					self.maps[m].sidedefs[count].middle_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20))
+					self.maps[m].sidedefs[count].upper_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
+					self.maps[m].sidedefs[count].lower_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
+					self.maps[m].sidedefs[count].middle_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
 					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
 				end
 
@@ -2411,8 +2411,8 @@ function wad:processMaps()
 					self.maps[m].sectors[count] = {}
 					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
 					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4))
-					self.maps[m].sectors[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12))
+					self.maps[m].sectors[count].floor_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
+					self.maps[m].sectors[count].ceiling_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
 					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
@@ -2469,9 +2469,9 @@ function wad:processMaps()
 					self.maps[m].sidedefs[count] = {}
 					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
 					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4))
-					self.maps[m].sidedefs[count].lower_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12))
-					self.maps[m].sidedefs[count].middle_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20))
+					self.maps[m].sidedefs[count].upper_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
+					self.maps[m].sidedefs[count].lower_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
+					self.maps[m].sidedefs[count].middle_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
 					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
 				end
 
@@ -2493,8 +2493,8 @@ function wad:processMaps()
 					self.maps[m].sectors[count] = {}
 					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
 					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4))
-					self.maps[m].sectors[count].ceiling_texture = self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12))
+					self.maps[m].sectors[count].floor_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
+					self.maps[m].sectors[count].ceiling_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
 					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
