@@ -900,15 +900,11 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
 	self:printf(0, "Extracting Flats...")
 	self:extractFlats()
 
+	self:printf(0, "Extracting Patches...")
+	self:extractPatches()
+
 	self:printf(0, "Extracting Composites...")
 	self:extractTextures()
-
-	if(self.extractpatches == "Y") then
-		self:printf(0, "Extracting Patches...")
-		self:extractPatches()
-	else
-		self:printf(0, "Skipping Patches...")
-	end
 
 	self:printf(0, "Extracting Sprites...")
 	self:extractSprites()
@@ -1844,38 +1840,37 @@ function wad:processTexturesX(num)
 
 			-- mappatch_t
 			love.graphics.setCanvas(self.composites[c].canvas)
-				for p = 1, self.composites[c].patchcount do
-					self.composites[c].patches[p] = {}
-					self.composites[c].patches[p].x = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10))
-					self.composites[c].patches[p].y = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+2)
-					self.composites[c].patches[p].patch = self.pnames[love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+4)+1]
-					self.composites[c].patches[p].stepdir = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+6)
-					self.composites[c].patches[p].colormap = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+8)
+			for p = 1, self.composites[c].patchcount do
+				self.composites[c].patches[p] = {}
+				self.composites[c].patches[p].x = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10))
+				self.composites[c].patches[p].y = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+2)
+				self.composites[c].patches[p].patch = self.pnames[love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+4)+1]
+				self.composites[c].patches[p].stepdir = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+6)
+				self.composites[c].patches[p].colormap = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+8)
 
-					-- patches
-					if(self.patches[self.composites[c].patches[p].patch] == nil) then
-						local notfound = true
-						if(self.base.patches[self.composites[c].patches[p].patch] ~= nil) then
-							love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
-							notfound = false
-						end
-
-						-- flats
-						if(notfound) then
-							--love.graphics.draw(self.flats[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
-						end
-					else
-						love.graphics.draw(self.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+				-- patches
+				if(self.patches[self.composites[c].patches[p].patch] == nil) then
+					local notfound = true
+					if(self.base.patches[self.composites[c].patches[p].patch] ~= nil) then
+						love.graphics.draw(self.base.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+						notfound = false
 					end
 
+					-- flats
+					if(notfound) then
+						--love.graphics.draw(self.flats[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
+					end
+				else
+					love.graphics.draw(self.patches[self.composites[c].patches[p].patch].image, self.composites[c].patches[p].x, self.composites[c].patches[p].y)
 				end
+
+			end
 			love.graphics.setCanvas()
 
 			self.composites[c].png = self.composites[c].canvas:newImageData():encode("png"):getString()
 			self.composites[c].md5 = love.data.hash("md5", self.composites[c].png)
 
             self:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", self.composites[c].name, love.data.encode("string", "hex", self.composites[c].md5))
-
 		end
 	self:printf(1, "\tFound '%d' composite textures.", numtextures)
 	else
@@ -2828,30 +2823,36 @@ function wad:ModifyMaps()
 	self:printf(1, "\tDone.\n")
 end
 
-
 function wad:extractTextures()
 	if(self.base ~= self) then
-		if(#self.composites > 0) then
-			for c = 1, #self.composites do
-			    if(not self.composites[c].iszdoom) then
-					if(not self.composites[c].isdoomdup) then
-                        self:printf(2, "\tExtracting Composite: %s", self.composites[c].newname)
-						local png, err = io.open(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
-						if err then error("[ERROR] " .. err) end
-						png:write(self.composites[c].png)
-						png:close()
+		local texturesStr = ""
+
+		for c = 1, #self.composites do
+			local composite = self.composites[c]
+
+			if (composite.patchcount > 0) then
+				if (not composite.iszdoom) then
+					if (not composite.isdoomdup) then
+						self:printf(2, "\tExtracting Composite: %s", composite.newname)
+
+						texturesStr = string.format("%s%s", texturesStr, self:createTextureDefinition(composite))
 					end
 				else
-                    self:printf(2, "\tExtracting Texture: %s", self.composites[c].newname)
-					local png, err = io.open(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(self.composites[c].newname)), "w+b")
-					if err then error("[ERROR] " .. err) end
-					png:write(self.composites[c].raw)
-					png:close()
+					self:printf(2, "\tExtracting Texture: %s", composite.newname)
+
+					texturesStr = string.format("%s%s", texturesStr, self:createTextureDefinition(composite))
 				end
 			end
 		end
-		collectgarbage()
-		self:printf(1, "\tDone.\n")
+
+		if #texturesStr > 0 then
+			local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
+			if err then error("[ERROR] " .. err) end
+			file:write(texturesStr)
+			file:close()
+		else
+			self:printf(1, "\tNo textures to define.\n")
+		end
 	else
 		self:printf(1, "\tNot extracting base wad composites.\n")
 	end
@@ -3366,6 +3367,24 @@ function wad:findTexture(data, texture, tbl, pos)
 	return tbl
 end
 
+-- Creates a WallTexture definition for TEXTURES
+function wad:createTextureDefinition(composite)
+	local textureDef = string.format("WallTexture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height)
+
+	for p = 1, composite.patchcount do
+		local compositePatch = composite.patches[p]
+		local newPatchData = self.patches[compositePatch.patch]
+		local oldPatchData = self.base.patches[compositePatch.patch]
+		local patchName = (newPatchData and newPatchData.newname) or (oldPatchData and oldPatchData.name)
+
+		if (patchName) then
+			textureDef = string.format("%s	Patch \"%s\", %d, %d\n", textureDef, patchName, compositePatch.x, compositePatch.y)
+		end
+	end
+
+	return string.format("%s}\n\n", textureDef)
+end
+
 -- function that insert zdoom's grAb chunk in a png file, with x and y offset
 function wad:insertGRAB(data, xoff, yoff)
     local offsetdata = love.data.pack("string", ">c4i4i4", "grAb", xoff, yoff)
@@ -3409,7 +3428,6 @@ function wad:ByteCRC(sum, data)
     end
     return sum
 end
-
 
 function wad:checkFormat(data, magic, offset, bigendian)
 	offset = offset or 1
