@@ -820,7 +820,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- read doom's patch image format, with the loaded palette
     -- turn patches into pngs
 	self:printf(0, "Processing Patches...")
-	self:buildPatches()
+	self:buildImages(self.patches, "Patch")
 
     -- read doom's patch image format, with the loaded palette
     -- turn flats into pngs
@@ -830,7 +830,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- read doom's patch image format, with the loaded palette
     -- turn sprites into pngs
 	self:printf(0, "Processing Sprites...")
-	self:buildSprites()
+	self:buildImages(self.sprites, "Sprite")
 
     -- read doom's PNAMES definition lump
 	self:printf(0, "Processing PNAMES...")
@@ -1539,235 +1539,140 @@ function wad:processPalette()
 	self:printf(1, "\tDone.\n")
 end
 
-function wad:buildPatches()
-	for p = 1, #self.patches do
-        local t = "Patch"
-		if(not self:checkFormat(self.patches[p].data, "PNG", 2, true)) then
-            self:printfNoNewLine(2, "\tBuilding Patch: %s; Type: %s; ", self.patches[p].name, t)
-			self.patches[p].width = love.data.unpack("<H", self.patches[p].data)
-			self.patches[p].height = love.data.unpack("<H", self.patches[p].data, 3)
-			self.patches[p].xoffset = love.data.unpack("<h", self.patches[p].data, 5)
-			self.patches[p].yoffset = love.data.unpack("<h", self.patches[p].data, 7)
-			self.patches[p].imagedata = love.image.newImageData(self.patches[p].width, self.patches[p].height)
-            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset)
-			self.patches[p].columns = {}
-
-            for c = 1, self.patches[p].width do
-				self.patches[p].columns[c] = love.data.unpack("<i4", self.patches[p].data, 9+((c-1)*4))      
-            end
-
-            local pleiadeshack = false
-            if self.patches[p].height == 256 then
-
-                pleiadeshack = true
-                for c = 2, self.patches[p].width do
-
-                    if self.patches[p].columns[c] - self.patches[p].columns[c-1] ~= 261 then
-                        pleiadeshack = false
-                        break;
-                    end
-                end
-                if #self.patches[p].data - self.patches[p].columns[self.patches[p].width] ~= 261 then
-                    pleiadeshack = false;
-                end
-            end
-
-			for c = 1, self.patches[p].width do
-
-				local row = 0
-				local post = self.patches[p].columns[c]+1
-
-				while(row ~= 0xFF) do
-
-					local top = row
-
-					row = love.data.unpack("<B", self.patches[p].data, post)
-					if(row == 0xFF) then break end
-
-					-- tall patches
-					if(row <= top) then
-						row = row+top
-					end
-
-					local length = love.data.unpack("<B", self.patches[p].data, post+1)
-
-                    -- 256 height fix
-                    if pleiadeshack then
-                        length = 255
-                    end
-                    
-					local data = self.patches[p].data:sub(post+3, post+3+length)
-
-					for pixel = 1, length do
-						local color = love.data.unpack("<B", data, pixel)+1
-						self.patches[p].imagedata:setPixel(c-1, row+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
-					end
-
-					post = post+4+length
-				end
-			end
-
-			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
-			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
-			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.patches[p].md5))
-		else
-            t = "PNG"
-            self:printfNoNewLine(2, "\tBuilding Patch: %s; Type: %s ", self.patches[p].name, t)
-			filedata = love.filesystem.newFileData(self.patches[p].data, "-")
-			self.patches[p].imagedata = love.image.newImageData(filedata)
-
-			self.patches[p].width = self.patches[p].imagedata:getWidth()
-			self.patches[p].height = self.patches[p].imagedata:getHeight()
-            local offx, offy = self:readGRAB(self.patches[p].data) 
-			self.patches[p].xoffset = offx or 0
-			self.patches[p].yoffset = offy or 0
-            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.patches[p].width, self.patches[p].height, self.patches[p].xoffset, self.patches[p].yoffset) 
-
-			self.patches[p].image = love.graphics.newImage(self.patches[p].imagedata)
-			self.patches[p].png = self.patches[p].imagedata:encode("png"):getString()
-			self.patches[p].md5 = love.data.hash("md5", self.patches[p].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.patches[p].md5))
-			self.patches[p].notdoompatch = true
-		end
-		self.patches[p].istexture = false
-		self.patches[self.patches[p].name] = self.patches[p]
-	end
-	collectgarbage()
-	self:printf(1, "\tDone.\n")
-end
-
 function wad:buildFlats()
 	for f = 1, #self.flats do
-        local t = "Flat"
-		if(not self:checkFormat(self.flats[f].data, "PNG", 2, true)) then
-            self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", self.flats[f].name, t)
-			self.flats[f].image = love.image.newImageData(64, 64)
-			self.flats[f].rows = {}
+		local flat = self.flats[f]
+		local t = "Flat"
+
+		if (not self:checkFormat(flat.data, "PNG", 2, true)) then
+			self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
+			flat.image = love.image.newImageData(64, 64)
+			flat.rows = {}
 
 			local pcount = 0
 			for y = 1, 64 do
 				for x = 1, 64 do
 					pcount = pcount + 1
-					local color = love.data.unpack("<B", self.flats[f].data, pcount)+1
-					self.flats[f].image:setPixel(x-1, y-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+					self:setPixelForPalette(flat.image, x, y, flat.data, pcount)
 				end
 			end
 
-			self.flats[f].png = self.flats[f].image:encode("png"):getString()
-			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.flats[f].md5))
+			flat.png = flat.image:encode("png"):getString()
+			flat.md5 = love.data.hash("md5", flat.png)
+			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
 		else
-            t = "PNG"
-            self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", self.flats[f].name, t)
-			self.flats[f].png = self.flats[f].data
-			self.flats[f].image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(self.flats[f].png)))
-			self.flats[f].md5 = love.data.hash("md5", self.flats[f].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.flats[f].md5))
-			self.flats[f].notdoomflat = true
+			t = "PNG"
+			self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
+			flat.png = flat.data
+			flat.image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(flat.png)))
+			flat.md5 = love.data.hash("md5", flat.png)
+			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
+			flat.notdoomflat = true
 		end
-		self.flats[self.flats[f].name] = self.flats[f]
+		self.flats[flat.name] = flat
 	end
 
 	collectgarbage()
 	self:printf(1, "\tDone.\n")
 end
 
--- a copy of build patches
-function wad:buildSprites()
+function wad:buildImages(images, imagetype)
+	for i = 1, #images do
+		local image = images[i]
 
-	for s = 1, #self.sprites do
-        local t = "Sprite"
-		if(not self:checkFormat(self.sprites[s].data, "PNG", 2, true)) then
-            self:printfNoNewLine(2, "\tBuilding Sprite: %s; Type: %s ", self.sprites[s].name, t)
-			self.sprites[s].width = love.data.unpack("<H", self.sprites[s].data)
-			self.sprites[s].height = love.data.unpack("<H", self.sprites[s].data, 3)
-			self.sprites[s].xoffset = love.data.unpack("<h", self.sprites[s].data, 5)
-			self.sprites[s].yoffset = love.data.unpack("<h", self.sprites[s].data, 7)
-			self.sprites[s].imagedata = love.image.newImageData(self.sprites[s].width, self.sprites[s].height)
-            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset)
-			self.sprites[s].columns = {}
+		if (not self:checkFormat(image.data, "PNG", 2, true)) then
+			self:printfNoNewLine(2, "\tBuilding $s: %s; Type: %s; ", imagetype, image.name, imagetype)
+			image.width = love.data.unpack("<H", image.data)
+			image.height = love.data.unpack("<H", image.data, 3)
+			image.xoffset = love.data.unpack("<h", image.data, 5)
+			image.yoffset = love.data.unpack("<h", image.data, 7)
+			image.imagedata = love.image.newImageData(image.width, image.height)
+			self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
+			image.columns = {}
 
-            for c = 1, self.sprites[s].width do
-				self.sprites[s].columns[c] = love.data.unpack("<i4", self.sprites[s].data, 9+((c-1)*4))      
-            end
+			for c = 1, image.width do
+				image.columns[c] = love.data.unpack("<i4", image.data, 9+((c-1)*4))
+			end
 
-            local pleiadeshack = false
-            if self.sprites[s].height == 256 then
+			local pleiadeshack = false
+			if image.height == 256 then
+				pleiadeshack = true
+				for c = 2, image.width do
+					if image.columns[c] - image.columns[c-1] ~= 261 then
+						pleiadeshack = false
+						break;
+					end
+				end
+				if #image.data - image.columns[image.width] ~= 261 then
+					pleiadeshack = false;
+				end
+			end
 
-                pleiadeshack = true
-                for c = 2, self.sprites[s].width do
-
-                    if self.sprites[s].columns[s] - self.sprites[s].columns[c-1] ~= 261 then
-                        pleiadeshack = false
-                        break;
-                    end
-                end
-                if #self.sprites[s].data - self.sprites[s].columns[self.sprites[s].width] ~= 261 then
-                    pleiadeshack = false;
-                end
-            end
-            
-			for c = 1, self.sprites[s].width do
-
+			for c = 1, image.width do
 				local row = 0
-				local post = self.sprites[s].columns[c]+1
+				local post = image.columns[c]+1
 
-				while(row ~= 0xFF) do
-
+				while (row ~= 0xFF) do
 					local top = row
 
-					row = love.data.unpack("<B", self.sprites[s].data, post)
-					if(row == 0xFF) then break end
+					row = love.data.unpack("<B", image.data, post)
+					if (row == 0xFF) then break end
 
-					-- tall sprites
-					if(row <= top) then
+					-- tall images
+					if (row <= top) then
 						row = row+top
 					end
 
-					local length = love.data.unpack("<B", self.sprites[s].data, post+1)
-                    -- 256 height fix
-                    if self.sprites[s].height == 256 then
-                        length = 256
-                    end
+					local length = love.data.unpack("<B", image.data, post+1)
 
-					local data = self.sprites[s].data:sub(post+3, post+3+length)
+					-- 256 height fix
+					if pleiadeshack then
+						length = 255
+					end
 
-					for pixel = 1, length-1 do
-						local color = love.data.unpack("<B", data, pixel)+1
-						self.sprites[s].imagedata:setPixel(c-1, row+pixel-1, self.palette[color][1], self.palette[color][2], self.palette[color][3], 1.0)
+					local data = image.data:sub(post+3, post+3+length)
+
+					for pixel = 1, length do
+						self:setPixelForPalette(image.imagedata, c, row+pixel, data, pixel)
 					end
 
 					post = post+4+length
 				end
 			end
 
-			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
-			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
-			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.sprites[s].md5))
+			image.image = love.graphics.newImage(image.imagedata)
+			image.png = image.imagedata:encode("png"):getString()
+			image.md5 = love.data.hash("md5", image.png)
+			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
 		else
-            t = "PNG"
-            self:printf(2, "\tBuilding Sprite: %s; Type: %s", self.sprites[s].name, t)
-			filedata = love.filesystem.newFileData(self.sprites[s].data, "-")
-			self.sprites[s].imagedata = love.image.newImageData(filedata)
-			self.sprites[s].width = self.sprites[s].imagedata:getWidth()
-			self.sprites[s].height = self.sprites[s].imagedata:getHeight()
+			self:printfNoNewLine(2, "\tBuilding %s: %s; Type: PNG; ", imagetype, image.name)
+			filedata = love.filesystem.newFileData(image.data, "-")
+			image.imagedata = love.image.newImageData(filedata)
 
-            local offx, offy = self:readGRAB(self.sprites[s].data) 
-			self.sprites[s].xoffset = offx or 0
-			self.sprites[s].yoffset = offy or 0
-            self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", self.sprites[s].width, self.sprites[s].height, self.sprites[s].xoffset, self.sprites[s].yoffset)
-			self.sprites[s].image = love.graphics.newImage(self.sprites[s].imagedata)
-			self.sprites[s].png = self.sprites[s].imagedata:encode("png"):getString()
-			self.sprites[s].md5 = love.data.hash("md5", self.sprites[s].png)
-            self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", self.sprites[s].md5))
-			self.sprites[s].notdoompatch = true
+			image.width = image.imagedata:getWidth()
+			image.height = image.imagedata:getHeight()
+			local offx, offy = self:readGRAB(image.data)
+			image.xoffset = offx or 0
+			image.yoffset = offy or 0
+			self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
+
+			image.image = love.graphics.newImage(image.imagedata)
+			image.png = image.imagedata:encode("png"):getString()
+			image.md5 = love.data.hash("md5", image.png)
+			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
+			image.notdoompatch = true
 		end
-		self.sprites[self.sprites[s].name] = self.sprites[s]
+		images[image.name] = image
 	end
 	collectgarbage()
 	self:printf(1, "\tDone.\n")
+end
+
+function wad:setPixelForPalette(image, x, y, colordata, colorindex)
+	local color = love.data.unpack("<B", colordata, colorindex) + 1
+	local palettergb = self.palette[color]
+
+	image:setPixel(x-1, y-1, palettergb[1], palettergb[2], palettergb[3], 1.0)
 end
 
 function wad:processPnames()
@@ -1848,7 +1753,7 @@ function wad:processTexturesX(num)
 			love.graphics.setCanvas(composite.canvas)
 			for p = 1, composite.patchcount do
 				composite.patches[p] = {}
-				
+
 				local compositepatch = composite.patches[p]
 
 				compositepatch.x = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10))
@@ -1865,7 +1770,9 @@ function wad:processTexturesX(num)
 					patchdata = self.base.patches[compositepatch.patch]
 
 					if (patchdata ~= nil) then
-						patchdata.istexture = patchdata.istexture or istexturepatch
+						if (istexturepatch and patchdata.composite == nil) then
+							patchdata.composite = composite
+						end
 
 						love.graphics.draw(patchdata.image, compositepatch.x, compositepatch.y)
 						notfound = false
@@ -1873,10 +1780,12 @@ function wad:processTexturesX(num)
 
 					-- flats
 					if (notfound) then
-						--love.graphics.draw(self.flats[compositepatch.name].image, compositepatch.x, compositepatch.y)
+						--love.graphics.draw(self.flats[compositepatch.patch].image, compositepatch.x, compositepatch.y)
 					end
 				else
-					patchdata.istexture = patchdata.istexture or istexturepatch
+					if (istexturepatch and patchdata.composite == nil) then
+						patchdata.composite = composite
+					end
 
 					love.graphics.draw(patchdata.image, compositepatch.x, compositepatch.y)
 				end
@@ -2071,7 +1980,7 @@ end
 
 function wad:renamePatches()
 	if(self.base ~= self) then
-        local patchcount = self:renameAssets(self.patches)
+		local patchcount = self:renameAssets(self.patches)
 		self:printf(1, "\tDone. Found %d patches.\n", patchcount)
 	else
 		self:printf(1, "\tNot renaming base wad patches.\n")
@@ -2081,7 +1990,7 @@ end
 
 function wad:renameTextures()
 	if(self.base ~= self) then
-        local texturecount = self:renameAssets(self.composites)
+		local texturecount = self:renameAssets(self.composites)
 		self:printf(1, "\tDone. Found %d composites.\n", texturecount)
 	else
 		self:printf(1, "\tNot renaming base wad textures.\n")
@@ -2091,7 +2000,7 @@ end
 
 function wad:renameFlats()
 	if(self.base ~= self) then
-        local flatcount = self:renameAssets(self.flats)
+		local flatcount = self:renameAssets(self.flats)
 		self:printf(1, "\tDone. Found %d flats.\n", flatcount)
 	else
 		self:printf(1, "\tNot renaming base wad flats.\n")
@@ -2545,23 +2454,23 @@ function wad:ModifyMaps()
 				-- find textures and rename
                 self:printf(2, "\t\tReplacing textures.")
 				for c = 1, #self.composites do
-					self:replaceMapTextures(map, self.composites[c])
+					local composite = self.composites[c]
+					self:replaceMapTextures(map, composite, composite.newname)
 				end
 
 				-- find flats and rename
                 self:printf(2, "\t\tReplacing flats.")
 				for f = 1, #self.flats do
-					self:replaceMapTextures(map, self.flats[f])
+					local flat = self.flats[f]
+					self:replaceMapTextures(map, flat, flat.newname)
 				end
 
 				-- find patches and rename
                 self:printf(2, "\t\tReplacing patches.")
 				for p = 1, #self.patches do
 					local patch = self.patches[p]
-					
-					if (not patch.istexture) then
-						self:replaceMapTextures(map, patch)
-					end
+
+					self:replaceMapTextures(map, patch, getPatchName(patch))
 				end
 
 				-- build raw things back
@@ -2629,7 +2538,7 @@ function wad:ModifyMaps()
 					map.raw.textmap = map.raw.textmap:gsub(self.flats[f].name, self.flats[f].newname)
 				end
 				for p = 1, #self.patches do
-					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, self.patches[p].newname)
+					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, getPatchName(self.patches[p]))
 				end
 			end
 		end
@@ -2640,7 +2549,7 @@ function wad:ModifyMaps()
 	self:printf(1, "\tDone.\n")
 end
 
-function wad:replaceMapTextures(map, texture)
+function wad:replaceMapTextures(map, texture, newtexturename)
 	if (not texture.isdoomdup) then
 		-- walls
 		for s = 1, #map.sidedefs do
@@ -2648,19 +2557,19 @@ function wad:replaceMapTextures(map, texture)
 
 			if (sidedef.upper_texture == texture.name) then
 				self:printf(2, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
-				sidedef.upper_texture = texture.newname
+				sidedef.upper_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.lower_texture == texture.name) then
 				self:printf(2, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
-				sidedef.lower_texture = texture.newname
+				sidedef.lower_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.middle_texture == texture.name) then
 				self:printf(2, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
-				sidedef.middle_texture = texture.newname
+				sidedef.middle_texture = newtexturename
 				texture.used = true
 			end
 		end
@@ -2671,13 +2580,13 @@ function wad:replaceMapTextures(map, texture)
 
 			if (sector.floor_texture == texture.name) then
 				self:printf(2, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
-				sector.floor_texture = texture.newname
+				sector.floor_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sector.ceiling_texture == texture.name) then
 				self:printf(2, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
-				sector.ceiling_texture = texture.newname
+				sector.ceiling_texture = newtexturename
 				texture.used = true
 			end
 		end
@@ -2722,31 +2631,32 @@ end
 function wad:extractTextures()
 	if(self.base ~= self) then
 		local texturesstr = ""
+		local displaydone = false
 
 		for c = 1, #self.composites do
 			local composite = self.composites[c]
 
 			if (not composite.iszdoom) then
 				if (not composite.isdoomdup) then
+					displaydone = true
 					self:printf(2, "\tExtracting Composite: %s", composite.newname)
 
 					if (composite.patchcount > 1) then
 						texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
 					else
-						local png, err = io.open(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
-						if err then error("[ERROR] " .. err) end
+						local png = openFile(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
 						png:write(composite.png)
 						png:close()
 					end
 				end
 			else
+				displaydone = true
 				self:printf(2, "\tExtracting Texture: %s", composite.newname)
 
 				if (composite.patchcount > 1) then
 					texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
 				else
-					local png, err = io.open(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
-					if err then error("[ERROR] " .. err) end
+					local png = openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
 					png:write(composite.raw)
 					png:close()
 				end
@@ -2754,12 +2664,15 @@ function wad:extractTextures()
 		end
 
 		if #texturesstr > 0 then
-			local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
-			if err then error("[ERROR] " .. err) end
+			local file = openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
 			file:write(texturesstr)
 			file:close()
-		else
-			self:printf(1, "\tNo textures to define.\n")
+		end
+
+		collectgarbage()
+
+		if (displaydone) then
+			self:printf(1, "\tDone.\n")
 		end
 	else
 		self:printf(1, "\tNot extracting base wad composites.\n")
@@ -2772,9 +2685,9 @@ function wad:createTextureDefinition(composite)
 
 	for p = 1, composite.patchcount do
 		local compositepatch = composite.patches[p]
-		local newpatchdata = self.patches[compositepatch.patch]
-		local oldpatchdata = self.base.patches[compositepatch.patch]
-		local patchname = (newpatchdata and newpatchdata.newname) or (oldpatchdata and oldpatchdata.name)
+		local patchdata = self.patches[compositepatch.patch]
+		local basepatchdata = self.base.patches[compositepatch.patch]
+		local patchname = getPatchName(patchdata, basepatchdata)
 
 		if (patchname) then
 			texturedef = string.format("%s	Patch \"%s\", %d, %d\n", texturedef, patchname, compositepatch.x, compositepatch.y)
@@ -2784,13 +2697,29 @@ function wad:createTextureDefinition(composite)
 	return string.format("%s}\n\n", texturedef)
 end
 
+
+function getPatchName(patch, basepatch)
+	local patchname = ""
+
+	if (patch) then
+		-- If this patch is a standalone texture, then use the composite texture name instead
+		patchname = patch.composite and patch.composite.newname or patch.newname
+	end
+
+	-- If patch was not defined or somehow did not have a name, then attempt to get name from basepatch (if it exists)
+	if (basepatch and #patchname == 0) then
+		patchname = basepatch.composite and (basepatch.composite.newname or basepatch.composite.name) or basepatch.name
+	end
+
+	return patchname
+end
+
 function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
                 self:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
-				local png, err = io.open(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
-				if err then error("[ERROR] " .. err) end
+				local png = openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				png:write(self.flats[f].png)
 				png:close()
 			end
@@ -2807,10 +2736,9 @@ function wad:extractPatches()
 		for p = 1, #self.patches do
 			local patch = self.patches[p]
 
-			if (not patch.isdoomdup and not patch.istexture) then
+			if (not patch.isdoomdup and patch.composite == nil) then
                 self:printf(2, "\tExtracting Patch: %s", patch.newname)
-				local png, err = io.open(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
-				if err then error("[ERROR] " .. err) end
+				local png = openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
 				png:write(patch.png)
 				png:close()
 			end
@@ -2829,8 +2757,7 @@ function wad:extractSprites()
 			if(not self.sprites[s].isdoomdup) then
                 self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
                 self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
-				local png, err = io.open(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
-				if err then error("[ERROR] " .. err) end
+				local png = openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
                 self.sprites[s].png = self:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
 				png:write(self.sprites[s].png)
 				png:close()
@@ -2893,16 +2820,8 @@ function wad:extractMaps()
 				if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
 				if(self.maps[m].raw.scripts) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
 
-				local wad
-				if(self.maps[m].format == "DM") then
-					wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
-				elseif(self.maps[m].format == "HM") then
-					wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
-				else
-					wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
-				end
+				local wad = openFile(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
 
-				if err then error("[ERROR] " .. err) end
 				wad:write(header)
 				wad:write(lumpchunk)
 				wad:write(dir)
@@ -2943,8 +2862,7 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad, err = io.open(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
-				if err then error("[ERROR] " .. err) end
+				local wad = openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
 				wad:write(header)
 				wad:write(lumpchunk)
 				wad:write(dir)
@@ -3002,8 +2920,7 @@ function wad:extractAnimdefs()
 		end
 
         if #anim > 0 or #switch > 0 or #self.animdefs.original > 0 then
-            local file, err = io.open(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
-            if err then error("[ERROR] " .. err) end
+			local file = openFile(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
             file:write(anim)
             file:write(switch)
             file:write(self.animdefs.original)
@@ -3044,8 +2961,7 @@ function wad:extractSNDINFO()
 		end
 
         if #txt > 0 then
-            local file, err = io.open(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
-            if err then error("[ERROR] " .. err) end
+            local file = openFile(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
             file:write(txt)
             file:close()
         else
@@ -3062,32 +2978,28 @@ function wad:extractSounds()
 
 		--LMP
 		for s = 1, #self.doomsounds do
-			local snd, err = io.open(string.format("%s/sounds/%s.lmp", self.pk3path, string.lower(self.doomsounds[s].newname)), "w+b")
-			if err then error("[ERROR] " .. err) end
+			local snd = openFile(string.format("%s/sounds/%s.lmp", self.pk3path, string.lower(self.doomsounds[s].newname)), "w+b")
 			snd:write(self.doomsounds[s].data)
 			snd:close()
 		end
 
 		--WAV
 		for s = 1, #self.wavesounds do
-			local snd, err = io.open(string.format("%s/sounds/%s.wav", self.pk3path, string.lower(self.wavesounds[s].newname)), "w+b")
-			if err then error("[ERROR] " .. err) end
+			local snd = openFile(string.format("%s/sounds/%s.wav", self.pk3path, string.lower(self.wavesounds[s].newname)), "w+b")
 			snd:write(self.wavesounds[s].data)
 			snd:close()
 		end
 
 		--OGG
 		for s = 1, #self.oggsounds do
-			local snd, err = io.open(string.format("%s/sounds/%s.ogg", self.pk3path, string.lower(self.oggsounds[s].newname)), "w+b")
-			if err then error("[ERROR] " .. err) end
+			local snd = openFile(string.format("%s/sounds/%s.ogg", self.pk3path, string.lower(self.oggsounds[s].newname)), "w+b")
 			snd:write(self.oggsounds[s].data)
 			snd:close()
 		end
 
 		--FLAC
 		for s = 1, #self.flacsounds do
-			local snd, err = io.open(string.format("%s/sounds/%s.flac", self.pk3path, string.lower(self.flacsounds[s].newname)), "w+b")
-			if err then error("[ERROR] " .. err) end
+			local snd = openFile(string.format("%s/sounds/%s.flac", self.pk3path, string.lower(self.flacsounds[s].newname)), "w+b")
 			snd:write(self.flacsounds[s].data)
 			snd:close()
 		end
@@ -3103,8 +3015,7 @@ function wad:extractTexturesLump()
 	if(self.base ~= self) then
 
         if #self.textures.original > 0 then
-            local file, err = io.open(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
-            if err then error("[ERROR] " .. err) end
+            local file = openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
             file:write(self.textures.original)
             file:close()
         else
@@ -3119,20 +3030,17 @@ end
 function wad:extractMapinfo()
 	if(self.base ~= self) then
 
-		local file, err = io.open(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
-		if err then error("[ERROR] " .. err) end
+		local file = openFile(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
 		file:write(self.mapinfo)
 		file:close()
 
-		file, err = io.open(string.format("%s/mapinfo.txt", self.pk3path), "r")
-		if err then error("[ERROR] " .. err) end
+		file = openFile(string.format("%s/mapinfo.txt", self.pk3path), "r")
 		local mapinfo = file:read("*all")
 		file:close()
 
 		mapinfo = string.format('%s\ninclude "mapinfo/%s.txt"', mapinfo, self.acronym)
 
-		file, err = io.open(string.format("%s/mapinfo.txt", self.pk3path), "w")
-		if err then error("[ERROR] " .. err) end
+		file = openFile(string.format("%s/mapinfo.txt", self.pk3path), "w")
 		file:write(mapinfo)
 		file:close()
 
@@ -3353,6 +3261,16 @@ function wad:checkFormat(data, magic, offset, bigendian)
 	if(m == magic) then return true end
 
 	return false
+end
+
+function openFile(filepath, filemode)
+	local file, err = io.open(filepath, filemode)
+
+	if err then
+		error("[ERROR] " .. err)
+	end
+
+	return file
 end
 
 local lastString
