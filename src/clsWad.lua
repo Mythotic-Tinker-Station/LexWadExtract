@@ -2353,7 +2353,7 @@ function wad:ModifyMaps()
 						actor2 = actor2 + 0
 						for t = 1, #map.things do
 							if(map.things[t].typ == actor1) then
-                                self:printf(2, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, map.things[t].x, map.things[t].y, map.things[t].angle, map.things[t].flags, actor1, actor2)
+                                self:printf(3, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, map.things[t].x, map.things[t].y, map.things[t].angle, map.things[t].flags, actor1, actor2)
                                 map.things[t].typ = actor2
 							end
 						end
@@ -2468,19 +2468,19 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sidedef = map.sidedefs[s]
 
 			if (sidedef.upper_texture == texture.name) then
-				self:printf(2, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
+				self:printf(3, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
 				sidedef.upper_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.lower_texture == texture.name) then
-				self:printf(2, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
+				self:printf(3, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
 				sidedef.lower_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.middle_texture == texture.name) then
-				self:printf(2, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
+				self:printf(3, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
 				sidedef.middle_texture = newtexturename
 				texture.used = true
 			end
@@ -2491,13 +2491,13 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sector = map.sectors[ss]
 
 			if (sector.floor_texture == texture.name) then
-				self:printf(2, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
+				self:printf(3, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
 				sector.floor_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sector.ceiling_texture == texture.name) then
-				self:printf(2, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
+				self:printf(3, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
 				sector.ceiling_texture = newtexturename
 				texture.used = true
 			end
@@ -2508,17 +2508,17 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sidedef = map.sidedefs[s]
 
 			if (sidedef.upper_texture == texture.name) then
-				self:printf(2, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
+				self:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
 				sidedef.upper_texture = texture.doomdup
 			end
 
 			if (sidedef.lower_texture == texture.name) then
-				self:printf(2, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
+				self:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
 				sidedef.lower_texture = texture.doomdup
 			end
 
 			if (sidedef.middle_texture == texture.name) then
-				self:printf(2, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
+				self:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
 				sidedef.middle_texture = texture.doomdup
 			end
 		end
@@ -2528,12 +2528,12 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sector = map.sectors[ss]
 
 			if (sector.floor_texture == texture.name) then
-				self:printf(2, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
+				self:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
 				sector.floor_texture = texture.doomdup
 			end
 
 			if (sector.ceiling_texture == texture.name) then
-				self:printf(2, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
+				self:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
 				sector.ceiling_texture = texture.doomdup
 			end
 		end
