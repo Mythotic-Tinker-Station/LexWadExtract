@@ -1510,13 +1510,7 @@ end
 
 function wad:processPalette()
 	-- find PLAYPAL
-	local paldata = ""
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == "PLAYPAL") then
-			paldata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+	local paldata = self:findLump("SP", "PLAYPAL")
 
 	-- if playpal found
 	if(paldata ~= "") then
@@ -1678,13 +1672,7 @@ end
 function wad:processPnames()
 
 	-- find PNAMES
-	local pndata = ""
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == "PNAMES") then
-			pndata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+	local pndata = self:findLump("SP", "PNAMES")
 
 	-- if PNAMES found
 	if(pndata ~= "") then
@@ -1705,22 +1693,15 @@ end
 
 function wad:processTexturesX(num)
 	-- find TEXTUREx
-	local tdata = ""
-	local lumpname = string.format("TEXTURE%d", num)
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == lumpname) then
-			tdata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+    local data = self:findLump("SP", string.format("TEXTURE%d", num))
 
 	-- if TEXTUREx found
-	if(tdata ~= "") then
+	if(data ~= "") then
 		-- header
-		local numtextures = love.data.unpack("<i4", tdata)
+		local numtextures = love.data.unpack("<i4", data)
 		local offsets = {}
 		for i = 5, (numtextures*4)+4, 4 do
-			offsets[#offsets+1] = love.data.unpack("<i4", tdata, i)+1
+			offsets[#offsets+1] = love.data.unpack("<i4", data, i)+1
 		end
 
 		-- maptexture_t
@@ -1731,17 +1712,17 @@ function wad:processTexturesX(num)
 
 			local composite = self.composites[c]
 
-			composite.name = self:removePadding(love.data.unpack("<c8", tdata, offsets[i]))
-			composite.flags = love.data.unpack("<H", tdata, offsets[i]+8)
-			composite.scalex = love.data.unpack("<B", tdata, offsets[i]+0x0A)
-			composite.scaley = love.data.unpack("<B", tdata, offsets[i]+0x0B)
-			composite.width = love.data.unpack("<h", tdata, offsets[i]+0x0C)
-			composite.height = love.data.unpack("<H", tdata, offsets[i]+0x0E)
-			composite.unused1 = love.data.unpack("<B", tdata, offsets[i]+0x10)
-			composite.unused2 = love.data.unpack("<B", tdata, offsets[i]+0x11)
-			composite.unused3 = love.data.unpack("<B", tdata, offsets[i]+0x12)
-			composite.unused4 = love.data.unpack("<B", tdata, offsets[i]+0x13)
-			composite.patchcount = love.data.unpack("<h", tdata, offsets[i]+0x14)
+			composite.name = self:removePadding(love.data.unpack("<c8", data, offsets[i]))
+			composite.flags = love.data.unpack("<H", data, offsets[i]+8)
+			composite.scalex = love.data.unpack("<B", data, offsets[i]+0x0A)
+			composite.scaley = love.data.unpack("<B", data, offsets[i]+0x0B)
+			composite.width = love.data.unpack("<h", data, offsets[i]+0x0C)
+			composite.height = love.data.unpack("<H", data, offsets[i]+0x0E)
+			composite.unused1 = love.data.unpack("<B", data, offsets[i]+0x10)
+			composite.unused2 = love.data.unpack("<B", data, offsets[i]+0x11)
+			composite.unused3 = love.data.unpack("<B", data, offsets[i]+0x12)
+			composite.unused4 = love.data.unpack("<B", data, offsets[i]+0x13)
+			composite.patchcount = love.data.unpack("<h", data, offsets[i]+0x14)
 			composite.patches = {}
 			composite.canvas = love.graphics.newCanvas(composite.width, composite.height)
 			composite.dups = {}
@@ -1756,11 +1737,11 @@ function wad:processTexturesX(num)
 
 				local compositepatch = composite.patches[p]
 
-				compositepatch.x = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10))
-				compositepatch.y = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+2)
-				compositepatch.patch = self.pnames[love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+4)+1]
-				compositepatch.stepdir = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+6)
-				compositepatch.colormap = love.data.unpack("<h", tdata, offsets[i]+0x16+((p-1)*10)+8)
+				compositepatch.x = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10))
+				compositepatch.y = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+2)
+				compositepatch.patch = self.pnames[love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+4)+1]
+				compositepatch.stepdir = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+6)
+				compositepatch.colormap = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+8)
 
 				local patchdata = self.patches[compositepatch.patch]
 
@@ -1809,25 +1790,18 @@ end
 function wad:processAnimated()
 
 	-- find ANIMATED
-	local tdata = ""
-	local lumpname = "ANIMATED"
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == lumpname) then
-			tdata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+	local data = self:findLump("SP", "ANIMATED")
 
 	-- if ANIMATED found
-	if(tdata ~= "") then
+	if(data ~= "") then
 
-		local t = love.data.unpack("<B", tdata)
+		local t = love.data.unpack("<B", data)
 		local count = 0
 		while(t ~= 255) do
 
-			local last = self:removePadding(love.data.unpack("<c8", tdata, 2+count)):upper()
-			local first = self:removePadding(love.data.unpack("<c8", tdata, 11+count)):upper()
-			local speed = love.data.unpack("<i4", tdata, 20+count)
+			local last = self:removePadding(love.data.unpack("<c8", data, 2+count)):upper()
+			local first = self:removePadding(love.data.unpack("<c8", data, 11+count)):upper()
+			local speed = love.data.unpack("<i4", data, 20+count)
 
 			local isdup = false
 			for d = 1, #self.animlist do
@@ -1850,7 +1824,7 @@ function wad:processAnimated()
 			end
 
 			count = count + 23
-			t = love.data.unpack("<B", tdata, 1+count)
+			t = love.data.unpack("<B", data, 1+count)
 		end
 	end
 end
@@ -1858,25 +1832,18 @@ end
 function wad:processSwitches()
 
 	-- find SWITCHES
-	local tdata = ""
-	local lumpname = "SWITCHES"
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == lumpname) then
-			tdata = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+	local data = self:findLump("SP", "SWITCHES")
 
 	-- if SWITCHES found
-	if(tdata ~= "") then
+	if(data ~= "") then
 
 		local t = 1
 		local count = 0
 		while(t ~= 0) do
 
-			local off = self:removePadding(love.data.unpack("<c8", tdata, 1+count)):upper()
-			local on = self:removePadding(love.data.unpack("<c8", tdata, 10+count)):upper()
-			t = love.data.unpack("<H", tdata, 19+count)
+			local off = self:removePadding(love.data.unpack("<c8", data, 1+count)):upper()
+			local on = self:removePadding(love.data.unpack("<c8", data, 10+count)):upper()
+			t = love.data.unpack("<H", data, 19+count)
 
 			local isdup = false
 			for d = 1, #self.switchlist do
@@ -2085,14 +2052,7 @@ end
 function wad:processTextLump(name)
 
 	-- find ANIMDEFS
-	local data = ""
-	local lumpname = name
-	for l = 1, #self.namespaces["SP"].lumps do
-		if(self.namespaces["SP"].lumps[l].name == lumpname) then
-			data = self.namespaces["SP"].lumps[l].data
-			break;
-		end
-	end
+	local data = self:findLump("SP", name)
 
 	-- if ANIMDEFS found
 	if(data ~= "") then
@@ -2194,54 +2154,6 @@ function wad:buildAnimdefs()
 		self:printf(1, "\tDone.\n")
 	else
 		self:printf(1, "\tNot building animdefs for base wad.\n")
-	end
-end
-
-function wad:buildMapinfo()
-	if(self.base ~= self) then
-
-		for s = 1, #self.namespaces["SP"].lumps do
-			if(self.namespaces["SP"].lumps[s].name == "MAPINFO" or self.namespaces["SP"].lumps[s].name == "ZMAPINFO") then
-				local mapinfo = self.namespaces["SP"].lumps[s].data
-				break
-			end
-		end
-
-		if(mapinfo) then
-
-		else
-
-			for m = 1, #self.maps do
-				if(m == 1) then
-					self.mapinfo = string.format(
-					[[
-					Episode %s
-					{
-						name = %s
-					}
-					]], self.maps[1].name, self.acronym)
-				end
-
-				self.mapinfo = self.mapinfo .. string.format(
-					[[
-					Map %s
-					{
-						titlepatch = "%s"
-						next = "%s"
-						secretnext = "%s"
-						sky1 = "SKY1"
-						cluster = 0
-						par = 0
-						music = "$MUSIC_RUNNIN"
-					}
-					]], self.mapinfo, self.maps[m].name, self.acronym .. self.maps[m].name:sub(-2), self.acronym .. self.maps[m].name:sub(-2))
-			end
-		end
-
-		collectgarbage()
-		self:printf(1, "\tDone.\n")
-	else
-		self:printf(1, "\tNot building mapinfo for base wad\n")
 	end
 end
 
@@ -3201,6 +3113,15 @@ function wad:findTexture(data, texture, tbl, pos)
 		pos = pos + 1
 	end
 	return tbl
+end
+
+function wad:findLump(namespace, lumpname)
+	for l = 1, #self.namespaces[namespace].lumps do
+		if(self.namespaces[namespace].lumps[l].name == lumpname) then
+			return self.namespaces[namespace].lumps[l].data
+		end
+	end
+    return ""
 end
 
 -- function that insert zdoom's grAb chunk in a png file, with x and y offset
