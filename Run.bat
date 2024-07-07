@@ -25,9 +25,9 @@ echo ---------------------------------------------------------------------------
 
 echo Verbose settings
 echo 	0 = Basic.
-echo 	1 = Detailed.
-echo 	2 = Spam all the things.
-echo 	3 = Same as 2, but includes logging of loading the iwad.
+echo 	1 = Same as 0 but with a few more details.
+echo 	2 = Same as 1 but Log most individual conversions/renames.
+echo 	3 = Same as 2 but logs iwad reads and every individual map change. (slow)
 echo 	Blank = Same as 0
 set /p "verbose=Enter verbosity(0-3 or blank): "
 echo ---------------------------------------------------------------------------------------------
