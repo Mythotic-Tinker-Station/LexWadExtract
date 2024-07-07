@@ -2978,28 +2978,28 @@ function wad:extractSounds()
 
 		--LMP
 		for s = 1, #self.doomsounds do
-			local snd = openFile(string.format("%s/sounds/%s.lmp", self.pk3path, string.lower(self.doomsounds[s].newname)), "w+b")
+			local snd = openFile(string.format("%s/sounds/%s/%s.lmp", self.pk3path, self.acronym, string.lower(self.doomsounds[s].newname)), "w+b")
 			snd:write(self.doomsounds[s].data)
 			snd:close()
 		end
 
 		--WAV
 		for s = 1, #self.wavesounds do
-			local snd = openFile(string.format("%s/sounds/%s.wav", self.pk3path, string.lower(self.wavesounds[s].newname)), "w+b")
+			local snd = openFile(string.format("%s/sounds/%s/%s.wav", self.pk3path, self.acronym, string.lower(self.wavesounds[s].newname)), "w+b")
 			snd:write(self.wavesounds[s].data)
 			snd:close()
 		end
 
 		--OGG
 		for s = 1, #self.oggsounds do
-			local snd = openFile(string.format("%s/sounds/%s.ogg", self.pk3path, string.lower(self.oggsounds[s].newname)), "w+b")
+			local snd = openFile(string.format("%s/sounds/%s/%s.ogg", self.pk3path, self.acronym, string.lower(self.oggsounds[s].newname)), "w+b")
 			snd:write(self.oggsounds[s].data)
 			snd:close()
 		end
 
 		--FLAC
 		for s = 1, #self.flacsounds do
-			local snd = openFile(string.format("%s/sounds/%s.flac", self.pk3path, string.lower(self.flacsounds[s].newname)), "w+b")
+			local snd = openFile(string.format("%s/sounds/%s/%s.flac", self.pk3path, self.acronym, string.lower(self.flacsounds[s].newname)), "w+b")
 			snd:write(self.flacsounds[s].data)
 			snd:close()
 		end

@@ -3,13 +3,13 @@
 echo Mapset Acronym:
 echo 	Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-set acronym="JPCP"
+set acronym="EPIC"
 echo ---------------------------------------------------------------------------------------------
 
 echo Sprite Acronym:
 echo 	Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
 echo 	Acronym will automaticly be ALL CAPS.
-set acronym_sprite="TT"
+set acronym_sprite="EP"
 echo ---------------------------------------------------------------------------------------------
 
 echo Actor replacement:
@@ -20,7 +20,7 @@ echo ---------------------------------------------------------------------------
 
 echo Wad File Name:
 echo 	Wad files can be placed in same folder, just the filename is required.
-set wad="JPCP.wad"
+set wad="EPIC.wad"
 echo ---------------------------------------------------------------------------------------------
 
 echo Patch Extraction:
@@ -32,11 +32,11 @@ echo ---------------------------------------------------------------------------
 
 echo Verbose settings
 echo 	0 = Basic.
-echo 	1 = Detailed.
-echo 	2 = Spam all the things.
-echo 	3 = Same as 2, but includes logging of loading the iwad.
+echo 	1 = Same as 0 but with a few more details.
+echo 	2 = Same as 1 but Log most individual conversions/renames.
+echo 	3 = Same as 2 but logs iwad reads, and every individual map change. (slow)
 echo 	Blank = Same as 0
-set verbose="2"
+set verbose=3
 echo ---------------------------------------------------------------------------------------------
 
 if not exist %cd%\%wad% goto 20
