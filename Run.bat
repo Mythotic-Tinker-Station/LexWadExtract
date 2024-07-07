@@ -23,13 +23,6 @@ echo 	Wad files can be placed in same folder, just the filename is required.
 set /p "wad=Enter wad to convert: "
 echo ---------------------------------------------------------------------------------------------
 
-echo Patch Extraction:
-echo 	Must be either Y or N. Any other setting will default to N.
-echo 	Extract patches from the wad?
-echo    (only necessary if you are using a mapset that uses them as textures)
-set /p "patches=Enter either Y or N: "
-echo ---------------------------------------------------------------------------------------------
-
 echo Verbose settings
 echo 	0 = Basic.
 echo 	1 = Detailed.
