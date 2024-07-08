@@ -43,6 +43,7 @@ mkdir pk3\maps
 mkdir pk3\sounds
 mkdir pk3\textures
 mkdir pk3\sprites
+mkdir pk3\music
 
 mkdir pk3\flats\%acronym%
 mkdir pk3\patches\%acronym%
@@ -50,6 +51,7 @@ mkdir pk3\maps
 mkdir pk3\sounds\%acronym%
 mkdir pk3\textures\%acronym%
 mkdir pk3\sprites\%acronym%
+mkdir pk3\music\%acronym%
 
 Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
 goto 30

@@ -75,6 +75,7 @@ local wad = class("wad",
 	verbose = 0,
 	texturecount = 0,
 	soundcount = 0,
+    songcount = 0,
 	things = "N",
 	acronym = "DOOM",
     acronym_sprite = "XX",
@@ -330,6 +331,44 @@ local wad = class("wad",
 		{"texture",	"SLADRIP1",		"SLADRIP3", "allowdecals"},
 		{"texture",	"WFALL1",		"WFALL4"},
 	},
+
+    music_list =
+    {
+        -- order matters
+        "D_RUNNIN",     -- map01
+        "D_STALKS",
+        "D_COUNTD",
+        "D_BETWEE",
+        "D_DOOM",
+        "D_THE_DA",
+        "D_SHAWN",
+        "D_DDTBLU",
+        "D_IN_CIT",
+        "D_DEAD",
+        "D_STLKS2",
+        "D_THEDA2",
+        "D_DOOM2",
+        "D_DDTBL2",
+        "D_RUNNI2",
+        "D_DEAD2",
+        "D_STLKS3",
+        "D_ROMERO",
+        "D_SHAWN2",
+        "D_MESSAG",
+        "D_COUNT2",
+        "D_DDTBL3",
+        "D_AMPIE",
+        "D_THEDA3",
+        "D_ADRIAN",
+        "D_MESSG2",
+        "D_ROMER2",
+        "D_TENSE",
+        "D_SHAWN3",
+        "D_OPENIN",
+        "D_EVIL",
+        "D_ULTIMA",
+        "D_READ_M",     -- map32
+    },
 
 	linedef_flags =
 	{
@@ -872,6 +911,10 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
 	utils:printf(0, "Rename Sounds...")
 	self:renameSounds()
 
+    -- rename all songs in this wad with a number system
+    utils:printf(0, "Rename Songs...")
+    self:renameSongs()
+
     -- read zdoom's textures.txt (there is no code for this yet)
 	utils:printf(0, "Processing TEXTURES...")
 	self.textures.original = self:processTextLump("TEXTURES")
@@ -913,6 +956,9 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
 
 	utils:printf(0, "Extracting Sounds...")
 	self:extractSounds()
+
+    utils:printf(0, "Extracting Songs...")
+    self:extractSongs()
 
 	utils:printf(0, "Extracting ANIMDEFS...")
 	self:extractAnimdefs()
@@ -2046,6 +2092,25 @@ function wad:renameSounds()
 	collectgarbage()
 end
 
+function wad:renameSongs()
+    if self.base ~= self then
+        for l = 1, #self.music_list do
+            local lump = self:findLump("MS", self.music_list[l])
+            if lump ~= "" then
+                for s = 1, #self.songs do
+                    if self.songs[s].data == lump then
+                        self.songs[s].newname = string.format("%s%.4d", self.acronym, l)
+                        utils:printf(2, "\tRenamed %s to %s", self.songs[s].name, self.songs[s].newname)
+                        break
+                    end
+                end
+            end
+        end
+        utils:printf(1, "\tDone.\n")
+    end
+    collectgarbage()
+end
+
 function wad:processTextLump(name)
 
 	-- find ANIMDEFS
@@ -2918,6 +2983,29 @@ function wad:extractSounds()
 	else
 		utils:printf(1, "\tNot extracting base wad sounds.\n")
 	end
+end
+
+function wad:extractSongs()
+    if(self.base ~= self) then
+
+        for s = 1, #self.songs do
+            if self.songs[s].newname ~= nil then
+                local ext = "mus"
+                if self.songs[s].data:sub(1, 4) == "MThd" then
+                    ext = "mid"
+                end
+                
+                local mus = utils:openFile(string.format("%s/music/%s/%s.%s", self.pk3path, self.acronym, self.songs[s].newname, ext), "w+b")
+                mus:write(self.songs[s].data)
+                mus:close()
+            end
+        end
+
+        collectgarbage()
+        utils:printf(1, "\tDone.\n")
+    else
+        utils:printf(1, "\tNot extracting base wad music.\n")
+    end
 end
 
 function wad:extractTexturesLump()
