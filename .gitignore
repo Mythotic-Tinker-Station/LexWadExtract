@@ -9,6 +9,9 @@ maps.zip
 *.mp3
 *.dbs
 *.lmp
+*.mid
+*.mus
+*.flac
 *animdefs*
 *sndinfo*
 *textures*
@@ -26,4 +29,4 @@ tools/zwadconv.bat
 tools/zwadconv.bat
 tools/zandronum/zandronum-Tribeam.ini
 RunQuick.bat
-*.mid
+
