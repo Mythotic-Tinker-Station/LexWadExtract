@@ -52,7 +52,7 @@ function love.load(arg)
     date = date:gsub(" ", "_")
     date = date:gsub(":", "-")
     date = date:gsub("/", "-")
-	local logpath = apppath .. string.format("/logs/%s_%s.txt", arg[1], date)
+	local logpath = apppath .. string.format("/logs/%s_%s.txt", arg[2], date)
     print("Log path: " .. logpath)
 	logfile = io.open(logpath, "w+")
 -------------------------------------------------
