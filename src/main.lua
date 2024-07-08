@@ -65,14 +65,16 @@ function love.load(arg)
     -- these are global because apparently the class library i use only allows 10 args for a method
 
     -- get command line args
-    local pwad = apppath .. "/" .. arg[1]
-    local acronym = arg[2]
-    local verbose = arg[3]
-    local acronym_sprites = arg[4]
-    local things = arg[5]
-    local patches = arg[6]
+    local iwad = apppath .. "/" .. arg[1]
+    local pwad = apppath .. "/" .. arg[2]
+    local acronym = arg[3]
+    local verbose = arg[4]
+    local acronym_sprites = arg[5]
+    local things = arg[6]
+    local patches = arg[7]
 
     utils:printf(0, "Options: ")
+    utils:printf(0, "\tiwad: %s", tostring(iwad))
     utils:printf(0, "\tpwad: %s", tostring(pwad))
     utils:printf(0, "\tacronym: %s", tostring(acronym))
     utils:printf(0, "\tverbose: %s", tostring(verbose))
@@ -113,8 +115,8 @@ function love.load(arg)
         end
     end
 
-	-- read doom2.wad
-    local doom2 = wad(apppath .. "/doom2.wad", palette)
+	-- read iwad
+    local mainiwad = wad(iwad, palette)
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -130,7 +132,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(pwad, palette, acronym, patches, doom2, pk3path, toolspath, sprites, acronym_sprites, things)
+    mapset = wad(pwad, palette, acronym, patches, mainiwad, pk3path, toolspath, sprites, acronym_sprites, things)
 
     local endTime = os.time();
 

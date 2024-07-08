@@ -23,16 +23,22 @@ echo 	Wad files can be placed in same folder, just the filename is required.
 set /p "wad=Enter wad to convert: "
 echo ---------------------------------------------------------------------------------------------
 
+echo Iwad File Name:
+echo 	Iwad files can be placed in same folder, just the filename is required.
+set /p "iwad=Enter wad to convert: "
+echo ---------------------------------------------------------------------------------------------
+
 echo Verbose settings
 echo 	0 = Basic.
 echo 	1 = Same as 0 but with a few more details.
-echo 	2 = Same as 1 but Log most individual conversions/renames.
+echo 	2 = Same as 1 but log most individual conversions/renames.
 echo 	3 = Same as 2 but logs iwad reads and every individual map change. (slow)
 echo 	Blank = Same as 0
 set /p "verbose=Enter verbosity(0-3 or blank): "
 echo ---------------------------------------------------------------------------------------------
 
 if not exist %cd%\%wad% goto 20
+if not exist %cd%\%iwad% goto 25
 
 mkdir logs
 
@@ -55,11 +61,15 @@ mkdir pk3\music\%acronym%
 
 mkdir pk3\maps
 
-Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
+Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
 goto 30
 
 :20
 echo "Error: Connot find %wad%"
+pause
+
+:25
+echo "Error: Connot find %iwad%"
 pause
 
 :30
