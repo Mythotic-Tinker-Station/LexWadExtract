@@ -37,21 +37,23 @@ if not exist %cd%\%wad% goto 20
 mkdir logs
 
 rmdir pk3 /s /q
+mkdir pk3\graphics
 mkdir pk3\flats
 mkdir pk3\patches
-mkdir pk3\maps
 mkdir pk3\sounds
 mkdir pk3\textures
 mkdir pk3\sprites
 mkdir pk3\music
 
+mkdir pk3\graphics\%acronym%
 mkdir pk3\flats\%acronym%
 mkdir pk3\patches\%acronym%
-mkdir pk3\maps
 mkdir pk3\sounds\%acronym%
 mkdir pk3\textures\%acronym%
 mkdir pk3\sprites\%acronym%
 mkdir pk3\music\%acronym%
+
+mkdir pk3\maps
 
 Love2D\love.exe src %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
 goto 30
