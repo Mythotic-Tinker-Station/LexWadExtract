@@ -367,7 +367,7 @@ local wad = class("wad",
         "D_OPENIN",
         "D_EVIL",
         "D_ULTIMA",
-        "D_READ_M",     -- map32
+        "D_DM2INT",     -- map32
     },
 
 	linedef_flags =
@@ -2099,7 +2099,10 @@ function wad:renameSongs()
             if lump ~= "" then
                 for s = 1, #self.songs do
                     if self.songs[s].data == lump then
-                        self.songs[s].newname = string.format("%s%.4d", self.acronym, l)
+                        self.songs[s].newname = string.format("%s%.2d", self.acronym, l)
+						if l == 33 then
+							self.songs[s].newname = string.format("%sIN", self.acronym)
+						end
                         utils:printf(2, "\tRenamed %s to %s", self.songs[s].name, self.songs[s].newname)
                         break
                     end
@@ -2995,7 +2998,7 @@ function wad:extractSongs()
                     ext = "mid"
                 end
                 
-                local mus = utils:openFile(string.format("%s/music/%s/%s.%s", self.pk3path, self.acronym, self.songs[s].newname, ext), "w+b")
+                local mus = utils:openFile(string.format("%s/music/%s/D_%s.%s", self.pk3path, self.acronym, self.songs[s].newname, ext), "w+b")
                 mus:write(self.songs[s].data)
                 mus:close()
             end
