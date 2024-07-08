@@ -183,39 +183,39 @@ local wad = class("wad",
 
     graphicslist =
     {
-        {"CWILV00", "LV00"},
-        {"CWILV01", "LV01"},
-        {"CWILV02", "LV02"},
-        {"CWILV03", "LV03"},
-        {"CWILV04", "LV04"},
-        {"CWILV05", "LV05"},
-        {"CWILV06", "LV06"},
-        {"CWILV07", "LV07"},
-        {"CWILV08", "LV08"},
-        {"CWILV09", "LV09"},
-        {"CWILV10", "LV10"},
-        {"CWILV11", "LV11"},
-        {"CWILV12", "LV12"},
-        {"CWILV13", "LV13"},
-        {"CWILV14", "LV14"},
-        {"CWILV15", "LV15"},
-        {"CWILV16", "LV16"},
-        {"CWILV17", "LV17"},
-        {"CWILV18", "LV18"},
-        {"CWILV19", "LV19"},
-        {"CWILV20", "LV20"},
-        {"CWILV21", "LV21"},
-        {"CWILV22", "LV22"},
-        {"CWILV23", "LV23"},
-        {"CWILV24", "LV24"},
-        {"CWILV25", "LV25"},
-        {"CWILV26", "LV26"},
-        {"CWILV27", "LV27"},
-        {"CWILV28", "LV28"},
-        {"CWILV29", "LV29"},
-        {"CWILV30", "LV30"},
-        {"CWILV31", "LV31"},
-        {"CWILV32", "LV32"},
+        {"CWILV00", "V00"},
+        {"CWILV01", "V01"},
+        {"CWILV02", "V02"},
+        {"CWILV03", "V03"},
+        {"CWILV04", "V04"},
+        {"CWILV05", "V05"},
+        {"CWILV06", "V06"},
+        {"CWILV07", "V07"},
+        {"CWILV08", "V08"},
+        {"CWILV09", "V09"},
+        {"CWILV10", "V10"},
+        {"CWILV11", "V11"},
+        {"CWILV12", "V12"},
+        {"CWILV13", "V13"},
+        {"CWILV14", "V14"},
+        {"CWILV15", "V15"},
+        {"CWILV16", "V16"},
+        {"CWILV17", "V17"},
+        {"CWILV18", "V18"},
+        {"CWILV19", "V19"},
+        {"CWILV20", "V20"},
+        {"CWILV21", "V21"},
+        {"CWILV22", "V22"},
+        {"CWILV23", "V23"},
+        {"CWILV24", "V24"},
+        {"CWILV25", "V25"},
+        {"CWILV26", "V26"},
+        {"CWILV27", "V27"},
+        {"CWILV28", "V28"},
+        {"CWILV29", "V29"},
+        {"CWILV30", "V30"},
+        {"CWILV31", "V31"},
+        {"CWILV32", "V32"},
         {"WILV00", "UV00"},
         {"WILV01", "UV01"},
         {"WILV02", "UV02"},
@@ -696,7 +696,7 @@ local wad = class("wad",
 			name = "songs",
 			lumps = {},
 		},
-		["GF"] =
+		["GG"] =
 		{
 			name = "graphics",
 			lumps = {},
@@ -801,8 +801,8 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     -- it sets certain lumps to be ignored
     -- and puts all the data into their own table outside the self.namespace table
     -- so you get self.textures, self.patches, self.flats, ect
-	utils:printf(0, "Organizing Zdoom Textures...")
-	self:organizeNamespace("TX")
+	utils:printf(0, "Organizing Graphics...")
+	self:organizeNamespace("GG")
 
 	utils:printf(0, "Organizing Flats...")
 	self:organizeNamespace("FF")
@@ -813,8 +813,8 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
 	utils:printf(0, "Organizing Sprites...")
 	self:organizeNamespace("SS")
 
-	utils:printf(0, "Organizing Graphics...")
-	self:organizeNamespace("GF")
+	utils:printf(0, "Organizing Zdoom Textures...")
+	self:organizeNamespace("TX")
 
 	utils:printf(0, "Organizing LMP Sounds...")
 	self:organizeNamespace("DS")
@@ -854,6 +854,11 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     -- which stores all the switch animation definitions
 	utils:printf(0, "Processing Boom Switches...")
 	self:processSwitches()
+
+    -- read doom's patch image format, with the loaded palette
+    -- turn graphics into pngs
+	utils:printf(0, "Processing Graphics...")
+	self:buildImages(self.graphics, "Graphic")
 
     -- read doom's patch image format, with the loaded palette
     -- turn patches into pngs
@@ -939,11 +944,14 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
 	self:buildAnimdefs()
 
     -- all the extracting ones should be self explanatory
-	utils:printf(0, "Extracting Flats...")
-	self:extractFlats()
+    utils:printf(0, "Extracting Graphics...")
+    self:extractGraphics()
 
 	utils:printf(0, "Extracting Patches...")
 	self:extractPatches()
+
+	utils:printf(0, "Extracting Flats...")
+	self:extractFlats()
 
 	utils:printf(0, "Extracting Composites...")
 	self:extractTextures()
@@ -1066,7 +1074,9 @@ function wad:addExtraMarkers()
     for l, lump in ipairs(lumplist) do
         for g, graphic in ipairs(self.graphicslist) do
             if lump.name == graphic[1] then
-                utils:printf(2, "\t\tFound %s; renaming to %s%s", graphic[1], self.acronym, graphic[2])
+                local newname = self.acronym .. graphic[2]
+                utils:printf(2, "\t\tFound %s; renaming to %s", graphic[1], newname)
+                lump.name = newname
                 lumplist_new[#lumplist_new+1] = lump
             end
         end
@@ -2691,11 +2701,27 @@ function wad:getPatchName(patch, basepatch)
 	return patchname
 end
 
+function wad:extractGraphics()
+    if(self.base ~= self) then
+		for g = 1, #self.graphics do
+            utils:printf(2, "\tExtracting Graphic: %s", self.graphics[g].name)
+			local png = utils:openFile(string.format("%s/graphics/%s/%s.png", self.pk3path, self.acronym, string.lower(self.graphics[g].name)), "w+b")
+			png:write(self.graphics[g].png)
+			png:close()
+		end
+		collectgarbage()
+		utils:printf(1, "\tDone.\n")
+    else
+        utils:printf(1, "\tNot extracting base wad graphics.\n")
+    end
+
+end
+
 function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
-                utils:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
+                utils:printf(2, "\tExtracting Flat: %s", self.flats[f].newname)
 				local png = utils:openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				png:write(self.flats[f].png)
 				png:close()
