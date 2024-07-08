@@ -72,14 +72,15 @@ function love.load(arg)
     local things = arg[5]
     local patches = arg[6]
 
-    wad:printf(0, "Options: ")
-    wad:printf(0, "\tpwad: %s", tostring(pwad))
-    wad:printf(0, "\tacronym: %s", tostring(acronym))
-    wad:printf(0, "\tverbose: %s", tostring(verbose))
-    wad:printf(0, "\tacronym_sprites: %s", tostring(acronym_sprites))
-    wad:printf(0, "\tthings: %s", tostring(things))
-    wad:printf(0, "\tpatches: %s", tostring(patches))
+    utils:printf(0, "Options: ")
+    utils:printf(0, "\tpwad: %s", tostring(pwad))
+    utils:printf(0, "\tacronym: %s", tostring(acronym))
+    utils:printf(0, "\tverbose: %s", tostring(verbose))
+    utils:printf(0, "\tacronym_sprites: %s", tostring(acronym_sprites))
+    utils:printf(0, "\tthings: %s", tostring(things))
+    utils:printf(0, "\tpatches: %s", tostring(patches))
 
+    utils.verbose = tonumber(verbose)
     local palette = nil
 
     -- get pawd palette
@@ -113,7 +114,7 @@ function love.load(arg)
     end
 
 	-- read doom2.wad
-    local doom2 = wad(verbose, apppath .. "/doom2.wad", palette)
+    local doom2 = wad(apppath .. "/doom2.wad", palette)
 
     ------------------------------------------------------------------------------------------
 	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
@@ -129,7 +130,7 @@ function love.load(arg)
 	-----------------------------------------
 
     -- do all the things
-    mapset = wad(verbose, pwad, palette, acronym, patches, doom2, pk3path, toolspath, sprites, acronym_sprites, things)
+    mapset = wad(pwad, palette, acronym, patches, doom2, pk3path, toolspath, sprites, acronym_sprites, things)
 
     local endTime = os.time();
 

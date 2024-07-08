@@ -1,5 +1,8 @@
 
-local utils = {}
+local utils = 
+{
+    verbose = 3
+}
 
 -- opens a file, and returns the file handle
 function utils:openFile(filepath, filemode)
@@ -89,5 +92,51 @@ function utils:checkFormat(data, magic, offset, bigendian)
 	return false
 end
 
+-- find a value in a table
+function utils:findInTable(tbl, val)
+    for i = 1, #tbl do
+        if(tbl[i] == val) then
+            return true
+        end
+    end
+end
+
+-- print with verbosity and logging to file
+function utils:printf(verbose, ...)
+    local str = string.format(...) .. "\n"
+    if(verbose <= self.verbose) then
+        io.write(str)
+        io.flush()
+        logfile:write(str)
+    end
+end
+
+-- print with verbosity and logging to file, but without a newline
+function utils:printfNoNewLine(verbose, ...)
+    local str = string.format(...)
+    if(verbose <= self.verbose) then
+        io.write(str)
+        io.flush()
+        logfile:write(str)
+    end
+end
+
+-- print a table
+function utils:printTable(tbl, indent)
+	if not indent then indent = 0 end
+	for k, v in pairs(tbl) do
+		formatting = string.rep("  ", indent) .. k .. ": "
+		if(type(v) == "table") then
+			print(formatting)
+			self:printTable(v, indent+1)
+		elseif(type(v) == 'boolean') then
+			print(formatting .. tostring(v))
+		elseif(type(v) == "string" and #v > 50) then
+			print(formatting .. tostring(k))
+		else
+			print(formatting .. v)
+		end
+	end
+end
 
 return utils

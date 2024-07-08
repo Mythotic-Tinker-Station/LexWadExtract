@@ -701,8 +701,7 @@ local wad = class("wad",
     @return string
 -------------------------------------------------------------
 ]]
-function wad:init(verbose, path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, things)
-    self.verbose = tonumber(verbose)
+function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, sprites, acronym_sprite, things)
 	self.base = base or self
 
     if(acronym ~= nil) then 
@@ -735,12 +734,12 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     self.nodelete = nodelete
 
     -- we are loading the raw wad data in to memory
-	self:printf(0, "------------------------------------------------------------------------------------------")
-	self:printf(0, "Loading Wad '%s'...", path)
+	utils:printf(0, "------------------------------------------------------------------------------------------")
+	utils:printf(0, "Loading Wad '%s'...", path)
 	self:open(path)
 
     -- read and save the wad header
-	self:printf(0, "Gathering Header...")
+	utils:printf(0, "Gathering Header...")
 	self:gatherHeader()
 
     -- Run through the in memory wad data and add extra markers to help ID certain file types
@@ -748,7 +747,7 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- read through all the lumps, ignoring markers
     -- add markers for everything, place lumps accordingly, makes old and new markers such as MM_START MM_END which all maps are placed in
     -- rebuilds the header and directory of the in memory wad
-	self:printf(0, "Adding Extra Namespace Markers...")
+	utils:printf(0, "Adding Extra Namespace Markers...")
 	self:addExtraMarkers()
 
     -- run through the in memory wad data
@@ -756,188 +755,186 @@ function wad:init(verbose, path, palette, acronym, patches, base, pk3path, tools
     -- put all lump data within each _START _END into their own namespace table
     -- so texture lumps for example, which are between TX_START and TX_END
     -- would be in self.namespace[textures].lumps[#] = { name=name, size=size, pos=filepos, data=filedata }
-	self:printf(0, "Building Namespaces...")
+	utils:printf(0, "Building Namespaces...")
 	self:buildNamespaces()
 
     -- all of these organizers run through a specific namespace
     -- it sets certain lumps to be ignored
     -- and puts all the data into their own table outside the self.namespace table
     -- so you get self.textures, self.patches, self.flats, ect
-	self:printf(0, "Organizing Zdoom Textures...")
+	utils:printf(0, "Organizing Zdoom Textures...")
 	self:organizeNamespace("TX")
 
-	self:printf(0, "Organizing Flats...")
+	utils:printf(0, "Organizing Flats...")
 	self:organizeNamespace("FF")
 
-	self:printf(0, "Organizing Patches...")
+	utils:printf(0, "Organizing Patches...")
 	self:organizeNamespace("PP")
 
-	self:printf(0, "Organizing Sprites...")
+	utils:printf(0, "Organizing Sprites...")
 	self:organizeNamespace("SS")
 
-	self:printf(0, "Organizing Graphics...")
+	utils:printf(0, "Organizing Graphics...")
 	self:organizeNamespace("GF")
 
-	self:printf(0, "Organizing LMP Sounds...")
+	utils:printf(0, "Organizing LMP Sounds...")
 	self:organizeNamespace("DS")
 
-	self:printf(0, "Organizing WAV Sounds...")
+	utils:printf(0, "Organizing WAV Sounds...")
 	self:organizeNamespace("WS")
 
-	self:printf(0, "Organizing OGG Sounds...")
+	utils:printf(0, "Organizing OGG Sounds...")
 	self:organizeNamespace("OS")
 
-	self:printf(0, "Organizing FLAC Sounds...")
+	utils:printf(0, "Organizing FLAC Sounds...")
 	self:organizeNamespace("CS")
 
-	self:printf(0, "Organizing Music...")
+	utils:printf(0, "Organizing Music...")
 	self:organizeNamespace("MS")
 
     -- maps needed special organization code
-	self:printf(0, "Organizing Maps...")
+	utils:printf(0, "Organizing Maps...")
 	self:organizeMaps()
 
     -- read the palette, save each color into a table
     -- self.palette[entry] = { r, g, b }
 	
     if(palette == nil) then
-        self:printf(0, "Processing Palette...")
+        utils:printf(0, "Processing Palette...")
 	    self:processPalette()
     else
-        self:printf(0, "Skipping Palette...")
+        utils:printf(0, "Skipping Palette...")
     end
 
     -- process the boom ANIMATED binary lump
     -- which stores all the texture animation definitions
-	self:printf(0, "Processing Boom Animations...")
+	utils:printf(0, "Processing Boom Animations...")
 	self:processAnimated()
 
     -- process the boom SWITCHES binary lump
     -- which stores all the switch animation definitions
-	self:printf(0, "Processing Boom Switches...")
+	utils:printf(0, "Processing Boom Switches...")
 	self:processSwitches()
 
     -- read doom's patch image format, with the loaded palette
     -- turn patches into pngs
-	self:printf(0, "Processing Patches...")
+	utils:printf(0, "Processing Patches...")
 	self:buildImages(self.patches, "Patch")
 
     -- read doom's patch image format, with the loaded palette
     -- turn flats into pngs
-	self:printf(0, "Processing Flats...")
+	utils:printf(0, "Processing Flats...")
 	self:buildFlats()
 
     -- read doom's patch image format, with the loaded palette
     -- turn sprites into pngs
-	self:printf(0, "Processing Sprites...")
+	utils:printf(0, "Processing Sprites...")
 	self:buildImages(self.sprites, "Sprite")
 
     -- read doom's PNAMES definition lump
-	self:printf(0, "Processing PNAMES...")
+	utils:printf(0, "Processing PNAMES...")
 	self:processPnames()
 
     -- read through doom's TEXTUREx lump
     -- this lump makes new images in memory by stacking patches on top of each other
     -- we do the same, but then extract the result as a png
-	self:printf(0, "Processing TEXTUREx...")
+	utils:printf(0, "Processing TEXTUREx...")
 	self:processTexturesX(1)
 	self:processTexturesX(2)
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 
     -- simply just extract png files
     -- we no longer use this as zdoom textures namespace is now merged with patches
-    --self:printf(0, "Processing Zdoom Textures...")
+    --utils:printf(0, "Processing Zdoom Textures...")
 	--self:moveZDoomTextures()
 
     -- find and remove duplicate files by md5 hash
-	self:printf(0, "Processing Duplicates...")
+	utils:printf(0, "Processing Duplicates...")
 	self:filterDuplicates()
 
     -- rename all flats in this wad with a number system
-	self:printf(0, "Rename Flats...")
+	utils:printf(0, "Rename Flats...")
 	self:renameFlats()
 
     -- rename all flats in this wad with a number system
-	self:printf(0, "Rename Sprites...")
+	utils:printf(0, "Rename Sprites...")
 	self:renameSprites()
    
     -- rename all composites in TEXTUREx with a number system
-	self:printf(0, "Rename Composites...")
+	utils:printf(0, "Rename Composites...")
 	self:renameTextures()
 
     -- rename all patches in this wad with a number system
-	self:printf(0, "Rename Patches...")
+	utils:printf(0, "Rename Patches...")
 	self:renamePatches()
 
     -- rename all sounds in this wad with a number system
-	self:printf(0, "Rename Sounds...")
+	utils:printf(0, "Rename Sounds...")
 	self:renameSounds()
 
     -- read zdoom's textures.txt (there is no code for this yet)
-	self:printf(0, "Processing TEXTURES...")
+	utils:printf(0, "Processing TEXTURES...")
 	self.textures.original = self:processTextLump("TEXTURES")
 
     -- read zdoom's animdefs.txt file
-	self:printf(0, "Processing ANIMDEFS...")
+	utils:printf(0, "Processing ANIMDEFS...")
 	self.animdefs.original = self:processTextLump("ANIMDEFS")
 
     -- this reads raw doom and hexen map data into tables
-	self:printf(0, "Processing Maps...")
+	utils:printf(0, "Processing Maps...")
 	self:processMaps()
 
     -- this modifies maps in a number of ways
     -- renames all textures on the map with the newly renamed ones
     -- rebuilds sidedefs and sectors back into their binary form
     -- does this for doom hexen and udmf formats
-	self:printf(0, "Modifying Maps...")
+	utils:printf(0, "Modifying Maps...")
 	self:ModifyMaps()
 
     -- builds an animdefs.txt files for boom's ANIMATED and SWITCHES definitions
-	self:printf(0, "Processing ANIMDEFS for Doom/Boom...")
+	utils:printf(0, "Processing ANIMDEFS for Doom/Boom...")
 	self:buildAnimdefs()
 
     -- all the extracting ones should be self explanatory
-	self:printf(0, "Extracting Flats...")
+	utils:printf(0, "Extracting Flats...")
 	self:extractFlats()
 
-	self:printf(0, "Extracting Patches...")
+	utils:printf(0, "Extracting Patches...")
 	self:extractPatches()
 
-	self:printf(0, "Extracting Composites...")
+	utils:printf(0, "Extracting Composites...")
 	self:extractTextures()
 
-	self:printf(0, "Extracting Sprites...")
+	utils:printf(0, "Extracting Sprites...")
 	self:extractSprites()
 
-	self:printf(0, "Extracting Maps...")
+	utils:printf(0, "Extracting Maps...")
 	self:extractMaps()
 
-	self:printf(0, "Extracting Sounds...")
+	utils:printf(0, "Extracting Sounds...")
 	self:extractSounds()
 
-	self:printf(0, "Extracting ANIMDEFS...")
+	utils:printf(0, "Extracting ANIMDEFS...")
 	self:extractAnimdefs()
 
-	self:printf(0, "Extracting TEXTURES...")
+	utils:printf(0, "Extracting TEXTURES...")
 	self:extractTexturesLump()
 
-	self:printf(0, "Extracting SNDINFO...")
+	utils:printf(0, "Extracting SNDINFO...")
 	self:extractSNDINFO()
 
     -- removed any unused textures found
-	self:printf(0, "Removing Unused Textures")
+	utils:printf(0, "Removing Unused Textures")
 	self:removeUnusedTextures()
 
     -- we're done!
-	self:printf(0, "Complete.\n")
+	utils:printf(0, "Complete.\n")
     
     -- free up memory
 	collectgarbage()
 end
 
 function wad:initPalette(verbose, path)
-    self.verbose = tonumber(verbose)
-
 	self.base = base or self
 	self.pk3path = pk3path
 	self.toolspath = toolspath
@@ -946,7 +943,7 @@ function wad:initPalette(verbose, path)
 	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
 
     -- we are loading the raw wad data in to memory
-	self:printf(0, "Loading palette from mapset...", path)
+	utils:printf(0, "Loading palette from mapset...", path)
 
     if(self.palette ~= nil) then
         return self.palette
@@ -971,8 +968,8 @@ function wad:gatherHeader()
 
 	local isbase = (self.base == self) and "true" or "false"
 	collectgarbage()
-	self:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", self.header.magic, self.header.lumpcount, self.header.dirpos, isbase)
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tType: %s\n\tLumps: %d\n\tDirectory Position: 0x%X.\n\tBase: %s", self.header.magic, self.header.lumpcount, self.header.dirpos, isbase)
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:addExtraMarkers()
@@ -993,7 +990,7 @@ function wad:addExtraMarkers()
     ------------------
     -- specials 
     ------------------
-    self:printf(1, "\tCreating Specials Namespace...", name)
+    utils:printf(1, "\tCreating Specials Namespace...", name)
 
     -- make the SP_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SP_START", data = ""}
@@ -1002,7 +999,7 @@ function wad:addExtraMarkers()
     for l, lump in ipairs(lumplist) do
         for s, special in ipairs(self.specialslist) do
             if lump.name == special then
-                self:printf(2, "\t\tFound %s", special)
+                utils:printf(2, "\t\tFound %s", special)
                 lumplist_new[#lumplist_new+1] = lump
             end
         end
@@ -1014,7 +1011,7 @@ function wad:addExtraMarkers()
     ------------------
     -- graphics
     ------------------
-    self:printf(1, "\tCreating Graphics Namespace...", name)
+    utils:printf(1, "\tCreating Graphics Namespace...", name)
 
     -- make the GG_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "GG_START", data = ""}
@@ -1023,7 +1020,7 @@ function wad:addExtraMarkers()
     for l, lump in ipairs(lumplist) do
         for g, graphic in ipairs(self.graphicslist) do
             if lump.name == graphic[1] then
-                self:printf(2, "\t\tFound %s; renaming to %s%s", graphic[1], self.acronym, graphic[2])
+                utils:printf(2, "\t\tFound %s; renaming to %s%s", graphic[1], self.acronym, graphic[2])
                 lumplist_new[#lumplist_new+1] = lump
             end
         end
@@ -1035,7 +1032,7 @@ function wad:addExtraMarkers()
     ------------------
     -- maps
     ------------------
-    self:printf(1, "\tCreating Maps Namespace...", name)
+    utils:printf(1, "\tCreating Maps Namespace...", name)
 
     -- make the MM_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_START", data = ""}
@@ -1093,7 +1090,7 @@ function wad:addExtraMarkers()
                         lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "HM_END", data = ""}
                     end
 
-                    self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
+                    utils:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
                 end
             end
 
@@ -1105,13 +1102,13 @@ function wad:addExtraMarkers()
                             for lll = l, ll do
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
-                            self:printf(5)
+                            utils:printf(5)
                             lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_END", data = ""}
                             t = "UDMF"
                             break;
                         end
                     end
-                    self:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
+                    utils:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
                 end
             end
         --end
@@ -1122,14 +1119,14 @@ function wad:addExtraMarkers()
     ------------------
     -- doom sounds
     ------------------
-    self:printf(1, "\tCreating Doom Sounds Namespace...", name)
+    utils:printf(1, "\tCreating Doom Sounds Namespace...", name)
 
     -- make the DS_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DS_START", data = ""}
 
     for l, lump in ipairs(lumplist) do
         if lump.name:sub(1, 2) == "DS" then
-            self:printf(2, "\t\tFound Doom Sound: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound Doom Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
     end
@@ -1140,14 +1137,14 @@ function wad:addExtraMarkers()
     ------------------
     -- wave sounds
     ------------------
-    self:printf(1, "\tCreating Wave Sounds Namespace...", name)
+    utils:printf(1, "\tCreating Wave Sounds Namespace...", name)
 
     -- make the WS_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "WS_START", data = ""}
 
     for l, lump in ipairs(lumplist) do
         if lump.name:sub(1, 4) == "RIFF" then
-            self:printf(2, "\t\tFound Wave Sound: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound Wave Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
     end
@@ -1158,14 +1155,14 @@ function wad:addExtraMarkers()
     ------------------
     -- ogg sounds
     ------------------
-    self:printf(1, "\tCreating Ogg Sounds Namespace...", name)
+    utils:printf(1, "\tCreating Ogg Sounds Namespace...", name)
 
     -- make the OS_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "OS_START", data = ""}
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 3) == "Ogg" then
-            self:printf(2, "\t\tFound OGG Sound: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound OGG Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
     end
@@ -1176,14 +1173,14 @@ function wad:addExtraMarkers()
     ------------------
     -- flac sounds
     ------------------
-    self:printf(1, "\tCreating Flac Sounds Namespace...", name)
+    utils:printf(1, "\tCreating Flac Sounds Namespace...", name)
 
     -- make the CS_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "CS_START", data = ""}
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 4) == "fLaC" then
-            self:printf(2, "\t\tFound FLAC Sound: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound FLAC Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
     end
@@ -1194,18 +1191,18 @@ function wad:addExtraMarkers()
     ------------------
     -- music
     ------------------
-    self:printf(1, "\tCreating Music Namespace...", name)
+    utils:printf(1, "\tCreating Music Namespace...", name)
 
     -- make the MS_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MS_START", data = ""}
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 3) == "MUS" then
-            self:printf(2, "\t\tFound MUS song: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound MUS song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
         if lump.data:sub(1, 4) == "MThd" then
-            self:printf(2, "\t\tFound MIDI song: %s", lumplist[l].name)
+            utils:printf(2, "\t\tFound MIDI song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
     end
@@ -1216,7 +1213,7 @@ function wad:addExtraMarkers()
     ------------------
     -- texture
     ------------------
-    self:printf(1, "\tCreating Textures Namespace...", name)
+    utils:printf(1, "\tCreating Textures Namespace...", name)
 
     -- make the TX_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "TX_START", data = ""}
@@ -1226,7 +1223,7 @@ function wad:addExtraMarkers()
             for ll = l, #lumplist do
                 if lumplist[ll].name == "TX_END" then
                     for lll = l, ll do
-                        self:printf(2, "\t\tFound Texture: %s", lumplist[lll].name)
+                        utils:printf(2, "\t\tFound Texture: %s", lumplist[lll].name)
                         lumplist_new[#lumplist_new+1] = lumplist[lll]
                     end
                     break
@@ -1241,7 +1238,7 @@ function wad:addExtraMarkers()
     ------------------
     -- sprites
     ------------------
-    self:printf(1, "\tCreating Sprites Namespace...", name)
+    utils:printf(1, "\tCreating Sprites Namespace...", name)
 
     -- make the S_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SS_START", data = ""}
@@ -1251,7 +1248,7 @@ function wad:addExtraMarkers()
             for ll = l, #lumplist do
                 if lumplist[ll].name == "S_END" or lumplist[ll].name == "SS_END" then
                     for lll = l+1, ll-1 do
-                        self:printf(2, "\t\tFound Sprite: %s", lumplist[lll].name)
+                        utils:printf(2, "\t\tFound Sprite: %s", lumplist[lll].name)
                         lumplist_new[#lumplist_new+1] = lumplist[lll]
                     end
                     break
@@ -1266,7 +1263,7 @@ function wad:addExtraMarkers()
     ------------------
     -- flats
     ------------------
-    self:printf(1, "\tCreating Flats Namespace...", name)
+    utils:printf(1, "\tCreating Flats Namespace...", name)
 
     -- make the F_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "FF_START", data = ""}
@@ -1278,7 +1275,7 @@ function wad:addExtraMarkers()
                     for lll = l+1, ll-1 do
                         if lumplist[lll].name:sub(1,8) ~= "F1_START" and lumplist[lll].name:sub(1,8) ~= "F2_START" and lumplist[lll].name:sub(1,8) ~= "F3_START" then
                             if lumplist[lll].name:sub(1,6) ~= "F1_END" and lumplist[lll].name:sub(1,6) ~= "F2_END" and lumplist[lll].name:sub(1,6) ~= "F3_END" then
-                                self:printf(2, "\t\tFound Flat: %s", lumplist[lll].name)
+                                utils:printf(2, "\t\tFound Flat: %s", lumplist[lll].name)
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
                         end
@@ -1295,7 +1292,7 @@ function wad:addExtraMarkers()
     ------------------
     -- patches
     ------------------
-    self:printf(1, "\tCreating Patches Namespace...", name)
+    utils:printf(1, "\tCreating Patches Namespace...", name)
 
     -- make the P_START marker
     lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "PP_START", data = ""}
@@ -1307,7 +1304,7 @@ function wad:addExtraMarkers()
                     for lll = l+1, ll-1 do
                         if lumplist[lll].name:sub(1,8) ~= "P1_START" and lumplist[lll].name:sub(1,8) ~= "P2_START" and lumplist[lll].name:sub(1,8) ~= "P3_START" then
                             if lumplist[lll].name:sub(1,6) ~= "P1_END" and lumplist[lll].name:sub(1,6) ~= "P2_END" and lumplist[lll].name:sub(1,6) ~= "P3_END" then
-                                self:printf(2, "\t\tFound Patch: %s", lumplist[lll].name)
+                                utils:printf(2, "\t\tFound Patch: %s", lumplist[lll].name)
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
                         end
@@ -1325,7 +1322,7 @@ function wad:addExtraMarkers()
     local pos = {}
     local lumpchunk = ""
 
-    self:printf(1, "\tConcatenating lump data...")
+    utils:printf(1, "\tConcatenating lump data...")
 
 
     local datatable = {}
@@ -1370,7 +1367,7 @@ function wad:buildNamespaces()
 		-- end namespace
 		if(name == string.format("%s_END", namespace)) then
 			found = false
-			self:printf(1, "\tFound End of Namespace %s.", name)
+			utils:printf(1, "\tFound End of Namespace %s.", name)
             foundend = true
 		end
 
@@ -1385,14 +1382,14 @@ function wad:buildNamespaces()
 		if(name:sub(-6) == "_START" and not found) then
 			namespace = name:sub(1, 2)
 			found = true
-			self:printf(1, "\tFound Start of Namespace %s.", name)
+			utils:printf(1, "\tFound Start of Namespace %s.", name)
 		end
 	end
     if(not foundend) then
-        self:printf(0, "\tCould not find the end marker of namespace %s", name)
+        utils:printf(0, "\tCould not find the end marker of namespace %s", name)
         error()
     end
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 	collectgarbage()
 end
 
@@ -1419,12 +1416,12 @@ function wad:organizeNamespace(name)
 				end
 			end
 		end
-		self:printf(1, "\tFound '%d' %s.", #self[self.namespaces[name].name], self.namespaces[name].name)
+		utils:printf(1, "\tFound '%d' %s.", #self[self.namespaces[name].name], self.namespaces[name].name)
 	else
-		self:printf(1, "\tNo '%s' found.", self.namespaces[name].name)
+		utils:printf(1, "\tNo '%s' found.", self.namespaces[name].name)
 	end
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:organizeMaps()
@@ -1466,7 +1463,7 @@ function wad:organizeMaps()
 
 			-- structure map data
 			for m = 1, #self.maps do
-                self:printf(2, "\tFound %s", self.maps[m].name)
+                utils:printf(2, "\tFound %s", self.maps[m].name)
 				for l = self.maps[m].pos[1], self.maps[m].pos[2] do
 					if(self.namespaces["MM"].lumps[l].name == "THINGS") then 	self.maps[m].raw.things 		= self.namespaces["MM"].lumps[l].data end
 					if(self.namespaces["MM"].lumps[l].name == "LINEDEFS") then 	self.maps[m].raw.linedefs 		= self.namespaces["MM"].lumps[l].data end
@@ -1498,14 +1495,14 @@ function wad:organizeMaps()
 				end
 			end
 
-			self:printf(1, "\tDoom Maps: '%d' \n\tHexen Maps: '%d' \n\tUDMF Maps: '%d'", count_dm, count_hm, count_um)
+			utils:printf(1, "\tDoom Maps: '%d' \n\tHexen Maps: '%d' \n\tUDMF Maps: '%d'", count_dm, count_hm, count_um)
 		end
 		collectgarbage()
 	else
-		self:printf(1, "\tNot organizing base wad maps.")
+		utils:printf(1, "\tNot organizing base wad maps.")
 	end
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:processPalette()
@@ -1527,10 +1524,10 @@ function wad:processPalette()
 		end
 	else
 		self.palette = self.base.palette
-		self:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
+		utils:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
 	end
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:buildFlats()
@@ -1539,7 +1536,7 @@ function wad:buildFlats()
 		local t = "Flat"
 
 		if (not utils:checkFormat(flat.data, "PNG", 2, true)) then
-			self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
+			utils:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
 			flat.image = love.image.newImageData(64, 64)
 			flat.rows = {}
 
@@ -1553,21 +1550,21 @@ function wad:buildFlats()
 
 			flat.png = flat.image:encode("png"):getString()
 			flat.md5 = love.data.hash("md5", flat.png)
-			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
+			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
 		else
 			t = "PNG"
-			self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
+			utils:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
 			flat.png = flat.data
 			flat.image = love.graphics.newImage(love.image.newImageData(love.data.newByteData(flat.png)))
 			flat.md5 = love.data.hash("md5", flat.png)
-			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
+			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", flat.md5))
 			flat.notdoomflat = true
 		end
 		self.flats[flat.name] = flat
 	end
 
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:buildImages(images, imagetype)
@@ -1575,13 +1572,13 @@ function wad:buildImages(images, imagetype)
 		local image = images[i]
 
 		if (not utils:checkFormat(image.data, "PNG", 2, true)) then
-			self:printfNoNewLine(2, "\tBuilding %s: %s; Type: %s; ", imagetype, image.name, imagetype)
+			utils:printfNoNewLine(2, "\tBuilding %s: %s; Type: %s; ", imagetype, image.name, imagetype)
 			image.width = love.data.unpack("<H", image.data)
 			image.height = love.data.unpack("<H", image.data, 3)
 			image.xoffset = love.data.unpack("<h", image.data, 5)
 			image.yoffset = love.data.unpack("<h", image.data, 7)
 			image.imagedata = love.image.newImageData(image.width, image.height)
-			self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
+			utils:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
 			image.columns = {}
 
 			for c = 1, image.width do
@@ -1637,9 +1634,9 @@ function wad:buildImages(images, imagetype)
 			image.image = love.graphics.newImage(image.imagedata)
 			image.png = image.imagedata:encode("png"):getString()
 			image.md5 = love.data.hash("md5", image.png)
-			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
+			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
 		else
-			self:printfNoNewLine(2, "\tBuilding %s: %s; Type: PNG; ", imagetype, image.name)
+			utils:printfNoNewLine(2, "\tBuilding %s: %s; Type: PNG; ", imagetype, image.name)
 			filedata = love.filesystem.newFileData(image.data, "-")
 			image.imagedata = love.image.newImageData(filedata)
 
@@ -1648,18 +1645,18 @@ function wad:buildImages(images, imagetype)
 			local offx, offy = utils:readGRAB(image.data)
 			image.xoffset = offx or 0
 			image.yoffset = offy or 0
-			self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
+			utils:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
 
 			image.image = love.graphics.newImage(image.imagedata)
 			image.png = image.imagedata:encode("png"):getString()
 			image.md5 = love.data.hash("md5", image.png)
-			self:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
+			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
 			image.notdoompatch = true
 		end
 		images[image.name] = image
 	end
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:setPixelForPalette(image, x, y, colordata, colorindex)
@@ -1680,15 +1677,15 @@ function wad:processPnames()
 		for p = 5, count*8, 8 do
 			local index = #self.pnames+1
 			self.pnames[index] = utils:removePadding(love.data.unpack("<c8", pndata, p)):upper()
-            self:printf(2, "\tFound PNAMES Patch: %s", self.pnames[index])
+            utils:printf(2, "\tFound PNAMES Patch: %s", self.pnames[index])
 		end
-		self:printf(1, "\tFound '%d' PNAMES patches.", #self.pnames)
+		utils:printf(1, "\tFound '%d' PNAMES patches.", #self.pnames)
 	else
 		self.pnames = self.base.pnames
-		self:printf(1, "\tNo PNAMES found. Using base wad PNAMES.")
+		utils:printf(1, "\tNo PNAMES found. Using base wad PNAMES.")
 	end
 	collectgarbage()
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:processTexturesX(num)
@@ -1777,12 +1774,12 @@ function wad:processTexturesX(num)
 			composite.png = composite.canvas:newImageData():encode("png"):getString()
 			composite.md5 = love.data.hash("md5", composite.png)
 
-            self:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
+            utils:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
 		end
-	self:printf(1, "\tFound '%d' composite textures.", numtextures)
+	utils:printf(1, "\tFound '%d' composite textures.", numtextures)
 	else
 		--self.composites = self.base.composites
-		--self:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
+		--utils:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
 	end
 	collectgarbage()
 end
@@ -1820,7 +1817,7 @@ function wad:processAnimated()
 
 				self.animlist[index][2] = first
 				self.animlist[index][3] = last
-                self:printf(2, "\tFound ANIMATED define: %s to %s with speed %s", first, last, speed)
+                utils:printf(2, "\tFound ANIMATED define: %s to %s with speed %s", first, last, speed)
 			end
 
 			count = count + 23
@@ -1853,7 +1850,7 @@ function wad:processSwitches()
 					end
 				end
 			end
-            self:printf(2, "\tFound SWITCH define: %s, %s, %s", off, on, t)
+            utils:printf(2, "\tFound SWITCH define: %s, %s, %s", off, on, t)
 			if(isdup == false) then
 				local index = #self.switchlist+1
 				self.switchlist[index] = {}
@@ -1877,9 +1874,9 @@ function wad:moveZDoomTextures()
 			self.composites[c].iszdoom = true
 		end
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot moving base wad zdoom textures.\n")
+		utils:printf(1, "\tNot moving base wad zdoom textures.\n")
 	end
 	collectgarbage()
 end
@@ -1902,7 +1899,7 @@ function wad:filterDuplicates()
 		end
 	end
 
-	self:printf(1, "\tFound '%d' duplicates", count)
+	utils:printf(1, "\tFound '%d' duplicates", count)
 	count = 0
 	-- filter dups from base wad
 	if(self.base ~= self) then
@@ -1919,8 +1916,8 @@ function wad:filterDuplicates()
 		count = count + self:flagDuplicateAssets(self.sprites, self.base.sprites)
 	end
 
-	self:printf(1, "\tFound '%d' doom duplicates", count)
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tFound '%d' doom duplicates", count)
+	utils:printf(1, "\tDone.\n")
     collectgarbage()
 end
 
@@ -1937,7 +1934,7 @@ function wad:flagDuplicateAssets(pwadassets, baseassets)
 				totalduplicates = totalduplicates + 1
 				pwadasset.isdoomdup = true
 				pwadasset.doomdup = baseasset.name
-				self:printf(2, "\tFound pwad:'%s' and base:'%s' duplicates.", pwadasset.name, baseasset.name)
+				utils:printf(2, "\tFound pwad:'%s' and base:'%s' duplicates.", pwadasset.name, baseasset.name)
 			end
 		end
 	end
@@ -1948,9 +1945,9 @@ end
 function wad:renamePatches()
 	if(self.base ~= self) then
 		local patchcount = self:renameAssets(self.patches)
-		self:printf(1, "\tDone. Found %d patches.\n", patchcount)
+		utils:printf(1, "\tDone. Found %d patches.\n", patchcount)
 	else
-		self:printf(1, "\tNot renaming base wad patches.\n")
+		utils:printf(1, "\tNot renaming base wad patches.\n")
 	end
     collectgarbage()
 end
@@ -1958,9 +1955,9 @@ end
 function wad:renameTextures()
 	if(self.base ~= self) then
 		local texturecount = self:renameAssets(self.composites)
-		self:printf(1, "\tDone. Found %d composites.\n", texturecount)
+		utils:printf(1, "\tDone. Found %d composites.\n", texturecount)
 	else
-		self:printf(1, "\tNot renaming base wad textures.\n")
+		utils:printf(1, "\tNot renaming base wad textures.\n")
 	end
     collectgarbage()
 end
@@ -1968,9 +1965,9 @@ end
 function wad:renameFlats()
 	if(self.base ~= self) then
 		local flatcount = self:renameAssets(self.flats)
-		self:printf(1, "\tDone. Found %d flats.\n", flatcount)
+		utils:printf(1, "\tDone. Found %d flats.\n", flatcount)
 	else
-		self:printf(1, "\tNot renaming base wad flats.\n")
+		utils:printf(1, "\tNot renaming base wad flats.\n")
 	end
     collectgarbage()
 end
@@ -1983,7 +1980,7 @@ function wad:renameAssets(assets)
 
 		self.texturecount = self.texturecount + 1
 		local newname = string.format("%s%.4d", self.acronym, self.texturecount)
-		self:printf(2, "\tRenaming %s to %s", asset.name, newname)
+		utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
 		asset.newname = newname
 	end
 
@@ -2000,16 +1997,16 @@ function wad:renameSprites()
             if(spritesets[set] == nil) then 
                 spritesets[set] = {} 
                 setcount = setcount + 1
-                self:printf(1, "\tFound Sprite Set: %s", set)
+                utils:printf(1, "\tFound Sprite Set: %s", set)
             end
             self.sprites[s].newname = string.format("%s%02d%s", self.acronym_sprite, setcount, self.sprites[s].name:sub(5))
-            self:printf(2, "\tRenamed %s to %s", self.sprites[s].name, self.sprites[s].newname)
+            utils:printf(2, "\tRenamed %s to %s", self.sprites[s].name, self.sprites[s].newname)
         end
 
-        self:printf(1, "\tFound %d Sprite Sets.", setcount)
-		self:printf(1, "\tDone.\n")
+        utils:printf(1, "\tFound %d Sprite Sets.", setcount)
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot renaming base wad patches.\n")
+		utils:printf(1, "\tNot renaming base wad patches.\n")
 	end
     collectgarbage()
 end
@@ -2021,30 +2018,30 @@ function wad:renameSounds()
 		for s = 1, #self.doomsounds do
 			self.soundcount = self.soundcount + 1
 			self.doomsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
-            self:printf(2, "\tRenamed %s to %s", self.doomsounds[s].name, self.doomsounds[s].newname)
+            utils:printf(2, "\tRenamed %s to %s", self.doomsounds[s].name, self.doomsounds[s].newname)
 		end
 
 		--WAV
 		for s = 1, #self.wavesounds do
 			self.soundcount = self.soundcount + 1
 			self.wavesounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
-            self:printf(2, "\tRenamed %s to %s", self.wavesounds[s].name, self.wavesounds[s].newname)
+            utils:printf(2, "\tRenamed %s to %s", self.wavesounds[s].name, self.wavesounds[s].newname)
 		end
 
 		--OGG
 		for s = 1, #self.oggsounds do
 			self.soundcount = self.soundcount + 1
 			self.oggsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
-            self:printf(2, "\tRenamed %s to %s", self.oggsounds[s].name, self.oggsounds[s].newname)
+            utils:printf(2, "\tRenamed %s to %s", self.oggsounds[s].name, self.oggsounds[s].newname)
 		end
 
 		--FLAC
 		for s = 1, #self.flacsounds do
 			self.soundcount = self.soundcount + 1
 			self.flacsounds[s].newname = string.format("%s%.4d", self.acronym, self.soundcount)
-            self:printf(2, "\tRenamed %s to %s", self.flacsounds[s].name, self.flacsounds[s].newname)
+            utils:printf(2, "\tRenamed %s to %s", self.flacsounds[s].name, self.flacsounds[s].newname)
 		end
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	end
 	collectgarbage()
 end
@@ -2151,16 +2148,16 @@ function wad:buildAnimdefs()
 			end
 		end
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot building animdefs for base wad.\n")
+		utils:printf(1, "\tNot building animdefs for base wad.\n")
 	end
 end
 
 function wad:processMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
-			self:printf(2, "\tProcessing Map: %d, %s", m, self.maps[m].name)
+			utils:printf(2, "\tProcessing Map: %d, %s", m, self.maps[m].name)
 
 			-- doom
 			if(self.maps[m].format == "DM") then
@@ -2318,10 +2315,10 @@ function wad:processMaps()
 			collectgarbage()
 		end
 	else
-		self:printf(1, "\tNot processing base wad maps.")
+		utils:printf(1, "\tNot processing base wad maps.")
 	end
 
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:ModifyMaps()
@@ -2329,7 +2326,7 @@ function wad:ModifyMaps()
 		for m = 1, #self.maps do
 			local map = self.maps[m]
 
-			self:printf(1, "\tModifying Map: %d", m)
+			utils:printf(1, "\tModifying Map: %d", m)
 			
 			local actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/actorlist.txt")
 			actorlist:read("*line")
@@ -2342,7 +2339,7 @@ function wad:ModifyMaps()
 
 				-- thing replacement
 				if(self.things == "Y") then
-                    self:printf(2, "\t\tReplacing actors.")
+                    utils:printf(2, "\t\tReplacing actors.")
 					while line ~= nil do
                         
 						-- actor replacement stuff
@@ -2353,7 +2350,7 @@ function wad:ModifyMaps()
 						actor2 = actor2 + 0
 						for t = 1, #map.things do
 							if(map.things[t].typ == actor1) then
-                                self:printf(3, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, map.things[t].x, map.things[t].y, map.things[t].angle, map.things[t].flags, actor1, actor2)
+                                utils:printf(3, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, map.things[t].x, map.things[t].y, map.things[t].angle, map.things[t].flags, actor1, actor2)
                                 map.things[t].typ = actor2
 							end
 						end
@@ -2364,21 +2361,21 @@ function wad:ModifyMaps()
 				end
 
 				-- find textures and rename
-                self:printf(2, "\t\tReplacing textures.")
+                utils:printf(2, "\t\tReplacing textures.")
 				for c = 1, #self.composites do
 					local composite = self.composites[c]
 					self:replaceMapTextures(map, composite, composite.newname)
 				end
 
 				-- find flats and rename
-                self:printf(2, "\t\tReplacing flats.")
+                utils:printf(2, "\t\tReplacing flats.")
 				for f = 1, #self.flats do
 					local flat = self.flats[f]
 					self:replaceMapTextures(map, flat, flat.newname)
 				end
 
 				-- find patches and rename
-                self:printf(2, "\t\tReplacing patches.")
+                utils:printf(2, "\t\tReplacing patches.")
 				for p = 1, #self.patches do
 					local patch = self.patches[p]
 
@@ -2386,7 +2383,7 @@ function wad:ModifyMaps()
 				end
 
 				-- build raw things back
-                self:printf(2, "\t\tBuilding things lump...")
+                utils:printf(2, "\t\tBuilding things lump...")
 				count = 0
 				map.raw.things = ""
 				local t = {}
@@ -2401,7 +2398,7 @@ function wad:ModifyMaps()
 				map.raw.things = table.concat(t)
 
 				-- build raw sidedefs back
-                self:printf(2, "\t\tBuilding sidedefs lump...")
+                utils:printf(2, "\t\tBuilding sidedefs lump...")
 				count = 0
 				map.raw.sidedefs = ""
 				t = {}
@@ -2412,7 +2409,7 @@ function wad:ModifyMaps()
 				map.raw.sidedefs = table.concat(t)
 
 				-- build raw sectors back
-                self:printf(2, "\t\tBuilding sectors lump...")
+                utils:printf(2, "\t\tBuilding sectors lump...")
 				count = 0
 				map.raw.sectors = ""
 				t = {}
@@ -2455,10 +2452,10 @@ function wad:ModifyMaps()
 			end
 		end
 	else
-		self:printf(1, "\tNot modifying base wad maps.")
+		utils:printf(1, "\tNot modifying base wad maps.")
 	end
 
-	self:printf(1, "\tDone.\n")
+	utils:printf(1, "\tDone.\n")
 end
 
 function wad:replaceMapTextures(map, texture, newtexturename)
@@ -2468,19 +2465,19 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sidedef = map.sidedefs[s]
 
 			if (sidedef.upper_texture == texture.name) then
-				self:printf(3, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
+				utils:printf(3, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
 				sidedef.upper_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.lower_texture == texture.name) then
-				self:printf(3, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
+				utils:printf(3, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
 				sidedef.lower_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sidedef.middle_texture == texture.name) then
-				self:printf(3, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
+				utils:printf(3, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
 				sidedef.middle_texture = newtexturename
 				texture.used = true
 			end
@@ -2491,13 +2488,13 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sector = map.sectors[ss]
 
 			if (sector.floor_texture == texture.name) then
-				self:printf(3, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
+				utils:printf(3, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
 				sector.floor_texture = newtexturename
 				texture.used = true
 			end
 
 			if (sector.ceiling_texture == texture.name) then
-				self:printf(3, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
+				utils:printf(3, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
 				sector.ceiling_texture = newtexturename
 				texture.used = true
 			end
@@ -2508,17 +2505,17 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sidedef = map.sidedefs[s]
 
 			if (sidedef.upper_texture == texture.name) then
-				self:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
+				utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
 				sidedef.upper_texture = texture.doomdup
 			end
 
 			if (sidedef.lower_texture == texture.name) then
-				self:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
+				utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
 				sidedef.lower_texture = texture.doomdup
 			end
 
 			if (sidedef.middle_texture == texture.name) then
-				self:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
+				utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
 				sidedef.middle_texture = texture.doomdup
 			end
 		end
@@ -2528,12 +2525,12 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sector = map.sectors[ss]
 
 			if (sector.floor_texture == texture.name) then
-				self:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
+				utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
 				sector.floor_texture = texture.doomdup
 			end
 
 			if (sector.ceiling_texture == texture.name) then
-				self:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
+				utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
 				sector.ceiling_texture = texture.doomdup
 			end
 		end
@@ -2551,7 +2548,7 @@ function wad:extractTextures()
 			if (not composite.iszdoom) then
 				if (not composite.isdoomdup) then
 					displaydone = true
-					self:printf(2, "\tExtracting Composite: %s", composite.newname)
+					utils:printf(2, "\tExtracting Composite: %s", composite.newname)
 
 					if (composite.patchcount > 1) then
 						texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
@@ -2563,7 +2560,7 @@ function wad:extractTextures()
 				end
 			else
 				displaydone = true
-				self:printf(2, "\tExtracting Texture: %s", composite.newname)
+				utils:printf(2, "\tExtracting Texture: %s", composite.newname)
 
 				if (composite.patchcount > 1) then
 					texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
@@ -2584,10 +2581,10 @@ function wad:extractTextures()
 		collectgarbage()
 
 		if (displaydone) then
-			self:printf(1, "\tDone.\n")
+			utils:printf(1, "\tDone.\n")
 		end
 	else
-		self:printf(1, "\tNot extracting base wad composites.\n")
+		utils:printf(1, "\tNot extracting base wad composites.\n")
 	end
 end
 
@@ -2630,16 +2627,16 @@ function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
-                self:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
+                utils:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
 				local png = utils:openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				png:write(self.flats[f].png)
 				png:close()
 			end
 		end
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad flats.\n")
+		utils:printf(1, "\tNot extracting base wad flats.\n")
 	end
 end
 
@@ -2649,7 +2646,7 @@ function wad:extractPatches()
 			local patch = self.patches[p]
 
 			if (not patch.isdoomdup and patch.composite == nil) then
-                self:printf(2, "\tExtracting Patch: %s", patch.newname)
+                utils:printf(2, "\tExtracting Patch: %s", patch.newname)
 				local png = utils:openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
 				png:write(patch.png)
 				png:close()
@@ -2657,9 +2654,9 @@ function wad:extractPatches()
 		end
 
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad patches.\n")
+		utils:printf(1, "\tNot extracting base wad patches.\n")
 	end
 end
 
@@ -2667,21 +2664,21 @@ function wad:extractSprites()
 	if(self.base ~= self) then
 		for s = 1, #self.sprites do
 			if(not self.sprites[s].isdoomdup) then
-                self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
+                utils:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
                 self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
 				local png = utils:openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
                 self.sprites[s].png = utils:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
 				png:write(self.sprites[s].png)
 				png:close()
             else
-                self:printf(2, "\tNot Extracting Duplicate Sprite: %s", self.sprites[s].name) 
+                utils:printf(2, "\tNot Extracting Duplicate Sprite: %s", self.sprites[s].name) 
 			end
 		end
 
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad sprites.\n")
+		utils:printf(1, "\tNot extracting base wad sprites.\n")
 	end
 end
 
@@ -2691,7 +2688,7 @@ function wad:extractMaps()
             
 			-- doom/hexen
 			if(self.maps[m].format == "DM" or self.maps[m].format == "HM") then
-                self:printf(2, "\tExtracting DM/HM Map: %d", m)
+                utils:printf(2, "\tExtracting DM/HM Map: %d", m)
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.things
@@ -2741,7 +2738,7 @@ function wad:extractMaps()
 
 			-- udmf
 			elseif(self.maps[m].format == "UM") then
-                self:printf(2, "\tExtracting UM Map: %d", m)
+                utils:printf(2, "\tExtracting UM Map: %d", m)
 				-- lumps
 				local order = {}
 				order[#order+1] = self.maps[m].raw.textmap
@@ -2782,9 +2779,9 @@ function wad:extractMaps()
 			end
 		end
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad maps.\n")
+		utils:printf(1, "\tNot extracting base wad maps.\n")
 	end
 end
 
@@ -2838,11 +2835,11 @@ function wad:extractAnimdefs()
             file:write(self.animdefs.original)
             file:close()
         else
-            self:printf(1, "\tNo animations/switchs to define.\n")
+            utils:printf(1, "\tNo animations/switchs to define.\n")
         end
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad animdefs.\n")
+		utils:printf(1, "\tNot extracting base wad animdefs.\n")
 	end
 end
 
@@ -2877,11 +2874,11 @@ function wad:extractSNDINFO()
             file:write(txt)
             file:close()
         else
-            self:printf(1, "\tNo sounds to define.\n")
+            utils:printf(1, "\tNo sounds to define.\n")
         end
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad sndinfo.\n")
+		utils:printf(1, "\tNot extracting base wad sndinfo.\n")
 	end
 end
 
@@ -2917,9 +2914,9 @@ function wad:extractSounds()
 		end
 
 		collectgarbage()
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad sounds.\n")
+		utils:printf(1, "\tNot extracting base wad sounds.\n")
 	end
 end
 
@@ -2931,11 +2928,11 @@ function wad:extractTexturesLump()
             file:write(self.textures.original)
             file:close()
         else
-            self:printf(1, "\tNo textures.txt to define.\n")
+            utils:printf(1, "\tNo textures.txt to define.\n")
         end
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting base wad TextureX.\n")
+		utils:printf(1, "\tNot extracting base wad TextureX.\n")
 	end
 end
 
@@ -2956,9 +2953,9 @@ function wad:extractMapinfo()
 		file:write(mapinfo)
 		file:close()
 
-		self:printf(1, "\tDone.\n")
+		utils:printf(1, "\tDone.\n")
 	else
-		self:printf(1, "\tNot extracting mapinfo for base wad.\n")
+		utils:printf(1, "\tNot extracting mapinfo for base wad.\n")
 	end
 end
 
@@ -2988,88 +2985,15 @@ function wad:removeUnusedTextures()
 		end
 	end
 
-	self:printf(1, "\tFound: %i Unused Textures.", tex)
-	self:printf(1, "\tFound: %i Unused Flats.", flats)
-	self:printf(1, "\tFound: %i Unused Patches.", patches)
+	utils:printf(1, "\tFound: %i Unused Textures.", tex)
+	utils:printf(1, "\tFound: %i Unused Flats.", flats)
+	utils:printf(1, "\tFound: %i Unused Patches.", patches)
 end
 
 
 ---------------------------------------------------------
 -- Helpers
 ---------------------------------------------------------
-
-function wad:ignore_thing(a)
-	for i = 1, #self.thing_ignore do
-		if(self.thing_ignore[i] == a) then
-			return true
-		end
-	end
-end
-
-function wad:find_thing(a)
-	for i = 1, #self.thing_filter do
-		if(self.thing_filter[i] == a) then
-			return true
-		end
-	end
-end
-
-function wad:flags(v, ...)
-    local a = bit.bor(...)
-    return bit.band(v, a) == a
-end
-
-function wad:flagsEx(v, ...)
-    local a = bit.bor(...)
-    return bit.band(v, a)
-end
-
-function wad:printf(verbose, ...)
-    local str = string.format(...) .. "\n"
-    if(self.base ~= self) then
-        if(verbose <= self.verbose) then
-            printNoNewLine(str)
-            logfile:write(str)
-        end
-    else
-        if(verbose <= self.verbose and self.verbose >= 3) then
-            printNoNewLine(str)
-            logfile:write(str)
-        end
-    end
-end
-
-function wad:printfNoNewLine(verbose, ...)
-    local str = string.format(...)
-    if(self.base ~= self) then
-        if(verbose <= self.verbose) then
-            printNoNewLine(str)
-            logfile:write(str)
-        end
-    else
-        if(verbose <= self.verbose and self.verbose >= 3) then
-            printNoNewLine(str)
-            logfile:write(str)
-        end
-    end
-end
-
-function wad:printTable(tbl, indent)
-	if not indent then indent = 0 end
-	for k, v in pairs(tbl) do
-		formatting = string.rep("  ", indent) .. k .. ": "
-		if(type(v) == "table") then
-			print(formatting)
-			self:printTable(v, indent+1)
-		elseif(type(v) == 'boolean') then
-			print(formatting .. tostring(v))
-		elseif(type(v) == "string" and #v > 50) then
-			print(formatting .. tostring(k))
-		else
-			print(formatting .. v)
-		end
-	end
-end
 
 function wad:findLump(namespace, lumpname)
 	for l = 1, #self.namespaces[namespace].lumps do
@@ -3103,34 +3027,6 @@ function wad:findTexture(data, texture, tbl, pos)
 		pos = pos + 1
 	end
 	return tbl
-end
-
-local lastString
-
-function printNoNewLine(str)
-	deleteLine()
-	io.write(str)
-	io.flush()
-end
-
-function printSameLine(str)
-	deleteLine()
-	io.write(str)
-	io.flush()
-	lastString = str
-end
-
-function deleteLine()
-	if not (lastString == nil) then
-		io.write(("\b"):rep(#lastString)..(" "):rep(#lastString)..("\b"):rep(#lastString))
-		io.flush()
-		lastString = nil
-	end
-end
-
-function newLine()
-	io.write("\n")
-	io.flush()
 end
 
 return wad
