@@ -37,17 +37,9 @@
 log = {}
 timeTaken = ""
 
-function removePadding(str)
-	local newstr = ""
-	for i = 1, #str do
-		if str:sub(i,i) == "\0" then break end
-		newstr = string.format("%s%s", newstr, str:sub(i,i))
-	end
-	return newstr
-end
-
 function love.load(arg)
     class = require("mod30log")
+    utils = require("utils")
     wad = require("clsWad")
 
     -- path stuff
@@ -103,7 +95,7 @@ function love.load(arg)
 
     for lump = 0, lumpcount do
         local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(lump*16))
-        if(removePadding(name) == "PLAYPAL") then
+        if(utils:removePadding(name) == "PLAYPAL") then
             palette = {}
             local data = love.data.unpack(string.format("<c%d", size), raw, filepos+1)
             for c = 1, 256*3, 3 do
@@ -119,7 +111,6 @@ function love.load(arg)
             end
         end
     end
-
 
 	-- read doom2.wad
     local doom2 = wad(verbose, apppath .. "/doom2.wad", palette)

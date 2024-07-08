@@ -987,7 +987,7 @@ function wad:addExtraMarkers()
 		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(lump*16))
         lumplist[lumpindex].filepos = filepos
         lumplist[lumpindex].size = size
-        lumplist[lumpindex].name = self:removePadding(name)
+        lumplist[lumpindex].name = utils:removePadding(name)
         lumplist[lumpindex].data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
     end
     ------------------
@@ -1361,7 +1361,7 @@ function wad:buildNamespaces()
 
 		-- get file meta data
 		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(l*16))
-		name = string.upper(self:removePadding(name))
+		name = string.upper(utils:removePadding(name))
 		filepos = filepos+1
         
 		-- get file data
@@ -1538,7 +1538,7 @@ function wad:buildFlats()
 		local flat = self.flats[f]
 		local t = "Flat"
 
-		if (not self:checkFormat(flat.data, "PNG", 2, true)) then
+		if (not utils:checkFormat(flat.data, "PNG", 2, true)) then
 			self:printfNoNewLine(2, "\tBuilding Flat: %s; Type: %s ", flat.name, t)
 			flat.image = love.image.newImageData(64, 64)
 			flat.rows = {}
@@ -1574,8 +1574,8 @@ function wad:buildImages(images, imagetype)
 	for i = 1, #images do
 		local image = images[i]
 
-		if (not self:checkFormat(image.data, "PNG", 2, true)) then
-			self:printfNoNewLine(2, "\tBuilding $s: %s; Type: %s; ", imagetype, image.name, imagetype)
+		if (not utils:checkFormat(image.data, "PNG", 2, true)) then
+			self:printfNoNewLine(2, "\tBuilding %s: %s; Type: %s; ", imagetype, image.name, imagetype)
 			image.width = love.data.unpack("<H", image.data)
 			image.height = love.data.unpack("<H", image.data, 3)
 			image.xoffset = love.data.unpack("<h", image.data, 5)
@@ -1645,7 +1645,7 @@ function wad:buildImages(images, imagetype)
 
 			image.width = image.imagedata:getWidth()
 			image.height = image.imagedata:getHeight()
-			local offx, offy = self:readGRAB(image.data)
+			local offx, offy = utils:readGRAB(image.data)
 			image.xoffset = offx or 0
 			image.yoffset = offy or 0
 			self:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
@@ -1679,7 +1679,7 @@ function wad:processPnames()
 		local count = love.data.unpack("<i4", pndata)
 		for p = 5, count*8, 8 do
 			local index = #self.pnames+1
-			self.pnames[index] = self:removePadding(love.data.unpack("<c8", pndata, p)):upper()
+			self.pnames[index] = utils:removePadding(love.data.unpack("<c8", pndata, p)):upper()
             self:printf(2, "\tFound PNAMES Patch: %s", self.pnames[index])
 		end
 		self:printf(1, "\tFound '%d' PNAMES patches.", #self.pnames)
@@ -1712,7 +1712,7 @@ function wad:processTexturesX(num)
 
 			local composite = self.composites[c]
 
-			composite.name = self:removePadding(love.data.unpack("<c8", data, offsets[i]))
+			composite.name = utils:removePadding(love.data.unpack("<c8", data, offsets[i]))
 			composite.flags = love.data.unpack("<H", data, offsets[i]+8)
 			composite.scalex = love.data.unpack("<B", data, offsets[i]+0x0A)
 			composite.scaley = love.data.unpack("<B", data, offsets[i]+0x0B)
@@ -1799,8 +1799,8 @@ function wad:processAnimated()
 		local count = 0
 		while(t ~= 255) do
 
-			local last = self:removePadding(love.data.unpack("<c8", data, 2+count)):upper()
-			local first = self:removePadding(love.data.unpack("<c8", data, 11+count)):upper()
+			local last = utils:removePadding(love.data.unpack("<c8", data, 2+count)):upper()
+			local first = utils:removePadding(love.data.unpack("<c8", data, 11+count)):upper()
 			local speed = love.data.unpack("<i4", data, 20+count)
 
 			local isdup = false
@@ -1841,8 +1841,8 @@ function wad:processSwitches()
 		local count = 0
 		while(t ~= 0) do
 
-			local off = self:removePadding(love.data.unpack("<c8", data, 1+count)):upper()
-			local on = self:removePadding(love.data.unpack("<c8", data, 10+count)):upper()
+			local off = utils:removePadding(love.data.unpack("<c8", data, 1+count)):upper()
+			local on = utils:removePadding(love.data.unpack("<c8", data, 10+count)):upper()
 			t = love.data.unpack("<H", data, 19+count)
 
 			local isdup = false
@@ -2201,9 +2201,9 @@ function wad:processMaps()
 					self.maps[m].sidedefs[count] = {}
 					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
 					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
-					self.maps[m].sidedefs[count].lower_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
-					self.maps[m].sidedefs[count].middle_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
+					self.maps[m].sidedefs[count].upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
+					self.maps[m].sidedefs[count].lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
+					self.maps[m].sidedefs[count].middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
 					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
 				end
 
@@ -2225,8 +2225,8 @@ function wad:processMaps()
 					self.maps[m].sectors[count] = {}
 					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
 					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
-					self.maps[m].sectors[count].ceiling_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
+					self.maps[m].sectors[count].floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
+					self.maps[m].sectors[count].ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
 					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
@@ -2283,9 +2283,9 @@ function wad:processMaps()
 					self.maps[m].sidedefs[count] = {}
 					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
 					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
-					self.maps[m].sidedefs[count].lower_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
-					self.maps[m].sidedefs[count].middle_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
+					self.maps[m].sidedefs[count].upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
+					self.maps[m].sidedefs[count].lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
+					self.maps[m].sidedefs[count].middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
 					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
 				end
 
@@ -2307,8 +2307,8 @@ function wad:processMaps()
 					self.maps[m].sectors[count] = {}
 					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
 					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
-					self.maps[m].sectors[count].ceiling_texture = string.upper(self:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
+					self.maps[m].sectors[count].floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
+					self.maps[m].sectors[count].ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
 					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
 					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
 					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
@@ -2382,7 +2382,7 @@ function wad:ModifyMaps()
 				for p = 1, #self.patches do
 					local patch = self.patches[p]
 
-					self:replaceMapTextures(map, patch, getPatchName(patch))
+					self:replaceMapTextures(map, patch, self:getPatchName(patch))
 				end
 
 				-- build raw things back
@@ -2450,7 +2450,7 @@ function wad:ModifyMaps()
 					map.raw.textmap = map.raw.textmap:gsub(self.flats[f].name, self.flats[f].newname)
 				end
 				for p = 1, #self.patches do
-					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, getPatchName(self.patches[p]))
+					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, self:getPatchName(self.patches[p]))
 				end
 			end
 		end
@@ -2556,7 +2556,7 @@ function wad:extractTextures()
 					if (composite.patchcount > 1) then
 						texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
 					else
-						local png = openFile(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
+						local png = utils:openFile(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
 						png:write(composite.png)
 						png:close()
 					end
@@ -2568,7 +2568,7 @@ function wad:extractTextures()
 				if (composite.patchcount > 1) then
 					texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
 				else
-					local png = openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
+					local png = utils:openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
 					png:write(composite.raw)
 					png:close()
 				end
@@ -2576,7 +2576,7 @@ function wad:extractTextures()
 		end
 
 		if #texturesstr > 0 then
-			local file = openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
+			local file = utils:openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
 			file:write(texturesstr)
 			file:close()
 		end
@@ -2599,7 +2599,7 @@ function wad:createTextureDefinition(composite)
 		local compositepatch = composite.patches[p]
 		local patchdata = self.patches[compositepatch.patch]
 		local basepatchdata = self.base.patches[compositepatch.patch]
-		local patchname = getPatchName(patchdata, basepatchdata)
+		local patchname = self:getPatchName(patchdata, basepatchdata)
 
 		if (patchname) then
 			texturedef = string.format("%s	Patch \"%s\", %d, %d\n", texturedef, patchname, compositepatch.x, compositepatch.y)
@@ -2610,7 +2610,7 @@ function wad:createTextureDefinition(composite)
 end
 
 
-function getPatchName(patch, basepatch)
+function wad:getPatchName(patch, basepatch)
 	local patchname = ""
 
 	if (patch) then
@@ -2631,7 +2631,7 @@ function wad:extractFlats()
 		for f = 1, #self.flats do
 			if(not self.flats[f].isdoomdup) then
                 self:printf(2, "\tExtracting Flats: %s", self.flats[f].newname)
-				local png = openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
+				local png = utils:openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				png:write(self.flats[f].png)
 				png:close()
 			end
@@ -2650,7 +2650,7 @@ function wad:extractPatches()
 
 			if (not patch.isdoomdup and patch.composite == nil) then
                 self:printf(2, "\tExtracting Patch: %s", patch.newname)
-				local png = openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
+				local png = utils:openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
 				png:write(patch.png)
 				png:close()
 			end
@@ -2669,8 +2669,8 @@ function wad:extractSprites()
 			if(not self.sprites[s].isdoomdup) then
                 self:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
                 self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
-				local png = openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
-                self.sprites[s].png = self:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
+				local png = utils:openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
+                self.sprites[s].png = utils:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
 				png:write(self.sprites[s].png)
 				png:close()
             else
@@ -2732,7 +2732,7 @@ function wad:extractMaps()
 				if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
 				if(self.maps[m].raw.scripts) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
 
-				local wad = openFile(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
+				local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
 
 				wad:write(header)
 				wad:write(lumpchunk)
@@ -2774,7 +2774,7 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
 				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
-				local wad = openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
+				local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
 				wad:write(header)
 				wad:write(lumpchunk)
 				wad:write(dir)
@@ -2832,7 +2832,7 @@ function wad:extractAnimdefs()
 		end
 
         if #anim > 0 or #switch > 0 or #self.animdefs.original > 0 then
-			local file = openFile(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
+			local file = utils:openFile(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
             file:write(anim)
             file:write(switch)
             file:write(self.animdefs.original)
@@ -2873,7 +2873,7 @@ function wad:extractSNDINFO()
 		end
 
         if #txt > 0 then
-            local file = openFile(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
+            local file = utils:openFile(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
             file:write(txt)
             file:close()
         else
@@ -2890,28 +2890,28 @@ function wad:extractSounds()
 
 		--LMP
 		for s = 1, #self.doomsounds do
-			local snd = openFile(string.format("%s/sounds/%s/%s.lmp", self.pk3path, self.acronym, string.lower(self.doomsounds[s].newname)), "w+b")
+			local snd = utils:openFile(string.format("%s/sounds/%s/%s.lmp", self.pk3path, self.acronym, string.lower(self.doomsounds[s].newname)), "w+b")
 			snd:write(self.doomsounds[s].data)
 			snd:close()
 		end
 
 		--WAV
 		for s = 1, #self.wavesounds do
-			local snd = openFile(string.format("%s/sounds/%s/%s.wav", self.pk3path, self.acronym, string.lower(self.wavesounds[s].newname)), "w+b")
+			local snd = utils:openFile(string.format("%s/sounds/%s/%s.wav", self.pk3path, self.acronym, string.lower(self.wavesounds[s].newname)), "w+b")
 			snd:write(self.wavesounds[s].data)
 			snd:close()
 		end
 
 		--OGG
 		for s = 1, #self.oggsounds do
-			local snd = openFile(string.format("%s/sounds/%s/%s.ogg", self.pk3path, self.acronym, string.lower(self.oggsounds[s].newname)), "w+b")
+			local snd = utils:openFile(string.format("%s/sounds/%s/%s.ogg", self.pk3path, self.acronym, string.lower(self.oggsounds[s].newname)), "w+b")
 			snd:write(self.oggsounds[s].data)
 			snd:close()
 		end
 
 		--FLAC
 		for s = 1, #self.flacsounds do
-			local snd = openFile(string.format("%s/sounds/%s/%s.flac", self.pk3path, self.acronym, string.lower(self.flacsounds[s].newname)), "w+b")
+			local snd = utils:openFile(string.format("%s/sounds/%s/%s.flac", self.pk3path, self.acronym, string.lower(self.flacsounds[s].newname)), "w+b")
 			snd:write(self.flacsounds[s].data)
 			snd:close()
 		end
@@ -2927,7 +2927,7 @@ function wad:extractTexturesLump()
 	if(self.base ~= self) then
 
         if #self.textures.original > 0 then
-            local file = openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
+            local file = utils:openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
             file:write(self.textures.original)
             file:close()
         else
@@ -2942,17 +2942,17 @@ end
 function wad:extractMapinfo()
 	if(self.base ~= self) then
 
-		local file = openFile(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
+		local file = utils:openFile(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
 		file:write(self.mapinfo)
 		file:close()
 
-		file = openFile(string.format("%s/mapinfo.txt", self.pk3path), "r")
+		file = utils:openFile(string.format("%s/mapinfo.txt", self.pk3path), "r")
 		local mapinfo = file:read("*all")
 		file:close()
 
 		mapinfo = string.format('%s\ninclude "mapinfo/%s.txt"', mapinfo, self.acronym)
 
-		file = openFile(string.format("%s/mapinfo.txt", self.pk3path), "w")
+		file = utils:openFile(string.format("%s/mapinfo.txt", self.pk3path), "w")
 		file:write(mapinfo)
 		file:close()
 
@@ -3071,23 +3071,13 @@ function wad:printTable(tbl, indent)
 	end
 end
 
-function wad:removePadding(str)
-	local newstr = ""
-	for i = 1, #str do
-		if str:sub(i,i) == "\0" then break end
-		newstr = string.format("%s%s", newstr, str:sub(i,i))
+function wad:findLump(namespace, lumpname)
+	for l = 1, #self.namespaces[namespace].lumps do
+		if(self.namespaces[namespace].lumps[l].name == lumpname) then
+			return self.namespaces[namespace].lumps[l].data
+		end
 	end
-	return newstr
-end
-
-function wad:addPadding(str)
-	if #str >= 8 then return str end
-	local newstr = str
-
-	for i = #str+1, 8 do
-		newstr = string.format("%s%s", newstr, "\0")
-	end
-	return newstr
+    return ""
 end
 
 function wad:findTexture(data, texture, tbl, pos)
@@ -3113,85 +3103,6 @@ function wad:findTexture(data, texture, tbl, pos)
 		pos = pos + 1
 	end
 	return tbl
-end
-
-function wad:findLump(namespace, lumpname)
-	for l = 1, #self.namespaces[namespace].lumps do
-		if(self.namespaces[namespace].lumps[l].name == lumpname) then
-			return self.namespaces[namespace].lumps[l].data
-		end
-	end
-    return ""
-end
-
--- function that insert zdoom's grAb chunk in a png file, with x and y offset
-function wad:insertGRAB(data, xoff, yoff)
-    local offsetdata = love.data.pack("string", ">c4i4i4", "grAb", xoff, yoff)
-    local grAb = love.data.pack("string", ">I4c4i4i4I4", 8, "grAb", xoff, yoff, self:crc(offsetdata))
-    return data:sub(1, 33) .. grAb .. data:sub(34)
-end
-
--- function that read zdoom's grAb chunk in a png file, and return the x and y offset
-function wad:readGRAB(data)
-    local pos = 9
-    while pos < #data do
-        local size, chunk = love.data.unpack(">i4c4", data, pos)
-        if chunk == "grAb" then
-            local xoff = love.data.unpack(">i4", data, pos+8)
-            local yoff = love.data.unpack(">i4", data, pos+12)
-            return xoff, yoff
-        end
-        pos = pos + size + 12
-    end
-end
-
--- CRC code found: https://stackoverflow.com/questions/34120322/converting-a-c-checksum-function-to-lua
-function wad:crc(data)
-    sum = 65535
-    local d
-    for i = 1, #data do
-        d = string.byte(data, i)    -- get i-th element, like data[i] in C
-        sum = self:ByteCRC(sum, d)
-    end
-    return sum
-end
-
-function wad:ByteCRC(sum, data)
-    sum = bit.bxor(sum, data)
-    for i = 0, 7 do     -- lua for loop includes upper bound, so 7, not 8
-        if (bit.band(sum, 1) == 0) then
-            sum = bit.rshift(sum, 1)
-        else
-            sum = bit.bxor(bit.rshift(sum, 1),0xA001)  -- it is integer, no need for string func
-        end
-    end
-    return sum
-end
-
-function wad:checkFormat(data, magic, offset, bigendian)
-	offset = offset or 1
-	bigendian = bigendian or false
-
-	local m
-	if(not bigendian) then
-		m = love.data.unpack(">c" .. #magic, data, offset)
-	else
-		m = love.data.unpack("<c" .. #magic, data, offset)
-	end
-
-	if(m == magic) then return true end
-
-	return false
-end
-
-function openFile(filepath, filemode)
-	local file, err = io.open(filepath, filemode)
-
-	if err then
-		error("[ERROR] " .. err)
-	end
-
-	return file
 end
 
 local lastString
