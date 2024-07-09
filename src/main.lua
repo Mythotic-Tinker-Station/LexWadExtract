@@ -38,6 +38,8 @@ log = {}
 timeTaken = ""
 
 function love.load(arg)
+    local startTime = love.timer.getTime()
+
     class = require("mod30log")
     utils = require("utils")
     wad = require("clsWad")
@@ -56,7 +58,7 @@ function love.load(arg)
     print("Log path: " .. logpath)
 	logfile = io.open(logpath, "w+")
 -------------------------------------------------
-    local startTime = os.time()
+    
 
 	love.graphics.setFont(love.graphics.newFont(50))
 	love.graphics.setFont(love.graphics.newFont(50))
@@ -134,20 +136,11 @@ function love.load(arg)
     -- do all the things
     mapset = wad(pwad, palette, acronym, patches, mainiwad, pk3path, toolspath, sprites, acronym_sprites, things)
 
-    local endTime = os.time();
-
-    local timeTaken_seconds = os.difftime(endTime, startTime)
-
-    local minutes = 0
-    if timeTaken_seconds >= 60 then
-        minutes = math.floor(timeTaken_seconds / 60)
-        local s = ternary(minutes ~= 1, "minutes", "minute")
-        timeTaken = string.format("%d %s and ", minutes, s)
-    end
-
-    local seconds = timeTaken_seconds - (minutes * 60)
-    local s = ternary(seconds ~= 1, "seconds", "second")
-    timeTaken = timeTaken .. string.format("%d %s", seconds, s)
+    -- log time because why not
+    local endTime = love.timer.getTime()
+    local result = (endTime - startTime) * 1000 -- in milliseconds
+    local result_seconds = result / 1000
+    utils:printf(0, "Time taken: %0.2f seconds", result_seconds)
 
 	logfile:close()
     love.window.close()
@@ -159,16 +152,6 @@ function love.update(dt)
 end
 
 
-function love.draw()
-    love.graphics.clear(0, 0, 0)
-    love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.print("Complete", 10, 10)
-	love.graphics.print(string.format("Time taken:\n%s.", timeTaken), 10, 70)
-end
-
-function ternary(cond, T, F)
-    if cond then return T else return F end
-end
 
 ----------------------------------------------------------------------------------------
 -- Error handling
