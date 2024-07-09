@@ -1689,6 +1689,7 @@ function wad:buildImages(images, imagetype)
 
 			image.image = love.graphics.newImage(image.imagedata)
 			image.png = image.imagedata:encode("png"):getString()
+            image.png = utils:insertGRAB(image.png, image.xoffset, image.yoffset)
 			image.md5 = love.data.hash("md5", image.png)
 			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
 		else
@@ -2761,7 +2762,6 @@ function wad:extractSprites()
                 utils:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
                 self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
 				local png = utils:openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
-                self.sprites[s].png = utils:insertGRAB(self.sprites[s].png, self.sprites[s].xoffset, self.sprites[s].yoffset)
 				png:write(self.sprites[s].png)
 				png:close()
             else
