@@ -2036,7 +2036,7 @@ function wad:renameAssets(assets)
 		local asset = assets[a]
 
 		self.texturecount = self.texturecount + 1
-		local newname = string.format("%s%.4d", self.acronym, self.texturecount)
+        local newname = string.format("%s%.4X", self.acronym, self.texturecount)
 		utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
 		asset.newname = newname
 	end
@@ -2677,7 +2677,10 @@ function wad:createTextureDefinition(composite)
 		local basepatchdata = self.base.patches[compositepatch.patch]
 		local patchname = self:getPatchName(patchdata, basepatchdata)
 
-		if (patchname) then
+		if (#patchname > 0) then
+            if(patchdata) then
+                patchdata.used = true
+            end
 			texturedef = string.format("%s	Patch \"%s\", %d, %d\n", texturedef, patchname, compositepatch.x, compositepatch.y)
 		end
 	end
@@ -2889,7 +2892,7 @@ function wad:extractAnimdefs()
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
 
-			for i = tonumber(texNumMin), tonumber(texNumMax) do
+			for i = tonumber(texNumMin, 16), tonumber(texNumMax, 16) do
 				local lumpName = self.acronym
 
 				if i < 1000 then
