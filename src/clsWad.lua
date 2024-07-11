@@ -2218,7 +2218,7 @@ function wad:buildAnimdefs()
 		self.animdefs.switches = {}
 
 		for c = 1, #self.composites do
-			if(self.composites[c].used) then
+			--if(self.composites[c].used) then
 				for sl = 1, #self.switchlist do
 					if(self.composites[c].name == self.switchlist[sl][1]) then
                         utils:printf(2, "\tBuilding Switch: %s to %s", self.composites[c].name, self.switchlist[sl][2])
@@ -2234,7 +2234,7 @@ function wad:buildAnimdefs()
 						break
 					end
 				end
-			end
+			--end
 		end
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
