@@ -2629,17 +2629,14 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
 			if (sidedef.upper_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
-				--sidedef.upper_texture = texture.doomdup
 			end
 
 			if (sidedef.lower_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
-				--sidedef.lower_texture = texture.doomdup
 			end
 
 			if (sidedef.middle_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
-				--sidedef.middle_texture = texture.doomdup
 			end
 		end
 
@@ -2649,12 +2646,10 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
 			if (sector.floor_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
-				--sector.floor_texture = texture.doomdup
 			end
 
 			if (sector.ceiling_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
-				--sector.ceiling_texture = texture.doomdup
 			end
 		end
 	end
