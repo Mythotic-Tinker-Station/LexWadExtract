@@ -42,8 +42,9 @@ function love.load(arg)
 
     class = require("mod30log")
     utils = require("utils")
+    otex = require("otex")
     wad = require("clsWad")
-
+    
     -- path stuff
     local apppath = love.filesystem.getSourceBaseDirectory()
     local pk3path = apppath ..  "/pk3"

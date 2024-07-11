@@ -7987,3 +7987,5 @@ function otex.checkImageExists(name, checksum)
         end
     end
 end
+
+return otex

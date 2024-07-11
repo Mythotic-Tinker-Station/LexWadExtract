@@ -921,6 +921,10 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:printf(0, "Rename Songs...")
     self:renameSongs()
 
+    -- check of otex textures and mark them as to not rename them in maps
+    --utils:printf(0, "Filtering OTEX Assets...")
+    --self:filterOTexAssets()
+
     -- read zdoom's textures.txt (there is no code for this yet)
 	utils:printf(0, "Processing TEXTURES...")
 	self.textures.original = self:processTextLump("TEXTURES")
@@ -1974,6 +1978,7 @@ function wad:filterDuplicates()
 
 		-- sprites
 		count = count + self:flagDuplicateAssets(self.sprites, self.base.sprites)
+
 	end
 
 	utils:printf(1, "\tFound '%d' doom duplicates", count)
@@ -2000,6 +2005,35 @@ function wad:flagDuplicateAssets(pwadassets, baseassets)
 	end
 	
 	return totalduplicates
+end
+
+function wad:filterOTexAssets()
+    local count = 0
+    for a = 1, #self.flats do
+        local flat = self.flats[a]
+        if otex:checkImageExists(flat.name, flat.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Flat: %s", flat.name)
+            flat.isotex = true
+        end
+    end
+    for a = 1, #self.patches do
+        local patch = self.patches[a]
+        if otex:checkImageExists(patch.name, patch.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Patch: %s", patch.name)
+            patch.isotex = true
+        end
+    end
+    for a = 1, #self.composites do
+        local composite = self.composites[a]
+        if otex:checkImageExists(composite.name, composite.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Composite: %s", composite.name)
+            composite.isotex = true
+        end
+    end
+    utils:printf(1, "\tDone. Found %d OTex Assets.\n", count)
 end
 
 function wad:renamePatches()
@@ -2548,11 +2582,11 @@ function wad:ModifyMaps()
 end
 
 function wad:replaceMapTextures(map, texture, newtexturename)
-	if (not texture.isdoomdup) then
+
+	if (not texture.isdoomdup or not texture.isotex) then
 		-- walls
 		for s = 1, #map.sidedefs do
 			local sidedef = map.sidedefs[s]
-
 			if (sidedef.upper_texture == texture.name) then
 				utils:printf(3, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
 				sidedef.upper_texture = newtexturename
@@ -2595,17 +2629,17 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
 			if (sidedef.upper_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
-				sidedef.upper_texture = texture.doomdup
+				--sidedef.upper_texture = texture.doomdup
 			end
 
 			if (sidedef.lower_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
-				sidedef.lower_texture = texture.doomdup
+				--sidedef.lower_texture = texture.doomdup
 			end
 
 			if (sidedef.middle_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
-				sidedef.middle_texture = texture.doomdup
+				--sidedef.middle_texture = texture.doomdup
 			end
 		end
 
@@ -2615,12 +2649,12 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
 			if (sector.floor_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
-				sector.floor_texture = texture.doomdup
+				--sector.floor_texture = texture.doomdup
 			end
 
 			if (sector.ceiling_texture == texture.name) then
 				utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
-				sector.ceiling_texture = texture.doomdup
+				--sector.ceiling_texture = texture.doomdup
 			end
 		end
 	end
