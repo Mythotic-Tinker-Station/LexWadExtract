@@ -2007,35 +2007,6 @@ function wad:flagDuplicateAssets(pwadassets, baseassets)
 	return totalduplicates
 end
 
-function wad:filterOTexAssets()
-    local count = 0
-    for a = 1, #self.flats do
-        local flat = self.flats[a]
-        if otex:checkImageExists(flat.name, flat.md5) then
-            count = count + 1
-            utils:printf(2, "\tFound OTex Flat: %s", flat.name)
-            flat.isotex = true
-        end
-    end
-    for a = 1, #self.patches do
-        local patch = self.patches[a]
-        if otex:checkImageExists(patch.name, patch.md5) then
-            count = count + 1
-            utils:printf(2, "\tFound OTex Patch: %s", patch.name)
-            patch.isotex = true
-        end
-    end
-    for a = 1, #self.composites do
-        local composite = self.composites[a]
-        if otex:checkImageExists(composite.name, composite.md5) then
-            count = count + 1
-            utils:printf(2, "\tFound OTex Composite: %s", composite.name)
-            composite.isotex = true
-        end
-    end
-    utils:printf(1, "\tDone. Found %d OTex Assets.\n", count)
-end
-
 function wad:renamePatches()
 	if(self.base ~= self) then
 		local patchcount = self:renameAssets(self.patches)
@@ -2166,6 +2137,35 @@ function wad:renameSongs()
         utils:printf(1, "\tDone.\n")
     end
     collectgarbage()
+end
+
+function wad:filterOTexAssets()
+    local count = 0
+    for a = 1, #self.flats do
+        local flat = self.flats[a]
+        if otex:checkImageExists(flat.name, flat.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Flat: %s", flat.name)
+            flat.isotex = true
+        end
+    end
+    for a = 1, #self.patches do
+        local patch = self.patches[a]
+        if otex:checkImageExists(patch.name, patch.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Patch: %s", patch.name)
+            patch.isotex = true
+        end
+    end
+    for a = 1, #self.composites do
+        local composite = self.composites[a]
+        if otex:checkImageExists(composite.name, composite.md5) then
+            count = count + 1
+            utils:printf(2, "\tFound OTex Composite: %s", composite.name)
+            composite.isotex = true
+        end
+    end
+    utils:printf(1, "\tDone. Found %d OTex Assets.\n", count)
 end
 
 function wad:processTextLump(name)
@@ -2583,7 +2583,7 @@ end
 
 function wad:replaceMapTextures(map, texture, newtexturename)
 
-	if (not texture.isdoomdup or not texture.isotex) then
+	if (not texture.isdoomdup and not texture.isotex) then
 		-- walls
 		for s = 1, #map.sidedefs do
 			local sidedef = map.sidedefs[s]
