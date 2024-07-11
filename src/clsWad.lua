@@ -2722,8 +2722,10 @@ function wad:createTextureDefinition(composite)
 		local patchname = self:getPatchName(patchdata, basepatchdata)
 
 		if (#patchname > 0) then
-            if(patchdata) then
-                patchdata.used = true
+            if(patchdata or basepatchdata) then
+                if(patchdata) then
+                    patchdata.used = true
+                end
                 texturedef = string.format("%s	Patch \"%s\", %d, %d\n", texturedef, patchname, compositepatch.x, compositepatch.y)
             end
 		end
