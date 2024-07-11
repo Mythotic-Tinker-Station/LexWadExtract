@@ -74,6 +74,7 @@ local wad = class("wad",
 	-- class variables
 	verbose = 0,
 	texturecount = 0,
+    texturecount2 = 0,
 	soundcount = 0,
     songcount = 0,
 	things = "N",
@@ -1861,6 +1862,7 @@ function wad:processAnimated()
 			for d = 1, #self.animlist do
 				if(self.animlist[d][2] == first) then
 					if(self.animlist[d][3] == last) then
+                        utils:printf(2, "\tFound Duplicate ANIMATED define: %s %s to %s with speed %s", t, first, last, speed)
 						isdup = true
 					end
 				end
@@ -1880,6 +1882,7 @@ function wad:processAnimated()
 			count = count + 23
 			t = love.data.unpack("<B", data, 1+count)
 		end
+        utils:printf(1, "\tFound '%d' ANIMATED defines.", #self.animlist)
 	end
 end
 
@@ -2036,7 +2039,13 @@ function wad:renameAssets(assets)
 		local asset = assets[a]
 
 		self.texturecount = self.texturecount + 1
-        local newname = string.format("%s%.4X", self.acronym, self.texturecount)
+        local newname = string.format("%s%.4d", self.acronym, self.texturecount)
+
+        if self.texturecount > 9999 then
+            self.texturecount2 = self.texturecount2 + 1
+            newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
+        end
+       
 		utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
 		asset.newname = newname
 	end
@@ -2152,18 +2161,18 @@ function wad:buildAnimdefs()
 		-- animations
 		self.animdefs.anims = {}
 		for c = 1, #self.composites do
-			if(self.composites[c].used) then
+			--if(self.composites[c].used == true) then
 				for al = 1, #self.animlist do
 					if(not self.composites[c].isdoomdup) then
 						if(self.composites[c].name == self.animlist[al][2]) then
 							if(self.animlist[al][1] == "texture") then
-
+                                utils:printf(2, "\tBuilding Animation: texture %s to %s", self.composites[c].name, self.animlist[al][3])
 								local a = #self.animdefs.anims+1
 								self.animdefs.anims[a] = {}
 								self.animdefs.anims[a].text1 = self.composites[c].newname
 								self.animdefs.anims[a].typ = self.animlist[al][1]
 								self.animdefs.anims[a].decal = self.animlist[al][4]
-
+                                
 								for c2 = 1, #self.composites do
 									if(self.composites[c2].name == self.animlist[al][3]) then
 										self.animdefs.anims[a].text2 = self.composites[c2].newname
@@ -2175,15 +2184,16 @@ function wad:buildAnimdefs()
 						end
 					end
 				end
-			end
+			--end
 		end
 
 		for f = 1, #self.flats do
-			if(self.flats[f].used) then
+			--if(self.flats[f].used) then
 				for al = 1, #self.animlist do
 					if(not self.flats[f].isdoomdup) then
 						if(self.flats[f].name == self.animlist[al][2]) then
 							if(self.animlist[al][1] == "flat") then
+                                utils:printf(2, "\tBuilding Animation: flat %s to %s", self.flats[f].name, self.animlist[al][3])
 								local a = #self.animdefs.anims+1
 								self.animdefs.anims[a] = {}
 								self.animdefs.anims[a].text1 = self.flats[f].newname
@@ -2201,7 +2211,7 @@ function wad:buildAnimdefs()
 						end
 					end
 				end
-			end
+			--end
 		end
 
 		-- switches
@@ -2211,7 +2221,7 @@ function wad:buildAnimdefs()
 			if(self.composites[c].used) then
 				for sl = 1, #self.switchlist do
 					if(self.composites[c].name == self.switchlist[sl][1]) then
-
+                        utils:printf(2, "\tBuilding Switch: %s to %s", self.composites[c].name, self.switchlist[sl][2])
 						local s = #self.animdefs.switches+1
 						self.animdefs.switches[s] = {}
 						self.animdefs.switches[s].text1 = self.composites[c].newname
@@ -2887,12 +2897,12 @@ function wad:extractAnimdefs()
 
 		local anim = ""
 		for a = 1, #self.animdefs.anims do
+            utils:printf(2, "\t\t%s %s range %s tics 8", self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
 			anim = string.format("%s%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
-
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
 
-			for i = tonumber(texNumMin, 16), tonumber(texNumMax, 16) do
+			for i = tonumber(texNumMin), tonumber(texNumMax) do
 				local lumpName = self.acronym
 
 				if i < 1000 then
@@ -2919,6 +2929,7 @@ function wad:extractAnimdefs()
 
 		local switch = ""
 		for s = 1, #self.animdefs.switches do
+            utils:printf(2, "\t\tswitch %s on pic %s tics 0", self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
 			switch = string.format("%sswitch %s on pic %s tics 0\n", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
 
 			animdefsIgnore[self.animdefs.switches[s].text1] = "not nil";
