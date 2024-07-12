@@ -661,7 +661,7 @@ local wad = class("wad",
 
 	ignorelist =
 	{
-		"F_SKY1",
+		{"F_SKY1", 0},
 	},
 
 	-- namespaces
@@ -922,8 +922,8 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     self:renameSongs()
 
     -- check of otex textures and mark them as to not rename them in maps
-    --utils:printf(0, "Filtering OTEX Assets...")
-    --self:filterOTexAssets()
+    utils:printf(0, "Filtering OTEX Assets...")
+    self:filterOTexAssets()
 
     -- read zdoom's textures.txt (there is no code for this yet)
 	utils:printf(0, "Processing TEXTURES...")
@@ -1464,9 +1464,9 @@ function wad:organizeNamespace(name)
 				if(self.base ~= self) then
 					local skip = false
 					for ignore = 1, #self.ignorelist do
-						if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore]) then
-							skip = true
-						end
+                        if(self.namespaces[name].lumps[l].name == self.ignorelist[ignore][1]) then
+                            skip = true
+                        end
 					end
 				end
 
@@ -1785,7 +1785,7 @@ function wad:processTexturesX(num)
 			composite.patches = {}
 			composite.canvas = love.graphics.newCanvas(composite.width, composite.height)
 			composite.dups = {}
-			composite.isdoomdup = false
+			composite.ignore = false
 
 			local istexturepatch = composite.patchcount == 1
 
@@ -1997,7 +1997,7 @@ function wad:flagDuplicateAssets(pwadassets, baseassets)
 
 			if (pwadasset.md5 == baseasset.md5) then
 				totalduplicates = totalduplicates + 1
-				pwadasset.isdoomdup = true
+				pwadasset.ignore = true
 				pwadasset.doomdup = baseasset.name
 				utils:printf(2, "\tFound pwad:'%s' and base:'%s' duplicates.", pwadasset.name, baseasset.name)
 			end
@@ -2141,28 +2141,28 @@ end
 
 function wad:filterOTexAssets()
     local count = 0
-    for a = 1, #self.flats do
-        local flat = self.flats[a]
+    for f = 1, #self.flats do
+        local flat = self.flats[f]
         if otex:checkImageExists(flat.name, flat.md5) then
             count = count + 1
             utils:printf(2, "\tFound OTex Flat: %s", flat.name)
-            flat.isotex = true
+            flat.ignore = true
         end
     end
-    for a = 1, #self.patches do
-        local patch = self.patches[a]
+    for p = 1, #self.patches do
+        local patch = self.patches[p]
         if otex:checkImageExists(patch.name, patch.md5) then
             count = count + 1
             utils:printf(2, "\tFound OTex Patch: %s", patch.name)
-            patch.isotex = true
+            patch.ignore = true
         end
     end
-    for a = 1, #self.composites do
-        local composite = self.composites[a]
+    for c = 1, #self.composites do
+        local composite = self.composites[c]
         if otex:checkImageExists(composite.name, composite.md5) then
             count = count + 1
             utils:printf(2, "\tFound OTex Composite: %s", composite.name)
-            composite.isotex = true
+            composite.ignore = true
         end
     end
     utils:printf(1, "\tDone. Found %d OTex Assets.\n", count)
@@ -2197,7 +2197,7 @@ function wad:buildAnimdefs()
 		for c = 1, #self.composites do
 			--if(self.composites[c].used == true) then
 				for al = 1, #self.animlist do
-					if(not self.composites[c].isdoomdup) then
+					if(not self.composites[c].ignore) then
 						if(self.composites[c].name == self.animlist[al][2]) then
 							if(self.animlist[al][1] == "texture") then
                                 utils:printf(2, "\tBuilding Animation: texture %s to %s", self.composites[c].name, self.animlist[al][3])
@@ -2224,7 +2224,7 @@ function wad:buildAnimdefs()
 		for f = 1, #self.flats do
 			--if(self.flats[f].used) then
 				for al = 1, #self.animlist do
-					if(not self.flats[f].isdoomdup) then
+					if(not self.flats[f].ignore) then
 						if(self.flats[f].name == self.animlist[al][2]) then
 							if(self.animlist[al][1] == "flat") then
                                 utils:printf(2, "\tBuilding Animation: flat %s to %s", self.flats[f].name, self.animlist[al][3])
@@ -2252,7 +2252,7 @@ function wad:buildAnimdefs()
 		self.animdefs.switches = {}
 
 		for c = 1, #self.composites do
-			--if(self.composites[c].used) then
+			if(not self.composites[c].ignore) then
 				for sl = 1, #self.switchlist do
 					if(self.composites[c].name == self.switchlist[sl][1]) then
                         utils:printf(2, "\tBuilding Switch: %s to %s", self.composites[c].name, self.switchlist[sl][2])
@@ -2268,7 +2268,7 @@ function wad:buildAnimdefs()
 						break
 					end
 				end
-			--end
+			end
 		end
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
@@ -2583,7 +2583,7 @@ end
 
 function wad:replaceMapTextures(map, texture, newtexturename)
 
-	if (not texture.isdoomdup and not texture.isotex) then
+	if (not texture.ignore) then
 		-- walls
 		for s = 1, #map.sidedefs do
 			local sidedef = map.sidedefs[s]
@@ -2628,18 +2628,21 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sidedef = map.sidedefs[s]
 
 			if (sidedef.upper_texture == texture.name) then
-				utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, texture.doomdup)
-				sidedef.upper_texture = texture.doomdup
+                local newname = texture.doomdup or texture.name
+				utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, newname)
+				sidedef.upper_texture = newname
 			end
 
 			if (sidedef.lower_texture == texture.name) then
-				utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, texture.doomdup)
-				sidedef.lower_texture = texture.doomdup
+                local newname = texture.doomdup or texture.name
+				utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, newname)
+				sidedef.lower_texture = newname
 			end
 
 			if (sidedef.middle_texture == texture.name) then
-				utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, texture.doomdup)
-				sidedef.middle_texture = texture.doomdup
+                local newname = texture.doomdup or texture.name
+				utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, newname)
+				sidedef.middle_texture = newname
 			end
 		end
 
@@ -2648,13 +2651,15 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 			local sector = map.sectors[ss]
 
 			if (sector.floor_texture == texture.name) then
-				utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, texture.doomdup)
-				sector.floor_texture = texture.doomdup
+                local newname = texture.doomdup or texture.name
+				utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, newname)
+				sector.floor_texture = newname
 			end
 
 			if (sector.ceiling_texture == texture.name) then
-				utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, texture.doomdup)
-				sector.ceiling_texture = texture.doomdup
+                local newname = texture.doomdup or texture.name
+				utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, newname)
+				sector.ceiling_texture = newname
 			end
 		end
 	end
@@ -2669,7 +2674,7 @@ function wad:extractTextures()
 			local composite = self.composites[c]
 
 			if (not composite.iszdoom) then
-				if (not composite.isdoomdup) then
+				if (not composite.ignore) then
 					displaydone = true
 					utils:printf(2, "\tExtracting Composite: %s", composite.newname)
 
@@ -2770,7 +2775,7 @@ end
 function wad:extractFlats()
 	if(self.base ~= self) then
 		for f = 1, #self.flats do
-			if(not self.flats[f].isdoomdup) then
+			if(not self.flats[f].ignore) then
                 utils:printf(2, "\tExtracting Flat: %s", self.flats[f].newname)
 				local png = utils:openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
 				png:write(self.flats[f].png)
@@ -2789,7 +2794,7 @@ function wad:extractPatches()
 		for p = 1, #self.patches do
 			local patch = self.patches[p]
 
-			if (not patch.isdoomdup and patch.composite == nil) then
+			if (not patch.ignore and patch.composite == nil) then
                 utils:printf(2, "\tExtracting Patch: %s", patch.newname)
 				local png = utils:openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
 				png:write(patch.png)
@@ -2807,7 +2812,7 @@ end
 function wad:extractSprites()
 	if(self.base ~= self) then
 		for s = 1, #self.sprites do
-			if(not self.sprites[s].isdoomdup) then
+			if(not self.sprites[s].ignore) then
                 utils:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
                 self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
 				local png = utils:openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
