@@ -1999,7 +1999,7 @@ function wad:flagDuplicateAssets(pwadassets, baseassets)
 				totalduplicates = totalduplicates + 1
 				pwadasset.ignore = true
 				pwadasset.doomdup = baseasset.name
-				utils:printf(2, "\tFound pwad:'%s' and base:'%s' duplicates.", pwadasset.name, baseasset.name)
+				utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
 			end
 		end
 	end
@@ -2255,7 +2255,7 @@ function wad:buildAnimdefs()
 			if(not self.composites[c].ignore) then
 				for sl = 1, #self.switchlist do
 					if(self.composites[c].name == self.switchlist[sl][1]) then
-                        utils:printf(2, "\tBuilding Switch: %s to %s", self.composites[c].name, self.switchlist[sl][2])
+                        utils:printf(2, "\tBuilding Switch From Composites: %s to %s", self.composites[c].name, self.switchlist[sl][2])
 						local s = #self.animdefs.switches+1
 						self.animdefs.switches[s] = {}
 						self.animdefs.switches[s].text1 = self.composites[c].newname
@@ -2270,6 +2270,46 @@ function wad:buildAnimdefs()
 				end
 			end
 		end
+		for f = 1, #self.flats do
+			if(not self.flats[f].ignore) then
+				for sl = 1, #self.switchlist do
+					if(self.flats[f].name == self.switchlist[sl][1]) then
+                        utils:printf(2, "\tBuilding Switch from Flats: %s to %s", self.flats[f].name, self.switchlist[sl][2])
+						local s = #self.animdefs.switches+1
+						self.animdefs.switches[s] = {}
+						self.animdefs.switches[s].text1 = self.flats[c].newname
+
+						for f2 = 1, #self.flats do
+							if(self.flats[f2].name == self.switchlist[sl][2]) then
+								self.animdefs.switches[s].text2 = self.flats[f2].newname
+							end
+						end
+						break
+					end
+				end
+			end
+		end
+		for p = 1, #self.patches do
+			if(not self.patches[p].ignore) then
+				for sl = 1, #self.switchlist do
+					if(self.patches[p].name == self.switchlist[sl][1]) then
+                        utils:printf(2, "\tBuilding Switch from Patches: %s to %s", self.patches[p].name, self.switchlist[sl][2])
+						local s = #self.animdefs.switches+1
+						self.animdefs.switches[s] = {}
+						self.animdefs.switches[s].text1 = self.patches[p].newname
+
+						for p2 = 1, #self.patches do
+							if(self.patches[p2].name == self.switchlist[sl][2]) then
+								self.animdefs.switches[s].text2 = self.patches[p2].newname
+							end
+						end
+						break
+					end
+				end
+			end
+		end
+
+
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
 	else
