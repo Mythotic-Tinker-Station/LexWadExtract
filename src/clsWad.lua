@@ -1704,16 +1704,16 @@ function wad:buildImages(images, imagetype)
 
 			image.width = image.imagedata:getWidth()
 			image.height = image.imagedata:getHeight()
-			local offx, offy = utils:readGRAB(image.data)
+			local offx, offy = utils:readGRAB(filedata)
 			image.xoffset = offx or 0
 			image.yoffset = offy or 0
-			utils:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
 
+			utils:printfNoNewLine(2, "Width: %d; Height: %d; Xoff: %d; Yoff: %d; ", image.width, image.height, image.xoffset, image.yoffset)
 			image.image = love.graphics.newImage(image.imagedata)
 			image.png = image.imagedata:encode("png"):getString()
+            image.png = utils:insertGRAB(image.png, image.xoffset, image.yoffset)
 			image.md5 = love.data.hash("md5", image.png)
 			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
-			image.notdoompatch = true
 		end
 		images[image.name] = image
 	end
@@ -2308,7 +2308,6 @@ function wad:buildAnimdefs()
 				end
 			end
 		end
-
 
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
