@@ -2943,12 +2943,14 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then order[#order+1] = self.maps[m].raw.scripts end
 				order[#order+1] = self.maps[m].raw.endmap
 
-                local pos = {}
-                local lumpchunk = {}
-                for o = 1, #order do
-                    pos[o] = #lumpchunk
-                    table.insert(lumpchunk, order[o])
-                end
+				local pos = {}
+                local pos2 = 0
+				local lumpchunk = {}
+				for o = 1, #order do
+                    pos[o] = pos2
+                    pos2 = pos2 + #order[o]
+					lumpchunk[#lumpchunk+1] = order[o]
+				end
 
 				-- header
                 lumpchunk = table.concat(lumpchunk)
@@ -2958,22 +2960,21 @@ function wad:extractMaps()
 				local dir = love.data.pack("string", "<i4i4c8", 10, 0, "MAP01")
 				local count = 1
 
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "TEXTMAP")
-				if(self.maps[m].raw.znodes) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "ZNODES") end
-				if(self.maps[m].raw.reject) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "REJECT") end
-				if(self.maps[m].raw.dialogue) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "DIALOGUE") end
-				if(self.maps[m].raw.behavior) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "BEHAVIOR") end
-				if(self.maps[m].raw.scripts) then count = count + 1; dir = dir .. love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
-				dir = dir .. love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
+				dir[1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "TEXTMAP")
+				if(self.maps[m].raw.znodes) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "ZNODES") end
+				if(self.maps[m].raw.reject) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "REJECT") end
+				if(self.maps[m].raw.dialogue) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "DIALOGUE") end
+				if(self.maps[m].raw.behavior) then count = count + 1; dir[#dir+1] =  love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "BEHAVIOR") end
+				if(self.maps[m].raw.scripts) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
 
 				local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(self.maps[m].name)), "w+b")
 				wad:write(header)
 				wad:write(lumpchunk)
-				wad:write(dir)
+				wad:write(table.concat(dir))
 				wad:close()
 			end
 		end
-		collectgarbage()
 		utils:printf(1, "\tDone.\n")
 	else
 		utils:printf(1, "\tNot extracting base wad maps.\n")
