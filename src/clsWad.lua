@@ -2871,6 +2871,8 @@ function wad:extractSprites()
 end
 
 function wad:extractMaps()
+	collectgarbage()
+    local starttime = love.timer.getTime()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
             
@@ -2893,35 +2895,39 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then order[#order+1] = self.maps[m].raw.scripts end
 
 				local pos = {}
-				local lumpchunk = ""
+                local pos2 = 0
+				local lumpchunk = {}
 				for o = 1, #order do
-					pos[o] = #lumpchunk
-					lumpchunk = lumpchunk .. order[o]
+                    pos[o] = pos2
+                    pos2 = pos2 + #order[o]
+					lumpchunk[#lumpchunk+1] = order[o]
 				end
 
-				-- header
-				local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
+                -- header
+                lumpchunk = table.concat(lumpchunk) -- lumpchunk table is now a string, static type languages would be having a fit right now
+                local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
 
 				-- directory
-				local dir = love.data.pack("string", "<i4i4c8", 0, 0, "MAP01")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[1]+12, #order[1], "THINGS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "LINEDEFS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "SIDEDEFS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "VERTEXES")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "SEGS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "SSECTORS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "NODES")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[8]+12, #order[8], "SECTORS")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[9]+12, #order[9], "REJECT")
-				dir = dir .. love.data.pack("string", "<i4i4c8", pos[10]+12, #order[10], "BLOCKMAP")
-				if(self.maps[m].raw.behavior) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
-				if(self.maps[m].raw.scripts) then dir = dir .. love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
+                local dir = {}
+				dir[1] = love.data.pack("string", "<i4i4c8", 0, 0, "MAP01")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[1]+12, #order[1], "THINGS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "LINEDEFS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "SIDEDEFS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "VERTEXES")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "SEGS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "SSECTORS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[7]+12, #order[7], "NODES")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[8]+12, #order[8], "SECTORS")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[9]+12, #order[9], "REJECT")
+				dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[10]+12, #order[10], "BLOCKMAP")
+				if(self.maps[m].raw.behavior) then dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR") end
+				if(self.maps[m].raw.scripts) then dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT") end
 
 				local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, self.maps[m].name), "w+b")
 
 				wad:write(header)
 				wad:write(lumpchunk)
-				wad:write(dir)
+				wad:write(table.concat(dir))
 				wad:close()
 
 			-- udmf
@@ -2937,14 +2943,15 @@ function wad:extractMaps()
 				if(self.maps[m].raw.scripts) then order[#order+1] = self.maps[m].raw.scripts end
 				order[#order+1] = self.maps[m].raw.endmap
 
-				local pos = {}
-				local lumpchunk = ""
-				for o = 1, #order do
-					pos[o] = #lumpchunk
-					lumpchunk = lumpchunk .. order[o]
-				end
+                local pos = {}
+                local lumpchunk = {}
+                for o = 1, #order do
+                    pos[o] = #lumpchunk
+                    table.insert(lumpchunk, order[o])
+                end
 
 				-- header
+                lumpchunk = table.concat(lumpchunk)
 				local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
 
 				-- directory
@@ -2971,6 +2978,8 @@ function wad:extractMaps()
 	else
 		utils:printf(1, "\tNot extracting base wad maps.\n")
 	end
+    utils:printf(1, "\tTime taken: %0.3f\n", (love.timer.getTime() - starttime) * 1000)
+	utils:printf(1, "\tMemory used: %0.3f MB\n", collectgarbage("count") / 1024)
 end
 
 function wad:extractAnimdefs()
