@@ -1381,26 +1381,30 @@ function wad:organizeMaps()
 end
 
 function wad:processPalette()
-	-- find PLAYPAL
-	local paldata = self:findLump("SP", "PLAYPAL")
+    if self.palette == nil then
+        -- find PLAYPAL
+        local paldata = self:findLump("SP", "PLAYPAL")
 
-	-- if playpal found
-	if(paldata ~= "") then
-		for c = 1, 256*3, 3 do
-			local r, g, b = love.data.unpack("<BBB", paldata, c)
-			local index = #self.palette+1
-			local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
-			self.palette[index] =
-			{
-				r2,
-				g2,
-				b2,
-			}
-		end
-	else
-		self.palette = self.base.palette
-		utils:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
-	end
+        -- if playpal found
+        if(paldata ~= "") then
+            for c = 1, 256*3, 3 do
+                local r, g, b = love.data.unpack("<BBB", paldata, c)
+                local index = #self.palette+1
+                local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
+                self.palette[index] =
+                {
+                    r2,
+                    g2,
+                    b2,
+                }
+            end
+        else
+            self.palette = self.base.palette
+            utils:printf(1, "\tNo PLAYPAL found. using base wad PLAYPAL.")
+        end
+    else
+        utils:printf(1, "\tUsing custom palette.")
+    end
 end
 
 function wad:buildFlats()
