@@ -827,22 +827,6 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
 	utils:printf(0, "Complete.\n")
 end
 
-function wad:initPalette(verbose, path)
-	self.base = base or self
-	self.pk3path = pk3path
-	self.toolspath = toolspath
-	self.extractpatches = patches or false
-	self.spritesname = sprites
-	self.apppath = love.filesystem.getSourceBaseDirectory():gsub("/", "\\")
-
-    -- we are loading the raw wad data in to memory
-	utils:printf(0, "Loading palette from mapset...", path)
-
-    if(self.palette ~= nil) then
-        return self.palette
-    end
-end
-
 function wad:open(path)
 	local file = assert(io.open(path, "rb"))
 	self.raw = file:read("*all")
