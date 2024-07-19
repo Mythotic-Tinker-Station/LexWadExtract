@@ -42,6 +42,7 @@ function love.load(arg)
 
     class = require("mod30log")
     utils = require("utils")
+    stringbuilder = require("stringbuilder")
     otex = require("otex")
     wad = require("clsWad")
     
