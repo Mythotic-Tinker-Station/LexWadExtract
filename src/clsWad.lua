@@ -1714,7 +1714,6 @@ function wad:buildImages(images, imagetype)
             image.png = utils:insertGRAB(image.png, image.xoffset, image.yoffset)
 			image.md5 = love.data.hash("md5", image.png)
 			utils:printf(2, "Checksum: %s;", love.data.encode("string", "hex", image.md5))
-			image.notdoompatch = true
 		end
 		images[image.name] = image
 	end
