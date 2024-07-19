@@ -1421,7 +1421,7 @@ function wad:buildNamespaces()
 		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(l*16))
 		name = string.upper(utils:removePadding(name))
 		filepos = filepos+1
-        
+
 		-- get file data
 		local filedata = love.data.unpack(string.format("<c%d", size), self.raw, filepos)
 
@@ -1434,8 +1434,9 @@ function wad:buildNamespaces()
 
 		-- in namespace
 		if(found) then
-			if(self.namespaces[namespace] ~= nil) then
-				self.namespaces[namespace].lumps[#self.namespaces[namespace].lumps+1] = { name=name, size=size, pos=filepos, data=filedata }
+			local namespacedata = self.namespaces[namespace]
+			if(namespacedata ~= nil) then
+				namespacedata.lumps[#namespacedata.lumps+1] = { name=name, size=size, pos=filepos, data=filedata }
 			end
 		end
 
@@ -1487,6 +1488,7 @@ end
 
 function wad:organizeMaps()
 	if(self.base ~= self) then
+		local namespacedata = self.namespaces["MM"]
 		local found = false
 		local namespace = ""
 		local mapname = ""
@@ -1496,12 +1498,12 @@ function wad:organizeMaps()
 		local index = 0
 
 		-- if any maps were found
-		if(#self.namespaces["MM"].lumps > 0) then
+		if(#namespacedata.lumps > 0) then
             
 			-- for each lump in the maps namespace
-			for l = 1, #self.namespaces["MM"].lumps do
+			for l = 1, #namespacedata.lumps do
 
-				local v = self.namespaces["MM"].lumps[l]
+				local v = namespacedata.lumps[l]
 
 				-- end namespace
 				if(v.name == string.format("%s_END", namespace)) then
@@ -1517,41 +1519,46 @@ function wad:organizeMaps()
 					self.maps[index] = {}
 					self.maps[index].pos = {l}
 					self.maps[index].format = namespace
-					self.maps[index].name = self.acronym .. self.namespaces["MM"].lumps[l+1].name:sub(-2)
+					self.maps[index].name = self.acronym .. namespacedata.lumps[l+1].name:sub(-2)
 					self.maps[index].raw = {}
 				end
 			end
 
 			-- structure map data
 			for m = 1, #self.maps do
-                utils:printf(2, "\tFound %s", self.maps[m].name)
-				for l = self.maps[m].pos[1], self.maps[m].pos[2] do
-					if(self.namespaces["MM"].lumps[l].name == "THINGS") then 	self.maps[m].raw.things 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "LINEDEFS") then 	self.maps[m].raw.linedefs 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "SIDEDEFS") then 	self.maps[m].raw.sidedefs 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "VERTEXES") then 	self.maps[m].raw.vertexes 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "SEGS") then 		self.maps[m].raw.segs 			= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "SSECTORS") then 	self.maps[m].raw.ssectors 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "NODES") then 	self.maps[m].raw.nodes 			= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "SECTORS") then 	self.maps[m].raw.sectors 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "REJECT") then 	self.maps[m].raw.reject 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "BLOCKMAP") then 	self.maps[m].raw.blockmap 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "BEHAVIOR") then 	self.maps[m].raw.behavior		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "SCRIPTS") then 	self.maps[m].raw.scripts 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "TEXTMAP") then 	self.maps[m].raw.textmap 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "ZNODES") then 	self.maps[m].raw.znodes 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "DIALOGUE") then 	self.maps[m].raw.dialogue 		= self.namespaces["MM"].lumps[l].data end
-					if(self.namespaces["MM"].lumps[l].name == "ENDMAP") then 	self.maps[m].raw.endmap 		= self.namespaces["MM"].lumps[l].data end
+				local map = self.maps[m]
+
+                utils:printf(2, "\tFound %s", map.name)
+				for l = map.pos[1], map.pos[2] do
+					local lump = namespacedata.lumps[l]
+
+					if(lump.name == "THINGS") then			map.raw.things		= lump.data
+					elseif(lump.name == "LINEDEFS") then 	map.raw.linedefs 	= lump.data
+					elseif(lump.name == "SIDEDEFS") then 	map.raw.sidedefs 	= lump.data
+					elseif(lump.name == "VERTEXES") then 	map.raw.vertexes 	= lump.data
+					elseif(lump.name == "SEGS") then		map.raw.segs		= lump.data
+					elseif(lump.name == "SSECTORS") then 	map.raw.ssectors 	= lump.data
+					elseif(lump.name == "NODES") then		map.raw.nodes		= lump.data
+					elseif(lump.name == "SECTORS") then 	map.raw.sectors 	= lump.data
+					elseif(lump.name == "REJECT") then		map.raw.reject 		= lump.data
+					elseif(lump.name == "BLOCKMAP") then 	map.raw.blockmap 	= lump.data
+					elseif(lump.name == "BEHAVIOR") then 	map.raw.behavior	= lump.data
+					elseif(lump.name == "SCRIPTS") then 	map.raw.scripts 	= lump.data
+					elseif(lump.name == "TEXTMAP") then 	map.raw.textmap 	= lump.data
+					elseif(lump.name == "ZNODES") then		map.raw.znodes 		= lump.data
+					elseif(lump.name == "DIALOGUE") then 	map.raw.dialogue 	= lump.data
+					elseif(lump.name == "ENDMAP") then		map.raw.endmap 		= lump.data
+					end
 				end
 
 				-- log stuff
-				if(self.maps[m].raw.behavior == nil and self.maps[m].raw.textmap == nil) then
+				if(map.raw.behavior == nil and map.raw.textmap == nil) then
 					count_dm = count_dm + 1
 				else
 					count_hm = count_hm + 1
 				end
 
-				if(self.maps[m].raw.textmap ~= nil) then
+				if(map.raw.textmap ~= nil) then
 					count_um = count_um + 1
 				end
 			end
@@ -1836,9 +1843,9 @@ function wad:processTexturesX(num)
 			composite.png = composite.canvas:newImageData():encode("png"):getString()
 			composite.md5 = love.data.hash("md5", composite.png)
 
-            utils:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
+			utils:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
 		end
-	utils:printf(1, "\tFound '%d' composite textures.", numtextures)
+		utils:printf(1, "\tFound '%d' composite textures.", numtextures)
 	else
 		--self.composites = self.base.composites
 		--utils:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
@@ -2042,20 +2049,23 @@ function wad:renameAssets(assets)
 
 	for a = 1, assetcount do
 		local asset = assets[a]
-
-		self.texturecount = self.texturecount + 1
-        local newname = string.format("%s%.4d", self.acronym, self.texturecount)
-
-        if self.texturecount > 9999 then
-            self.texturecount2 = self.texturecount2 + 1
-            newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
-        end
-       
-		utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
-		asset.newname = newname
+		self:renameAsset(asset)
 	end
 
 	return assetcount
+end
+
+function wad:renameAsset(asset)
+	self.texturecount = self.texturecount + 1
+	local newname = string.format("%s%.4d", self.acronym, self.texturecount)
+
+	if self.texturecount > 9999 then
+		self.texturecount2 = self.texturecount2 + 1
+		newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
+	end
+
+	utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
+	asset.newname = newname
 end
 
 function wad:renameSprites()
@@ -2176,7 +2186,7 @@ function wad:processTextLump(name)
 	-- if ANIMDEFS found
 	if(data ~= "") then
 		for p = 1, #self.patches do
-			data = data:gsub(self.patches[p].name, self.patches[p].newname)
+			data = data:gsub(self.patches[p].name, getPatchName(self.patches[p]))
 		end
 		for c = 1, #self.composites do
 			data = data:gsub(self.composites[c].name, self.composites[c].newname)
@@ -2194,120 +2204,16 @@ function wad:buildAnimdefs()
 
 		-- animations
 		self.animdefs.anims = {}
-		for c = 1, #self.composites do
-			--if(self.composites[c].used == true) then
-				for al = 1, #self.animlist do
-					if(not self.composites[c].ignore) then
-						if(self.composites[c].name == self.animlist[al][2]) then
-							if(self.animlist[al][1] == "texture") then
-                                utils:printf(2, "\tBuilding Animation: texture %s to %s", self.composites[c].name, self.animlist[al][3])
-								local a = #self.animdefs.anims+1
-								self.animdefs.anims[a] = {}
-								self.animdefs.anims[a].text1 = self.composites[c].newname
-								self.animdefs.anims[a].typ = self.animlist[al][1]
-								self.animdefs.anims[a].decal = self.animlist[al][4]
-                                
-								for c2 = 1, #self.composites do
-									if(self.composites[c2].name == self.animlist[al][3]) then
-										self.animdefs.anims[a].text2 = self.composites[c2].newname
-										break
-									end
-								end
-								break
-							end
-						end
-					end
-				end
-			--end
-		end
 
-		for f = 1, #self.flats do
-			--if(self.flats[f].used) then
-				for al = 1, #self.animlist do
-					if(not self.flats[f].ignore) then
-						if(self.flats[f].name == self.animlist[al][2]) then
-							if(self.animlist[al][1] == "flat") then
-                                utils:printf(2, "\tBuilding Animation: flat %s to %s", self.flats[f].name, self.animlist[al][3])
-								local a = #self.animdefs.anims+1
-								self.animdefs.anims[a] = {}
-								self.animdefs.anims[a].text1 = self.flats[f].newname
-								self.animdefs.anims[a].typ = self.animlist[al][1]
-								self.animdefs.anims[a].decal = self.animlist[al][4]
-
-								for f2 = 1, #self.flats do
-									if(self.flats[f2].name == self.animlist[al][3]) then
-										self.animdefs.anims[a].text2 = self.flats[f2].newname
-										break
-									end
-								end
-								break
-							end
-						end
-					end
-				end
-			--end
-		end
+		self:buildAnimdefsForAssets(self.composites, "texture")
+		self:buildAnimdefsForAssets(self.flats, "flat")
 
 		-- switches
 		self.animdefs.switches = {}
 
-		for c = 1, #self.composites do
-			if(not self.composites[c].ignore) then
-				for sl = 1, #self.switchlist do
-					if(self.composites[c].name == self.switchlist[sl][1]) then
-                        utils:printf(2, "\tBuilding Switch From Composites: %s to %s", self.composites[c].name, self.switchlist[sl][2])
-						local s = #self.animdefs.switches+1
-						self.animdefs.switches[s] = {}
-						self.animdefs.switches[s].text1 = self.composites[c].newname
-
-						for c2 = 1, #self.composites do
-							if(self.composites[c2].name == self.switchlist[sl][2]) then
-								self.animdefs.switches[s].text2 = self.composites[c2].newname
-							end
-						end
-						break
-					end
-				end
-			end
-		end
-		for f = 1, #self.flats do
-			if(not self.flats[f].ignore) then
-				for sl = 1, #self.switchlist do
-					if(self.flats[f].name == self.switchlist[sl][1]) then
-                        utils:printf(2, "\tBuilding Switch from Flats: %s to %s", self.flats[f].name, self.switchlist[sl][2])
-						local s = #self.animdefs.switches+1
-						self.animdefs.switches[s] = {}
-						self.animdefs.switches[s].text1 = self.flats[c].newname
-
-						for f2 = 1, #self.flats do
-							if(self.flats[f2].name == self.switchlist[sl][2]) then
-								self.animdefs.switches[s].text2 = self.flats[f2].newname
-							end
-						end
-						break
-					end
-				end
-			end
-		end
-		for p = 1, #self.patches do
-			if(not self.patches[p].ignore) then
-				for sl = 1, #self.switchlist do
-					if(self.patches[p].name == self.switchlist[sl][1]) then
-                        utils:printf(2, "\tBuilding Switch from Patches: %s to %s", self.patches[p].name, self.switchlist[sl][2])
-						local s = #self.animdefs.switches+1
-						self.animdefs.switches[s] = {}
-						self.animdefs.switches[s].text1 = self.patches[p].newname
-
-						for p2 = 1, #self.patches do
-							if(self.patches[p2].name == self.switchlist[sl][2]) then
-								self.animdefs.switches[s].text2 = self.patches[p2].newname
-							end
-						end
-						break
-					end
-				end
-			end
-		end
+		self:buildSwitchesForAssets(self.composites, "Composites")
+		self:buildSwitchesForAssets(self.flats, "Flats")
+		self:buildSwitchesForAssets(self.patches, "Patches")
 
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
@@ -2316,162 +2222,167 @@ function wad:buildAnimdefs()
 	end
 end
 
+function wad:buildAnimdefsForAssets(assets, assettype)
+	for ast = 1, #assets do
+		local asset = assets[ast]
+
+		for al = 1, #self.animlist do
+			if (not asset.ignore) then
+				local animlist = self.animlist[al]
+
+				if (animlist[2] == asset.name and animlist[1] == assettype) then
+					utils:printf(2, "\tBuilding Animation: %s %s to %s", assettype, asset.name, animlist[3])
+
+					local a = #self.animdefs.anims + 1
+					local anim = {}
+
+					self.animdefs.anims[a] = anim
+
+					anim.text1 = asset.newname
+					anim.typ = animlist[1]
+					anim.decal = animlist[4]
+
+					for ast2 = 1, #assets do
+						local asset2 = assets[ast2]
+
+						if (asset2.name == animlist[3]) then
+							anim.text2 = asset2.newname
+						end
+					end
+					break
+				end
+			end
+		end
+	end
+end
+
+function wad:buildSwitchesForAssets(assets, assettype)
+	for a = 1, #assets do
+		local asset = assets[a]
+
+		if (not asset.ignore) then
+			for sl = 1, #self.switchlist do
+				local switchlist = self.switchlist[sl]
+
+				if (switchlist[1] == asset.name) then
+					utils:printf(2, "\tBuilding Switch From %s: %s to %s", assettype, asset.name, switchlist[2])
+
+					local s = #self.animdefs.switches + 1
+					local switch = {}
+
+					self.animdefs.switches[s] = switch
+					switch.text1 = asset.newname
+
+					for a2 = 1, #assets do
+						local asset2 = assets[a2]
+
+						if (switchlist[2] == asset2.name) then
+							switch.text2 = asset2.newname
+						end
+					end
+					break
+				end
+			end
+		end
+	end
+end
+
 function wad:processMaps()
-	if(self.base ~= self) then
+	if (self.base ~= self) then
 		for m = 1, #self.maps do
-			utils:printf(2, "\tProcessing Map: %d, %s", m, self.maps[m].name)
+			local map = self.maps[m]
+
+			utils:printf(2, "\tProcessing Map: %d, %s", m, map.name)
 
 			-- doom
-			if(self.maps[m].format == "DM") then
+			if (map.format == "DM") then
 
 				-- things
-				self.maps[m].things = {}
+				map.things = {}
 				local count = 0
-				for s = 1, #self.maps[m].raw.things, 10 do
+				for s = 1, #map.raw.things, 10 do
 					count = count + 1
-					self.maps[m].things[count] = {}
-					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s)
-					self.maps[m].things[count].y = love.data.unpack("<h", self.maps[m].raw.things, s+2)
-					self.maps[m].things[count].angle = love.data.unpack("<H", self.maps[m].raw.things, s+4)
-					self.maps[m].things[count].typ = love.data.unpack("<H", self.maps[m].raw.things, s+6)
-					self.maps[m].things[count].flags = love.data.unpack("<H", self.maps[m].raw.things, s+8)
+
+					local thing = {}
+					map.things[count] = thing
+
+					thing.x = love.data.unpack("<h", map.raw.things, s)
+					thing.y = love.data.unpack("<h", map.raw.things, s+2)
+					thing.angle = love.data.unpack("<H", map.raw.things, s+4)
+					thing.typ = love.data.unpack("<H", map.raw.things, s+6)
+					thing.flags = love.data.unpack("<H", map.raw.things, s+8)
 				end
 
 				-- linedefs
-				self.maps[m].linedefs = {}
+				map.linedefs = {}
 				count = 0
-				for s = 1, #self.maps[m].raw.linedefs, 14 do
+				for s = 1, #map.raw.linedefs, 14 do
 					count = count + 1
-					self.maps[m].linedefs[count] = {}
-					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
-					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
-					self.maps[m].linedefs[count].flags = love.data.unpack("<H", self.maps[m].raw.linedefs, s+4)
-					self.maps[m].linedefs[count].line_type = love.data.unpack("<H", self.maps[m].raw.linedefs, s+6)
-					self.maps[m].linedefs[count].sector_tag = love.data.unpack("<H", self.maps[m].raw.linedefs, s+8)
-					self.maps[m].linedefs[count].sidedef_right =love.data.unpack("<H", self.maps[m].raw.linedefs, s+10)
-					self.maps[m].linedefs[count].sidedef_left = love.data.unpack("<H", self.maps[m].raw.linedefs, s+12)
+
+					local linedef = {}
+					map.linedefs[count] = linedef
+
+					linedef.vertex_start = love.data.unpack("<H", map.raw.linedefs, s)
+					linedef.vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2)
+					linedef.flags = love.data.unpack("<H", map.raw.linedefs, s+4)
+					linedef.line_type = love.data.unpack("<H", map.raw.linedefs, s+6)
+					linedef.sector_tag = love.data.unpack("<H", map.raw.linedefs, s+8)
+					linedef.sidedef_right =love.data.unpack("<H", map.raw.linedefs, s+10)
+					linedef.sidedef_left = love.data.unpack("<H", map.raw.linedefs, s+12)
 				end
 
-				-- sidedefs
-				self.maps[m].sidedefs = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.sidedefs, 30 do
-					count = count + 1
-					self.maps[m].sidedefs[count] = {}
-					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
-					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
-					self.maps[m].sidedefs[count].lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
-					self.maps[m].sidedefs[count].middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
-					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
-				end
-
-				-- vertexes
-				self.maps[m].vertexes = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.vertexes, 4 do
-					count = count + 1
-					self.maps[m].vertexes[count] = {}
-					self.maps[m].vertexes[count].x = love.data.unpack("<h", self.maps[m].raw.vertexes, s)
-					self.maps[m].vertexes[count].y = love.data.unpack("<h", self.maps[m].raw.vertexes, s+2)
-				end
-
-				-- sectors
-				self.maps[m].sectors = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.sectors, 26 do
-					count = count + 1
-					self.maps[m].sectors[count] = {}
-					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
-					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
-					self.maps[m].sectors[count].ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
-					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
-					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
-					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
-				end
+				self:processCommonMapData(map)
 
 			--hexen
-			elseif(self.maps[m].format == "HM") then
+			elseif(map.format == "HM") then
 
 				-- things
-				self.maps[m].things = {}
+				map.things = {}
 				local count = 0
-				for s = 1, #self.maps[m].raw.things, 20 do
+				for s = 1, #map.raw.things, 20 do
 					count = count + 1
-					self.maps[m].things[count] = {}
-					self.maps[m].things[count].id = love.data.unpack("<H", self.maps[m].raw.things, s)
-					self.maps[m].things[count].x = love.data.unpack("<h", self.maps[m].raw.things, s+2)
-					self.maps[m].things[count].y = love.data.unpack("<h", self.maps[m].raw.things, s+4)
-					self.maps[m].things[count].z = love.data.unpack("<h", self.maps[m].raw.things, s+6)
-					self.maps[m].things[count].angle = love.data.unpack("<H", self.maps[m].raw.things, s+8)
-					self.maps[m].things[count].typ = love.data.unpack("<H", self.maps[m].raw.things, s+10)
-					self.maps[m].things[count].flags = love.data.unpack("<H", self.maps[m].raw.things, s+12)
-					self.maps[m].things[count].special = love.data.unpack("<B", self.maps[m].raw.things, s+14)
-					self.maps[m].things[count].a1 = love.data.unpack("<B", self.maps[m].raw.things, s+15)
-					self.maps[m].things[count].a2 = love.data.unpack("<B", self.maps[m].raw.things, s+16)
-					self.maps[m].things[count].a3 = love.data.unpack("<B", self.maps[m].raw.things, s+17)
-					self.maps[m].things[count].a4 = love.data.unpack("<B", self.maps[m].raw.things, s+18)
-					self.maps[m].things[count].a5 = love.data.unpack("<B", self.maps[m].raw.things, s+19)
+
+					local thing = {}
+					map.things[count] = thing
+
+					thing.id = love.data.unpack("<H", map.raw.things, s)
+					thing.x = love.data.unpack("<h", map.raw.things, s+2)
+					thing.y = love.data.unpack("<h", map.raw.things, s+4)
+					thing.z = love.data.unpack("<h", map.raw.things, s+6)
+					thing.angle = love.data.unpack("<H", map.raw.things, s+8)
+					thing.typ = love.data.unpack("<H", map.raw.things, s+10)
+					thing.flags = love.data.unpack("<H", map.raw.things, s+12)
+					thing.special = love.data.unpack("<B", map.raw.things, s+14)
+					thing.a1 = love.data.unpack("<B", map.raw.things, s+15)
+					thing.a2 = love.data.unpack("<B", map.raw.things, s+16)
+					thing.a3 = love.data.unpack("<B", map.raw.things, s+17)
+					thing.a4 = love.data.unpack("<B", map.raw.things, s+18)
+					thing.a5 = love.data.unpack("<B", map.raw.things, s+19)
 				end
 
 				-- linedefs
-				self.maps[m].linedefs = {}
+				map.linedefs = {}
 				count = 0
-				for s = 1, #self.maps[m].raw.linedefs, 16 do
+				for s = 1, #map.raw.linedefs, 16 do
 					count = count + 1
-					self.maps[m].linedefs[count] = {}
-					self.maps[m].linedefs[count].vertex_start = love.data.unpack("<H", self.maps[m].raw.linedefs, s)
-					self.maps[m].linedefs[count].vertex_end = love.data.unpack("<H", self.maps[m].raw.linedefs, s+2)
-					self.maps[m].linedefs[count].flags = love.data.unpack("<H", self.maps[m].raw.linedefs, s+4)
-					self.maps[m].linedefs[count].special = love.data.unpack("<B", self.maps[m].raw.linedefs, s+6)
-					self.maps[m].linedefs[count].a1 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+7)
-					self.maps[m].linedefs[count].a2 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+8)
-					self.maps[m].linedefs[count].a3 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+9)
-					self.maps[m].linedefs[count].a4 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+10)
-					self.maps[m].linedefs[count].a5 = love.data.unpack("<B", self.maps[m].raw.linedefs, s+11)
-					self.maps[m].linedefs[count].front_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+12)
-					self.maps[m].linedefs[count].back_sidedef = love.data.unpack("<B", self.maps[m].raw.linedefs, s+14)
+
+					local linedef = {}
+					map.linedefs[count] = linedef
+
+					linedef.vertex_start = love.data.unpack("<H", map.raw.linedefs, s)
+					linedef.vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2)
+					linedef.flags = love.data.unpack("<H", map.raw.linedefs, s+4)
+					linedef.special = love.data.unpack("<B", map.raw.linedefs, s+6)
+					linedef.a1 = love.data.unpack("<B", map.raw.linedefs, s+7)
+					linedef.a2 = love.data.unpack("<B", map.raw.linedefs, s+8)
+					linedef.a3 = love.data.unpack("<B", map.raw.linedefs, s+9)
+					linedef.a4 = love.data.unpack("<B", map.raw.linedefs, s+10)
+					linedef.a5 = love.data.unpack("<B", map.raw.linedefs, s+11)
+					linedef.front_sidedef = love.data.unpack("<B", map.raw.linedefs, s+12)
+					linedef.back_sidedef = love.data.unpack("<B", map.raw.linedefs, s+14)
 				end
 
-				-- sidedefs
-				self.maps[m].sidedefs = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.sidedefs, 30 do
-					count = count + 1
-					self.maps[m].sidedefs[count] = {}
-					self.maps[m].sidedefs[count].xoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s)
-					self.maps[m].sidedefs[count].yoffset = love.data.unpack("<h", self.maps[m].raw.sidedefs, s+2)
-					self.maps[m].sidedefs[count].upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+4)))
-					self.maps[m].sidedefs[count].lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+12)))
-					self.maps[m].sidedefs[count].middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sidedefs, s+20)))
-					self.maps[m].sidedefs[count].sector = love.data.unpack("<H", self.maps[m].raw.sidedefs, s+28)
-				end
-
-				-- vertexes
-				self.maps[m].vertexes = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.vertexes, 4 do
-					count = count + 1
-					self.maps[m].vertexes[count] = {}
-					self.maps[m].vertexes[count].x = love.data.unpack("<h", self.maps[m].raw.vertexes, s)
-					self.maps[m].vertexes[count].y = love.data.unpack("<h", self.maps[m].raw.vertexes, s+2)
-				end
-
-				-- sectors
-				self.maps[m].sectors = {}
-				count = 0
-				for s = 1, #self.maps[m].raw.sectors, 26 do
-					count = count + 1
-					self.maps[m].sectors[count] = {}
-					self.maps[m].sectors[count].floor_height = love.data.unpack("<h", self.maps[m].raw.sectors, s)
-					self.maps[m].sectors[count].ceiling_height = love.data.unpack("<h", self.maps[m].raw.sectors, s+2)
-					self.maps[m].sectors[count].floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+4)))
-					self.maps[m].sectors[count].ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", self.maps[m].raw.sectors, s+12)))
-					self.maps[m].sectors[count].light = love.data.unpack("<h", self.maps[m].raw.sectors, s+20)
-					self.maps[m].sectors[count].special = love.data.unpack("<H", self.maps[m].raw.sectors, s+22)
-					self.maps[m].sectors[count].tag = love.data.unpack("<H", self.maps[m].raw.sectors, s+24)
-				end
+				self:processCommonMapData(map)
 			end
 
 			collectgarbage()
@@ -2483,13 +2394,64 @@ function wad:processMaps()
 	utils:printf(1, "\tDone.\n")
 end
 
+function wad:processCommonMapData(map)
+	-- sidedefs
+	map.sidedefs = {}
+	local count = 0
+	for s = 1, #map.raw.sidedefs, 30 do
+		count = count + 1
+
+		local sidedef = {}
+		map.sidedefs[count] = sidedef
+
+		sidedef.xoffset = love.data.unpack("<h", map.raw.sidedefs, s)
+		sidedef.yoffset = love.data.unpack("<h", map.raw.sidedefs, s+2)
+		sidedef.upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4)))
+		sidedef.lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+12)))
+		sidedef.middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20)))
+		sidedef.sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
+	end
+
+	-- vertexes
+	map.vertexes = {}
+	count = 0
+	for s = 1, #map.raw.vertexes, 4 do
+		count = count + 1
+
+		local vertex = {}
+		map.vertexes[count] = vertex
+
+		vertex.x = love.data.unpack("<h", map.raw.vertexes, s)
+		vertex.y = love.data.unpack("<h", map.raw.vertexes, s+2)
+	end
+
+	-- sectors
+	map.sectors = {}
+	count = 0
+	for s = 1, #map.raw.sectors, 26 do
+		count = count + 1
+		map.sectors[count] = {}
+
+		local sector = {}
+		map.sectors[count] = sector
+
+		sector.floor_height = love.data.unpack("<h", map.raw.sectors, s)
+		sector.ceiling_height = love.data.unpack("<h", map.raw.sectors, s+2)
+		sector.floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4)))
+		sector.ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+12)))
+		sector.light = love.data.unpack("<h", map.raw.sectors, s+20)
+		sector.special = love.data.unpack("<H", map.raw.sectors, s+22)
+		sector.tag = love.data.unpack("<H", map.raw.sectors, s+24)
+	end
+end
+
 function wad:ModifyMaps()
 	if(self.base ~= self) then
 		for m = 1, #self.maps do
 			local map = self.maps[m]
 
 			utils:printf(1, "\tModifying Map: %d", m)
-			
+
 			local actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/actorlist.txt")
 			actorlist:read("*line")
 			actorlist:read("*line")
@@ -2503,7 +2465,7 @@ function wad:ModifyMaps()
 				if(self.things == "Y") then
                     utils:printf(2, "\t\tReplacing actors.")
 					while line ~= nil do
-                        
+
 						-- actor replacement stuff
 						local actornewspace = string.find(line, " ")
 						local actor1 = string.sub(line, 1, actornewspace)
@@ -2541,7 +2503,7 @@ function wad:ModifyMaps()
 				for p = 1, #self.patches do
 					local patch = self.patches[p]
 
-					self:replaceMapTextures(map, patch, self:getPatchName(patch))
+					self:replaceMapTextures(map, patch, getPatchName(patch))
 				end
 
 				-- build raw things back
@@ -2609,7 +2571,7 @@ function wad:ModifyMaps()
 					map.raw.textmap = map.raw.textmap:gsub(self.flats[f].name, self.flats[f].newname)
 				end
 				for p = 1, #self.patches do
-					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, self:getPatchName(self.patches[p]))
+					map.raw.textmap = map.raw.textmap:gsub(self.patches[p].name, getPatchName(self.patches[p]))
 				end
 			end
 		end
@@ -2706,7 +2668,7 @@ end
 
 function wad:extractTextures()
 	if(self.base ~= self) then
-		local texturesstr = ""
+		local texturesb = stringbuilder()
 		local displaydone = false
 
 		for c = 1, #self.composites do
@@ -2718,11 +2680,9 @@ function wad:extractTextures()
 					utils:printf(2, "\tExtracting Composite: %s", composite.newname)
 
 					if (composite.patchcount > 1) then
-						texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
+						texturesb:append(self:createTextureDefinition(composite))
 					else
-						local png = utils:openFile(string.format("%s/textures/%s/%s.png", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
-						png:write(composite.png)
-						png:close()
+						self:extractAsset("textures", composite.newname, composite.png)
 					end
 				end
 			else
@@ -2730,7 +2690,7 @@ function wad:extractTextures()
 				utils:printf(2, "\tExtracting Texture: %s", composite.newname)
 
 				if (composite.patchcount > 1) then
-					texturesstr = string.format("%s%s", texturesstr, self:createTextureDefinition(composite))
+					texturesb:append(self:createTextureDefinition(composite))
 				else
 					local png = utils:openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
 					png:write(composite.raw)
@@ -2739,9 +2699,9 @@ function wad:extractTextures()
 			end
 		end
 
-		if #texturesstr > 0 then
+		if (not texturesb:empty()) then
 			local file = utils:openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
-			file:write(texturesstr)
+			file:write(texturessb:toString())
 			file:close()
 		end
 
@@ -2757,30 +2717,31 @@ end
 
 -- Creates a WallTexture definition for TEXTURES
 function wad:createTextureDefinition(composite)
-	local texturedef = string.format("WallTexture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height)
+	local texturedefsb = stringbuilder()
+	texturedefsb:append(string.format("WallTexture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height))
 
 	for p = 1, composite.patchcount do
 		local compositepatch = composite.patches[p]
 		local patchdata = self.patches[compositepatch.patch]
 		local basepatchdata = self.base.patches[compositepatch.patch]
-		local patchname = self:getPatchName(patchdata, basepatchdata)
+		local patchname = getPatchName(patchdata, basepatchdata)
 
 		if (#patchname > 0) then
-            if(patchdata or basepatchdata) then
-                if(patchdata) then
-                    patchdata.used = true
-                end
-                texturedef = string.format("%s	Patch \"%s\", %d, %d\n", texturedef, patchname, compositepatch.x, compositepatch.y)
-            end
+			if (patchdata or basepatchdata) then
+				if (patchdata) then
+					patchdata.used = true
+				end
+				texturedefsb:append(string.format("	Patch \"%s\", %d, %d\n", patchname, compositepatch.x, compositepatch.y))
+			end
 		end
 	end
 
-	return string.format("%s}\n\n", texturedef)
+	texturedefsb:append("}\n\n")
+	return texturedefsb:toString()
 end
 
-
-function wad:getPatchName(patch, basepatch)
-	local patchname = ""
+function getPatchName(patch, basepatch)
+	local patchname
 
 	if (patch) then
 		-- If this patch is a standalone texture, then use the composite texture name instead
@@ -2788,20 +2749,20 @@ function wad:getPatchName(patch, basepatch)
 	end
 
 	-- If patch was not defined or somehow did not have a name, then attempt to get name from basepatch (if it exists)
-	if (basepatch and #patchname == 0) then
+	if (basepatch and patchname == nil) then
 		patchname = basepatch.composite and (basepatch.composite.newname or basepatch.composite.name) or basepatch.name
 	end
 
-	return patchname
+	return patchname or ""
 end
 
 function wad:extractGraphics()
-    if(self.base ~= self) then
+	if (self.base ~= self) then
 		for g = 1, #self.graphics do
-            utils:printf(2, "\tExtracting Graphic: %s", self.graphics[g].name)
-			local png = utils:openFile(string.format("%s/graphics/%s/%s.png", self.pk3path, self.acronym, string.lower(self.graphics[g].name)), "w+b")
-			png:write(self.graphics[g].png)
-			png:close()
+			local graphic = self.graphics[g]
+
+			utils:printf(2, "\tExtracting Graphic: %s", graphic.name)
+			self:extractAsset("graphics", graphic.name, graphic.png)
 		end
 		collectgarbage()
 		utils:printf(1, "\tDone.\n")
@@ -2812,13 +2773,13 @@ function wad:extractGraphics()
 end
 
 function wad:extractFlats()
-	if(self.base ~= self) then
+	if (self.base ~= self) then
 		for f = 1, #self.flats do
-			if(not self.flats[f].ignore) then
-                utils:printf(2, "\tExtracting Flat: %s", self.flats[f].newname)
-				local png = utils:openFile(string.format("%s/flats/%s/%s.png", self.pk3path, self.acronym, string.lower(self.flats[f].newname)), "w+b")
-				png:write(self.flats[f].png)
-				png:close()
+			local flat = self.flats[f]
+
+			if (not flat.ignore and flat.newname) then
+				utils:printf(2, "\tExtracting Flat: %s", flat.newname)
+				self:extractAsset("flats", flat.newname, flat.png)
 			end
 		end
 		collectgarbage()
@@ -2833,11 +2794,9 @@ function wad:extractPatches()
 		for p = 1, #self.patches do
 			local patch = self.patches[p]
 
-			if (not patch.ignore and patch.composite == nil) then
-                utils:printf(2, "\tExtracting Patch: %s", patch.newname)
-				local png = utils:openFile(string.format("%s/patches/%s/%s.png", self.pk3path, self.acronym, string.lower(patch.newname)), "w+b")
-				png:write(patch.png)
-				png:close()
+			if (not patch.ignore and patch.composite == nil and patch.newname) then
+				utils:printf(2, "\tExtracting Patch: %s", patch.newname)
+				self:extractAsset("patches", patch.newname, patch.png)
 			end
 		end
 
@@ -2849,16 +2808,16 @@ function wad:extractPatches()
 end
 
 function wad:extractSprites()
-	if(self.base ~= self) then
+	if (self.base ~= self) then
 		for s = 1, #self.sprites do
-			if(not self.sprites[s].ignore) then
-                utils:printf(2, "\tExtracting Sprite: %s", self.sprites[s].name)
-                self.sprites[s].newname = self.sprites[s].newname:gsub("\\", "^")
-				local png = utils:openFile(string.format("%s/sprites/%s/%s.png", self.pk3path, self.acronym, string.lower(self.sprites[s].newname)), "w+b")
-				png:write(self.sprites[s].png)
-				png:close()
+			local sprite = self.sprites[s]
+
+			if (not sprite.ignore) then
+				utils:printf(2, "\tExtracting Sprite: %s", sprite.name)
+				sprite.newname = sprite.newname:gsub("\\", "^")
+				self:extractAsset("sprites", sprite.newname, sprite.png)
             else
-                utils:printf(2, "\tNot Extracting Duplicate Sprite: %s", self.sprites[s].name) 
+				utils:printf(2, "\tNot Extracting Duplicate Sprite: %s", sprite.name)
 			end
 		end
 
@@ -2867,6 +2826,12 @@ function wad:extractSprites()
 	else
 		utils:printf(1, "\tNot extracting base wad sprites.\n")
 	end
+end
+
+function wad:extractAsset(dirname, assetname, assetimagedata)
+	local png = utils:openFile(string.format("%s/%s/%s/%s.png", self.pk3path, dirname, self.acronym, string.lower(assetname)), "w+b")
+	png:write(assetimagedata)
+	png:close()
 end
 
 function wad:extractMaps()
@@ -2985,10 +2950,10 @@ end
 function wad:extractAnimdefs()
 	if(self.base ~= self) then
 
-		local anim = ""
+		local animsb = stringbuilder()
 		for a = 1, #self.animdefs.anims do
             utils:printf(2, "\t\t%s %s range %s tics 8", self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
-			anim = string.format("%s%s %s range %s tics 8", anim, self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2)
+			animsb:append(string.format("%s %s range %s tics 8", self.animdefs.anims[a].typ, self.animdefs.anims[a].text1, self.animdefs.anims[a].text2))
 			texNumMin = string.sub(self.animdefs.anims[a].text1, 5, 8)
 			texNumMax = string.sub(self.animdefs.anims[a].text2, 5, 8)
 
@@ -3012,24 +2977,24 @@ function wad:extractAnimdefs()
 			end
 
 			if(self.animdefs.anims[a].decal) then
-				anim = string.format("%s %s", anim, self.animdefs.anims[a].decal)
+				animsb:append(" "..self.animdefs.anims[a].decal)
 			end
-            anim = string.format("%s\n", anim)
+            animsb:append("\n")
 		end
 
-		local switch = ""
+		local switchsb = stringbuilder()
 		for s = 1, #self.animdefs.switches do
             utils:printf(2, "\t\tswitch %s on pic %s tics 0", self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
-			switch = string.format("%sswitch %s on pic %s tics 0\n", switch, self.animdefs.switches[s].text1, self.animdefs.switches[s].text2)
+			switchsb:append(string.format("switch %s on pic %s tics 0\n", self.animdefs.switches[s].text1, self.animdefs.switches[s].text2))
 
 			animdefsIgnore[self.animdefs.switches[s].text1] = "not nil";
 			animdefsIgnore[self.animdefs.switches[s].text2] = "not nil";
 		end
 
-        if #anim > 0 or #switch > 0 or #self.animdefs.original > 0 then
+        if (not animsb:empty() or not switchsb:empty() or #self.animdefs.original > 0) then
 			local file = utils:openFile(string.format("%s/animdefs.%s.txt", self.pk3path, self.acronym), "w")
-            file:write(anim)
-            file:write(switch)
+            file:write(animsb:toString())
+            file:write(switchsb:toString())
             file:write(self.animdefs.original)
             file:close()
         else
@@ -3044,32 +3009,32 @@ end
 function wad:extractSNDINFO()
 	if(self.base ~= self) then
 
-		local txt = ""
+		local txtsb = stringbuilder()
 		self.snddefs = {}
 
 		for s = 1, #self.doomsounds do
-			txt = string.format("%s\n%s/%s\t\t\t\t%s", txt, self.acronym, self.doomsounds[s].name, self.doomsounds[s].newname)
+			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.doomsounds[s].name, self.doomsounds[s].newname))
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.doomsounds[s].name),  self.doomsounds[s].name }
 		end
 
 		for s = 1, #self.wavesounds do
-			txt = string.format("%s\n%s/%s\t\t\t\t%s", txt, self.acronym, self.wavesounds[s].name, self.wavesounds[s].newname)
+			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.wavesounds[s].name, self.wavesounds[s].newname))
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.wavesounds[s].name),  self.wavesounds[s].name }
 		end
 
 		for s = 1, #self.oggsounds do
-			txt = string.format("%s\n%s/%s\t\t\t\t%s", txt, self.acronym, self.oggsounds[s].name, self.oggsounds[s].newname)
+			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.oggsounds[s].name, self.oggsounds[s].newname))
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.oggsounds[s].name),  self.oggsounds[s].name }
 		end
 
 		for s = 1, #self.flacsounds do
-			txt = string.format("%s\n%s/%s\t\t\t\t%s", txt, self.acronym, self.flacsounds[s].name, self.flacsounds[s].newname)
+			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.flacsounds[s].name, self.flacsounds[s].newname))
 			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
 		end
 
-        if #txt > 0 then
+        if (not txtsb:empty()) then
             local file = utils:openFile(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
-            file:write(txt)
+            file:write(txtsb:toString())
             file:close()
         else
             utils:printf(1, "\tNo sounds to define.\n")
