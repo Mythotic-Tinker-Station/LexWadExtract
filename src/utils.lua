@@ -139,4 +139,18 @@ function utils:printTable(tbl, indent)
 	end
 end
 
+function utils:bench(label, func, ...)
+    self:printf(0, label)
+    local start = love.timer.getTime()
+    collectgarbage()
+    local memstart = collectgarbage("count")
+    local result = func(...)
+    self:printf(1, "\t----------------------------------------")
+    self:printf(1, "\tTime Taken: %0.3fms.", (love.timer.getTime() - start) * 1000)
+    self:printf(1, "\tMemory Used: %0.2fMB.", (collectgarbage("count") - memstart) / 1024)
+    self:printf(1, "\tTotal Memory Used: %0.2fMB.", collectgarbage("count") / 1024)
+    self:printf(0, "\tDone.\n")
+    return result
+end
+
 return utils
