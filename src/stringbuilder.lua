@@ -47,73 +47,70 @@
 
 local stringbuilder = {}
 setmetatable(stringbuilder, {
-	__call = function(self, ...)
-		return self:create(...)
+	__call = function(self)
+		return self:new()
 	end
 })
-
-local stringbuilder_mt = {
-	__index = stringbuilder;
-
-	__add = function(self, ...)
-		return self:append(...)
-	end,
-
-	__concat = function(self, ...)
-		return self:append(...)
-	end,
-
-	__tostring = function(self)
-		return self:toString()
-	end
-}
-
-function stringbuilder:init(...)
-	local obj = {
-		buffer = {}
-	}
-	setmetatable(obj, stringbuilder_mt)
-
-	return obj
-end
-
-function stringbuilder:create(...)
-	return self:init(...)
-end
 
 function stringbuilder:empty()
 	return #self.buffer == 0
 end
 
 --[[
-    The append can deal with two cases.
-    1) The 'other' is a simple string, in which case
-    we just append it to our list and  move on.
-    2) The 'other' represents another table, and that table
-    is itself a stringbuilder.
+    The append can deal with 3 cases.
+    1) 'item' is a simple string or number, in which case
+    we just append it to our list and move on.
+    2) 'item' is a boolean, in which case
+    we stringify and append it to our list.
+    3) 'item' represents another table, in which case we recursively iterate
+    through every table until reaching the leaves.
 ]]
-function stringbuilder:append(other)
-	if type(other) == "string" then
-		table.insert(self.buffer, other)
+function stringbuilder:append(item)
+	if (item == nil) then
 		return self
-	elseif type(other) == "table" then
-		if other.buffer ~= nil then
-			for _, value in ipairs(other.buffer) do
-				table.insert(self.buffer, value)
-			end
+	end
+
+	local itemtype = type(item)
+
+	if (itemtype == "string" or itemtype == "number") then
+		table.insert(self.buffer, item)
+	elseif (itemtype == "boolean") then
+		table.insert(self.buffer, tostring(item))
+	elseif (itemtype == "table") then
+		for _, value in pairs(item) do
+			self:append(value)
 		end
+	else
+		error(string.format("Cannot append item of type %s", itemtype))
 	end
 
 	return self
 end
 
-function stringbuilder:toString(perLine)
-	perLine = perLine or ""
-	return table.concat(self.buffer, perLine)
+function stringbuilder:clear()
+	self.buffer = {}
+	return self
 end
 
-function stringbuilder:str()
-	return table.concat(self.buffer)
+function stringbuilder:toString(sep)
+	sep = sep or ""
+	return table.concat(self.buffer, sep)
+end
+
+local stringbuilder_mt = {
+	__index = stringbuilder;
+	__add = stringbuilder.append;
+	__concat = stringbuilder.append;
+	__tostring = stringbuilder.toString;
+}
+
+function stringbuilder:new()
+	local obj = {
+		buffer = {}
+	}
+	setmetatable(obj, stringbuilder_mt)
+
+	return obj
 end
 
 return stringbuilder
