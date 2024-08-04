@@ -1752,16 +1752,24 @@ end
 
 function wad:filterDuplicates()
 	local count = 0
+	local compositecount = #self.composites
 
 	-- filter dups from same wad
-	for c = 1, #self.composites do
-		for c2 = c, #self.composites do
-			if(c ~= c2) then
-				if(self.composites[c].md5 == self.composites[c2].md5) then
+	for c = 1, compositecount do
+		local composite = self.composites[c]
+
+		for c2 = c, compositecount do
+			if (c ~= c2) then
+				local composite2 = self.composites[c2]
+
+				if (composite.md5 == composite2.md5) then
 					count = count + 1
-					if(self.composites[c].dups ~= nil) then
-						if(self.composites[c].dups[self.composites[c].name] == nil) then self.composites[c].dups[self.composites[c].name] = {} end
-						self.composites[c].dups[self.composites[c].name][#self.composites[c].dups[self.composites[c].name]+1] = self.composites[c2].name
+
+					if (composite.dups ~= nil) then
+						local dupcomposite = composite.dups[composite.name]
+
+						if (dupcomposite == nil) then dupcomposite = {} end
+						dupcomposite[#dupcomposite+1] = composite2.name
 					end
 				end
 			end
@@ -1842,7 +1850,10 @@ function wad:renameAssets(assets)
 
 	for a = 1, assetcount do
 		local asset = assets[a]
-		self:renameAsset(asset)
+
+		if (not asset.ignore) then
+			self:renameAsset(asset)
+		end
 	end
 
 	return assetcount
@@ -2505,14 +2516,18 @@ end
 function getPatchName(patch, basepatch)
 	local patchname
 
-	if (patch) then
+	if (patch and not patch.ignore) then
 		-- If this patch is a standalone texture, then use the composite texture name instead
-		patchname = patch.composite and patch.composite.newname or patch.newname
+		if (patch.composite) then
+			patchname = patch.composite.newname
+		else
+			patchname = patch.newname
+		end
 	end
 
 	-- If patch was not defined or somehow did not have a name, then attempt to get name from basepatch (if it exists)
 	if (basepatch and patchname == nil) then
-		patchname = basepatch.composite and (basepatch.composite.newname or basepatch.composite.name) or basepatch.name
+		patchname = basepatch.name or (basepatch.composite and basepatch.composite.name)
 	end
 
 	return patchname or ""
