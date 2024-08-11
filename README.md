@@ -4,7 +4,7 @@
 ## Prerequisite:
     Add the doom2.wad to the root folder
 
-## Notes: 
+## Notes:
         Zandronum still relies on the 8 char name limit,
         So to avoid conflicts we made use of an acronym system
         all mods must have a 4 letter arconym, this will be used to:
@@ -15,7 +15,7 @@
                 - Sprites:                          xxyyzzzz (xx = 2 letter acronym, yy = number, zzzz = frame)
                 - Text lumps:                       xxxxxxxx.yyyy.txt (xxxxxxxx = lump file name, yyyy = acronym)
 
-    Notes: 
+    Notes:
         Zandronum still relies on the 8 char name limit,
         So to avoid conflicts we made use of an acronym system
         all mods must have a 4 letter arconym, this will be use to:
@@ -46,24 +46,27 @@
 
         Prompt 3: Provide the name of the wad file
                   Path does not need to be absolute, only the filename.wad is necessary
-                  
-        Prompt 4: Verbosity
+
+        Prompt 4: Provide the name of the iwad this file runs on
+                  Like the previous step, only filename.wad is necessary
+
+        Prompt 5: Verbosity
                   For debugging
                   0 = Basic.
                   1 = Detailed.
                   2 = Spam all the things.
                   3 = Same as 2, but includes logging of loading the doom2.wad.
                   Blank = Same as 0
-               
+
 4) If all goes well, the pk3 folder will have all your converted assets
 
         Copy the assets to the lexicon_base expansion pack pk3 folder
-   
+
 5) Next you will need to modify the lexicon_base acs main.c file
 
         Modify and add up "#define MODCOUNT", so if its 19, you'll change it to 20
         Add the acronym you decided on to the int acronym_list[MODCOUNT] list
-        
+
 6) Next is the language.txt file, this file is where all the data for the mapset lies
 
         To add a mapset, add the following information so lexicon can gather info for each mapset
@@ -98,10 +101,10 @@
 		    ACRO_REPLACER0          = "ZombieMan:Archvile";         // A replacement define, Archviles will spawn in the place of Zombiemen for all levels in this mapset.
 		    ACRO_REPLACER1          = "ShotgunGuy:CoolImp";         // CoolImp will spawn in the place of ShotgunGuy for all levels in this mapset.
 		    ...
-            
+
 6) Run zandronum.exe with the git lexicon pk3 folder listed first, and git lexicon_base pk3 folder second
 
-        Zandronum.exe -file "lexicon\pk3" -file "lexicon-base\pk3" 
-   
+        Zandronum.exe -file "lexicon\pk3" -file "lexicon-base\pk3"
+
 # Disclaimer
 This tool will allow one to extract full mapsets including most of their resources such as textures, sounds, sprites etc to be able to be placed in a mapset compliation easily. Please note that we are not resposible should you decide to use this tool in a way where you infringe on peoples permissions of a mapset. Some people may not give you permission to add their works into a compilation or to put it bluntly, to rip peoples work. Always get permission from the author before you extract their work!!!
