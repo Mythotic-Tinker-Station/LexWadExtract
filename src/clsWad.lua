@@ -74,12 +74,12 @@ local wad = class("wad",
 	-- class variables
 	verbose = 0,
 	texturecount = 0,
-    texturecount2 = 0,
+	texturecount2 = 0,
 	soundcount = 0,
-    songcount = 0,
+	songcount = 0,
 	things = "N",
 	acronym = "DOOM",
-    acronym_sprite = "XX",
+	acronym_sprite = "XX",
 	base = false,
 	extractpatches = false;
 
@@ -92,7 +92,7 @@ local wad = class("wad",
 	flats = {},
 	patches = {},
 	graphics = {},
-    sprites = {},
+	sprites = {},
 	doomsounds = {},
 	oggsounds = {},
 	wavesounds = {},
@@ -103,30 +103,30 @@ local wad = class("wad",
 	doomdups = {},
 	animdefs = {},
 
-    debugcanvas = love.graphics.newCanvas(1024, 1024),
+	debugcanvas = love.graphics.newCanvas(1024, 1024),
 
-    maplumps =
-    {
-        "THINGS",
-        "LINEDEFS",
-        "SIDEDEFS",
-        "VERTEXES",
-        "SEGS",
-        "SSECTORS",
-        "NODES",
-        "SECTORS",
-        "REJECT",
-        "BLOCKMAP",
-        "BEHAVIOR",
-        "SCRIPTS",
-        "TEXTMAP",
-        "ZNODES",
-        "DIALOGUE",
-        "ENDMAP",
-    },
+	maplumps =
+	{
+		"THINGS",
+		"LINEDEFS",
+		"SIDEDEFS",
+		"VERTEXES",
+		"SEGS",
+		"SSECTORS",
+		"NODES",
+		"SECTORS",
+		"REJECT",
+		"BLOCKMAP",
+		"BEHAVIOR",
+		"SCRIPTS",
+		"TEXTMAP",
+		"ZNODES",
+		"DIALOGUE",
+		"ENDMAP"
+	},
 
-    specialslist =
-    {
+	specialslist =
+	{
 		"ALTHUDCF",
 		"ANIMATED",
 		"ANIMDEFS",
@@ -178,197 +178,197 @@ local wad = class("wad",
 		"X11R6RGB",
 		"XHAIRS",
 		"XLAT",
-		"ZMAPINFO",
-    },
+		"ZMAPINFO"
+	},
 
-    graphicslist =
-    {
-        {"CWILV00", "V00"},
-        {"CWILV01", "V01"},
-        {"CWILV02", "V02"},
-        {"CWILV03", "V03"},
-        {"CWILV04", "V04"},
-        {"CWILV05", "V05"},
-        {"CWILV06", "V06"},
-        {"CWILV07", "V07"},
-        {"CWILV08", "V08"},
-        {"CWILV09", "V09"},
-        {"CWILV10", "V10"},
-        {"CWILV11", "V11"},
-        {"CWILV12", "V12"},
-        {"CWILV13", "V13"},
-        {"CWILV14", "V14"},
-        {"CWILV15", "V15"},
-        {"CWILV16", "V16"},
-        {"CWILV17", "V17"},
-        {"CWILV18", "V18"},
-        {"CWILV19", "V19"},
-        {"CWILV20", "V20"},
-        {"CWILV21", "V21"},
-        {"CWILV22", "V22"},
-        {"CWILV23", "V23"},
-        {"CWILV24", "V24"},
-        {"CWILV25", "V25"},
-        {"CWILV26", "V26"},
-        {"CWILV27", "V27"},
-        {"CWILV28", "V28"},
-        {"CWILV29", "V29"},
-        {"CWILV30", "V30"},
-        {"CWILV31", "V31"},
-        {"CWILV32", "V32"},
-        {"WILV00", "UV00"},
-        {"WILV01", "UV01"},
-        {"WILV02", "UV02"},
-        {"WILV03", "UV03"},
-        {"WILV04", "UV04"},
-        {"WILV05", "UV05"},
-        {"WILV06", "UV06"},
-        {"WILV07", "UV07"},
-        {"WILV08", "UV08"},
-        {"WILV09", "UV09"},
-        {"WILV10", "UV10"},
-        {"WILV11", "UV11"},
-        {"WILV12", "UV12"},
-        {"WILV13", "UV13"},
-        {"WILV14", "UV14"},
-        {"WILV15", "UV15"},
-        {"WILV16", "UV16"},
-        {"WILV17", "UV17"},
-        {"WILV18", "UV18"},
-        {"WILV19", "UV19"},
-        {"WILV20", "UV20"},
-        {"WILV21", "UV21"},
-        {"WILV22", "UV22"},
-        {"WILV23", "UV23"},
-        {"WILV24", "UV24"},
-        {"WILV25", "UV25"},
-        {"WILV26", "UV26"},
-        {"WILV27", "UV27"},
-        {"WILV28", "UV28"},
-        {"WILV29", "UV29"},
-        {"WILV30", "UV30"},
-        {"WILV31", "UV31"},
-        {"WILV32", "UV32"},
-        {"WILV33", "UV33"},
-        {"WILV34", "UV34"},
-        {"WILV35", "UV35"},
-        {"WILV36", "UV36"},
-        {"WILV37", "UV37"},
-        {"WILV38", "UV38"},
-        {"INTERPIC", "INT"},
-        {"TITLEPIC", "TITL"},
-        {"HELP", "HELP"},
-        {"CREDIT", "CRED"},
-        {"BOSSBACK", "BOSS"},
-    },
+	graphicslist =
+	{
+		{"CWILV00", "V00"},
+		{"CWILV01", "V01"},
+		{"CWILV02", "V02"},
+		{"CWILV03", "V03"},
+		{"CWILV04", "V04"},
+		{"CWILV05", "V05"},
+		{"CWILV06", "V06"},
+		{"CWILV07", "V07"},
+		{"CWILV08", "V08"},
+		{"CWILV09", "V09"},
+		{"CWILV10", "V10"},
+		{"CWILV11", "V11"},
+		{"CWILV12", "V12"},
+		{"CWILV13", "V13"},
+		{"CWILV14", "V14"},
+		{"CWILV15", "V15"},
+		{"CWILV16", "V16"},
+		{"CWILV17", "V17"},
+		{"CWILV18", "V18"},
+		{"CWILV19", "V19"},
+		{"CWILV20", "V20"},
+		{"CWILV21", "V21"},
+		{"CWILV22", "V22"},
+		{"CWILV23", "V23"},
+		{"CWILV24", "V24"},
+		{"CWILV25", "V25"},
+		{"CWILV26", "V26"},
+		{"CWILV27", "V27"},
+		{"CWILV28", "V28"},
+		{"CWILV29", "V29"},
+		{"CWILV30", "V30"},
+		{"CWILV31", "V31"},
+		{"CWILV32", "V32"},
+		{"WILV00", "UV00"},
+		{"WILV01", "UV01"},
+		{"WILV02", "UV02"},
+		{"WILV03", "UV03"},
+		{"WILV04", "UV04"},
+		{"WILV05", "UV05"},
+		{"WILV06", "UV06"},
+		{"WILV07", "UV07"},
+		{"WILV08", "UV08"},
+		{"WILV09", "UV09"},
+		{"WILV10", "UV10"},
+		{"WILV11", "UV11"},
+		{"WILV12", "UV12"},
+		{"WILV13", "UV13"},
+		{"WILV14", "UV14"},
+		{"WILV15", "UV15"},
+		{"WILV16", "UV16"},
+		{"WILV17", "UV17"},
+		{"WILV18", "UV18"},
+		{"WILV19", "UV19"},
+		{"WILV20", "UV20"},
+		{"WILV21", "UV21"},
+		{"WILV22", "UV22"},
+		{"WILV23", "UV23"},
+		{"WILV24", "UV24"},
+		{"WILV25", "UV25"},
+		{"WILV26", "UV26"},
+		{"WILV27", "UV27"},
+		{"WILV28", "UV28"},
+		{"WILV29", "UV29"},
+		{"WILV30", "UV30"},
+		{"WILV31", "UV31"},
+		{"WILV32", "UV32"},
+		{"WILV33", "UV33"},
+		{"WILV34", "UV34"},
+		{"WILV35", "UV35"},
+		{"WILV36", "UV36"},
+		{"WILV37", "UV37"},
+		{"WILV38", "UV38"},
+		{"INTERPIC", "INT"},
+		{"TITLEPIC", "TITL"},
+		{"HELP", "HELP"},
+		{"CREDIT", "CRED"},
+		{"BOSSBACK", "BOSS"}
+	},
 
 	switchlist =
 	{
-		{"SW1BRCOM", 	"SW2BRCOM"},
-		{"SW1BRN1",		"SW2BRN1"},
-		{"SW1BRN2",		"SW2BRN2"},
-		{"SW1BRNGN", 	"SW2BRNGN"},
-		{"SW1BROWN", 	"SW2BROWN"},
-		{"SW1COMM",		"SW2COMM"},
-		{"SW1COMP",		"SW2COMP"},
-		{"SW1DIRT",		"SW2DIRT"},
-		{"SW1EXIT",		"SW2EXIT"},
-		{"SW1GRAY",		"SW2GRAY"},
-		{"SW1GRAY1", 	"SW2GRAY1"},
-		{"SW1METAL", 	"SW2METAL"},
-		{"SW1PIPE",		"SW2PIPE"},
-		{"SW1SLAD",		"SW2SLAD"},
-		{"SW1STARG", 	"SW2STARG"},
-		{"SW1STON1", 	"SW2STON1"},
-		{"SW1STON2", 	"SW2STON2"},
-		{"SW1STONE", 	"SW2STONE"},
-		{"SW1STRTN", 	"SW2STRTN"},
-		{"SW1BLUE",		"SW2BLUE"},
-		{"SW1CMT",		"SW2CMT"},
-		{"SW1GARG",		"SW2GARG"},
-		{"SW1GSTON", 	"SW2GSTON"},
-		{"SW1HOT",		"SW2HOT"},
-		{"SW1LION",		"SW2LION"},
-		{"SW1SATYR", 	"SW2SATYR"},
-		{"SW1SKIN",		"SW2SKIN"},
-		{"SW1VINE",		"SW2VINE"},
-		{"SW1WOOD",		"SW2WOOD"},
-		{"SW1PANEL", 	"SW2PANEL"},
-		{"SW1ROCK",		"SW2ROCK"},
-		{"SW1MET2",		"SW2MET2"},
-		{"SW1WDMET", 	"SW2WDMET"},
-		{"SW1BRIK",		"SW2BRIK"},
-		{"SW1MOD1",		"SW2MOD1"},
-		{"SW1ZIM",		"SW2ZIM"},
-		{"SW1STON6", 	"SW2STON6"},
-		{"SW1TEK",		"SW2TEK"},
-		{"SW1MARB",		"SW2MARB"},
-		{"SW1SKULL", 	"SW2SKULL"},
+		{off = "SW1BRCOM", on = "SW2BRCOM"},
+		{off = "SW1BRN1",  on = "SW2BRN1"},
+		{off = "SW1BRN2",  on = "SW2BRN2"},
+		{off = "SW1BRNGN", on = "SW2BRNGN"},
+		{off = "SW1BROWN", on = "SW2BROWN"},
+		{off = "SW1COMM",  on = "SW2COMM"},
+		{off = "SW1COMP",  on = "SW2COMP"},
+		{off = "SW1DIRT",  on = "SW2DIRT"},
+		{off = "SW1EXIT",  on = "SW2EXIT"},
+		{off = "SW1GRAY",  on = "SW2GRAY"},
+		{off = "SW1GRAY1", on = "SW2GRAY1"},
+		{off = "SW1METAL", on = "SW2METAL"},
+		{off = "SW1PIPE",  on = "SW2PIPE"},
+		{off = "SW1SLAD",  on = "SW2SLAD"},
+		{off = "SW1STARG", on = "SW2STARG"},
+		{off = "SW1STON1", on = "SW2STON1"},
+		{off = "SW1STON2", on = "SW2STON2"},
+		{off = "SW1STONE", on = "SW2STONE"},
+		{off = "SW1STRTN", on = "SW2STRTN"},
+		{off = "SW1BLUE",  on = "SW2BLUE"},
+		{off = "SW1CMT",   on = "SW2CMT"},
+		{off = "SW1GARG",  on = "SW2GARG"},
+		{off = "SW1GSTON", on = "SW2GSTON"},
+		{off = "SW1HOT",   on = "SW2HOT"},
+		{off = "SW1LION",  on = "SW2LION"},
+		{off = "SW1SATYR", on = "SW2SATYR"},
+		{off = "SW1SKIN",  on = "SW2SKIN"},
+		{off = "SW1VINE",  on = "SW2VINE"},
+		{off = "SW1WOOD",  on = "SW2WOOD"},
+		{off = "SW1PANEL", on = "SW2PANEL"},
+		{off = "SW1ROCK",  on = "SW2ROCK"},
+		{off = "SW1MET2",  on = "SW2MET2"},
+		{off = "SW1WDMET", on = "SW2WDMET"},
+		{off = "SW1BRIK",  on = "SW2BRIK"},
+		{off = "SW1MOD1",  on = "SW2MOD1"},
+		{off = "SW1ZIM",   on = "SW2ZIM"},
+		{off = "SW1STON6", on = "SW2STON6"},
+		{off = "SW1TEK",   on = "SW2TEK"},
+		{off = "SW1MARB",  on = "SW2MARB"},
+		{off = "SW1SKULL", on = "SW2SKULL"}
 	},
 
 	animlist =
 	{
-		{"flat",	"BLOOD1",		"BLOOD3"},
-		{"flat",	"FWATER1",		"FWATER4"},
-		{"flat",	"LAVA1",		"LAVA4"},
-		{"flat",	"NUKAGE1",		"NUKAGE3"},
-		{"flat",	"RROCK05",		"RROCK08"},
-		{"flat",	"SLIME01",		"SLIME04"},
-		{"flat",	"SLIME05",		"SLIME08"},
-		{"flat",	"SLIME09",		"SLIME12"},
-		{"flat",	"SWATER1",		"SWATER4"},
-		{"texture",	"BFALL1",		"BFALL4"},
-		{"texture",	"BLODGR1",		"BLODGR4", 	"allowdecals"},
-		{"texture",	"BLODRIP1",		"BLODRIP4", "allowdecals"},
-		{"texture",	"DBRAIN1",		"DBRAIN4"},
-		{"texture",	"FIREBLU1",		"FIREBLU2"},
-		{"texture",	"FIRELAV3",		"FIRELAVA"},
-		{"texture",	"FIREMAG1",		"FIREMAG3"},
-		{"texture",	"FIREWALA",		"FIREWALL"},
-		{"texture",	"GSTFONT1",		"GSTFONT3", "allowdecals"},
-		{"texture",	"ROCKRED1",		"ROCKRED3", "allowdecals"},
-		{"texture",	"SFALL1",		"SFALL4"},
-		{"texture",	"SLADRIP1",		"SLADRIP3", "allowdecals"},
-		{"texture",	"WFALL1",		"WFALL4"},
+		{typ = "flat",    first = "BLOOD1",   last = "BLOOD3"},
+		{typ = "flat",    first = "FWATER1",  last = "FWATER4"},
+		{typ = "flat",    first = "LAVA1",    last = "LAVA4"},
+		{typ = "flat",    first = "NUKAGE1",  last = "NUKAGE3"},
+		{typ = "flat",    first = "RROCK05",  last = "RROCK08"},
+		{typ = "flat",    first = "SLIME01",  last = "SLIME04"},
+		{typ = "flat",    first = "SLIME05",  last = "SLIME08"},
+		{typ = "flat",    first = "SLIME09",  last = "SLIME12"},
+		{typ = "flat",    first = "SWATER1",  last = "SWATER4"},
+		{typ = "texture", first = "BFALL1",   last = "BFALL4"},
+		{typ = "texture", first = "BLODGR1",  last = "BLODGR4",  flags = "allowdecals"},
+		{typ = "texture", first = "BLODRIP1", last = "BLODRIP4", flags = "allowdecals"},
+		{typ = "texture", first = "DBRAIN1",  last = "DBRAIN4"},
+		{typ = "texture", first = "FIREBLU1", last = "FIREBLU2"},
+		{typ = "texture", first = "FIRELAV3", last = "FIRELAVA"},
+		{typ = "texture", first = "FIREMAG1", last = "FIREMAG3"},
+		{typ = "texture", first = "FIREWALA", last = "FIREWALL"},
+		{typ = "texture", first = "GSTFONT1", last = "GSTFONT3", flags = "allowdecals"},
+		{typ = "texture", first = "ROCKRED1", last = "ROCKRED3", flags = "allowdecals"},
+		{typ = "texture", first = "SFALL1",   last = "SFALL4"},
+		{typ = "texture", first = "SLADRIP1", last = "SLADRIP3", flags = "allowdecals"},
+		{typ = "texture", first = "WFALL1",   last = "WFALL4"}
 	},
 
-    music_list =
-    {
-        -- order matters
-        "D_RUNNIN",     -- map01
-        "D_STALKS",
-        "D_COUNTD",
-        "D_BETWEE",
-        "D_DOOM",
-        "D_THE_DA",
-        "D_SHAWN",
-        "D_DDTBLU",
-        "D_IN_CIT",
-        "D_DEAD",
-        "D_STLKS2",
-        "D_THEDA2",
-        "D_DOOM2",
-        "D_DDTBL2",
-        "D_RUNNI2",
-        "D_DEAD2",
-        "D_STLKS3",
-        "D_ROMERO",
-        "D_SHAWN2",
-        "D_MESSAG",
-        "D_COUNT2",
-        "D_DDTBL3",
-        "D_AMPIE",
-        "D_THEDA3",
-        "D_ADRIAN",
-        "D_MESSG2",
-        "D_ROMER2",
-        "D_TENSE",
-        "D_SHAWN3",
-        "D_OPENIN",
-        "D_EVIL",
-        "D_ULTIMA",
-        "D_DM2INT",     -- map32
-    },
+	music_list =
+	{
+		-- order matters
+		"D_RUNNIN",     -- map01
+		"D_STALKS",
+		"D_COUNTD",
+		"D_BETWEE",
+		"D_DOOM",
+		"D_THE_DA",
+		"D_SHAWN",
+		"D_DDTBLU",
+		"D_IN_CIT",
+		"D_DEAD",
+		"D_STLKS2",
+		"D_THEDA2",
+		"D_DOOM2",
+		"D_DDTBL2",
+		"D_RUNNI2",
+		"D_DEAD2",
+		"D_STLKS3",
+		"D_ROMERO",
+		"D_SHAWN2",
+		"D_MESSAG",
+		"D_COUNT2",
+		"D_DDTBL3",
+		"D_AMPIE",
+		"D_THEDA3",
+		"D_ADRIAN",
+		"D_MESSG2",
+		"D_ROMER2",
+		"D_TENSE",
+		"D_SHAWN3",
+		"D_OPENIN",
+		"D_EVIL",
+		"D_ULTIMA",
+		"D_DM2INT"     -- map32
+	},
 
 	linedef_flags =
 	{
@@ -390,7 +390,7 @@ local wad = class("wad",
 		[0x1800] = "blocking",
 		[0x2000] = "monsteractivate",
 		[0x4000] = "blockplayers",
-		[0x8000] = "blockeverything",
+		[0x8000] = "blockeverything"
 	},
 
 	thing_filter =
@@ -537,12 +537,12 @@ local wad = class("wad",
 		9058,
 		9059,
 		9060,
-		9061,
+		9061
 	},
 
 	thing_ignore =
 	{
-		32000,
+		32000
 	},
 
 	door_actions =
@@ -553,7 +553,7 @@ local wad = class("wad",
 		13,
 		14,
 		202,
-		249,
+		249
 	},
 
 	platform_actions =
@@ -573,7 +573,7 @@ local wad = class("wad",
 		207,
 		228,
 		230,
-		231,
+		231
 	},
 
 	floor_actions =
@@ -604,7 +604,7 @@ local wad = class("wad",
 		241,
 		242,
 		250,
-		251,
+		251
 	},
 
 	ceiling_actions =
@@ -634,33 +634,33 @@ local wad = class("wad",
 		252,
 		253,
 		254,
-		255,
+		255
 	},
 
-    ctf_filter =
-    {
-        {5, 5130},  -- blue key to zandronum blue flag
-        {13, 5131}, -- red key to zandronum red flag
-    },
+	ctf_filter =
+	{
+		{5, 5130},  -- blue key to zandronum blue flag
+		{13, 5131}  -- red key to zandronum red flag
+	},
 
 	door_sounds =
 	{
 		"DSDOROPN",
 		"DSDORCLS",
 		"DSBDOPN",
-		"DSBDCLS",
+		"DSBDCLS"
 	},
 
 	platform_sounds =
 	{
 		"DSPSTART",
 		"DSPSTOP",
-		"DSSTNMOV",
+		"DSSTNMOV"
 	},
 
 	ignorelist =
 	{
-		{"F_SKY1", 0},
+		{"F_SKY1", 0}
 	},
 
 	-- namespaces
@@ -669,64 +669,64 @@ local wad = class("wad",
 		["SP"] =
 		{
 			name = "specials",
-			lumps = {},
+			lumps = {}
 		},
 		["DS"] =
 		{
 			name = "doomsounds",
-			lumps = {},
+			lumps = {}
 		},
 		["WS"] =
 		{
 			name = "wavesounds",
-			lumps = {},
+			lumps = {}
 		},
 		["OS"] =
 		{
 			name = "oggsounds",
-			lumps = {},
+			lumps = {}
 		},
 		["CS"] =
 		{
 			name = "flacsounds",
-			lumps = {},
+			lumps = {}
 		},
 		["MS"] =
 		{
 			name = "songs",
-			lumps = {},
+			lumps = {}
 		},
 		["GG"] =
 		{
 			name = "graphics",
-			lumps = {},
+			lumps = {}
 		},
 		["TX"] =
 		{
 			name = "patches",
-			lumps = {},
+			lumps = {}
 		},
 		["PP"] =
 		{
 			name = "patches",
-			lumps = {},
+			lumps = {}
 		},
 		["FF"] =
 		{
 			name = "flats",
-			lumps = {},
+			lumps = {}
 		},
 		["SS"] =
 		{
 			name = "sprites",
-			lumps = {},
+			lumps = {}
 		},
 		["MM"] =
 		{
 			name = "maps",
 			lumps = {},
-			maps = {},
-		},
+			maps = {}
+		}
 	}
 })
 
@@ -846,19 +846,23 @@ function wad:gatherHeader()
 end
 
 function wad:addExtraMarkers()
-
     local lumplist = {}
     local lumplist_new = {}
 
+    local function addLumpListItem(name)
+        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = name, data = ""}
+    end
+
     -- save all lumps into a table
     for lump = 0, self.header.lumpcount do
-        lumpindex = #lumplist+1
-        lumplist[lumpindex] = {}
-		local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(lump*16))
-        lumplist[lumpindex].filepos = filepos
-        lumplist[lumpindex].size = size
-        lumplist[lumpindex].name = utils:removePadding(name)
-        lumplist[lumpindex].data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
+        local lumplistitem = {}
+        lumplist[#lumplist+1] = lumplistitem
+
+        local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(lump*16))
+        lumplistitem.filepos = filepos
+        lumplistitem.size = size
+        lumplistitem.name = utils:removePadding(name)
+        lumplistitem.data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
     end
     ------------------
     -- specials
@@ -866,7 +870,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Specials Namespace...", name)
 
     -- make the SP_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SP_START", data = ""}
+    addLumpListItem("SP_START")
 
     -- copy all the special lumps below the SP_START marker
     for l, lump in ipairs(lumplist) do
@@ -879,7 +883,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the SP_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SP_END", data = ""}
+    addLumpListItem("SP_END")
 
     ------------------
     -- graphics
@@ -887,7 +891,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Graphics Namespace...", name)
 
     -- make the GG_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "GG_START", data = ""}
+    addLumpListItem("GG_START")
 
     -- copy all the graphics lumps below the GG_START marker
     for l, lump in ipairs(lumplist) do
@@ -902,7 +906,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the GG_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "GG_END", data = ""}
+    addLumpListItem("GG_END")
 
     ------------------
     -- maps
@@ -910,7 +914,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Maps Namespace...", name)
 
     -- make the MM_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_START", data = ""}
+    addLumpListItem("MM_START")
 
     -- copy all the map lumps below the MM_START marker
     local maplist = {}
@@ -925,15 +929,15 @@ function wad:addExtraMarkers()
             if l+10 <= #lumplist then
                 local t = "Doom"
                 local function continue()
-                    if lumplist[l+1].name ~= "THINGS" then return false end
-                    if lumplist[l+2].name ~= "LINEDEFS" then return false end
-                    if lumplist[l+3].name ~= "SIDEDEFS" then return false end
-                    if lumplist[l+4].name ~= "VERTEXES" then return false end
-                    if lumplist[l+5].name ~= "SEGS" then return  false end
-                    if lumplist[l+6].name ~= "SSECTORS" then return  false end
-                    if lumplist[l+7].name ~= "NODES" then return false end
-                    if lumplist[l+8].name ~= "SECTORS" then return false end
-                    if lumplist[l+9].name ~= "REJECT" then return false end
+                    if lumplist[l+1].name ~= "THINGS"    then return false end
+                    if lumplist[l+2].name ~= "LINEDEFS"  then return false end
+                    if lumplist[l+3].name ~= "SIDEDEFS"  then return false end
+                    if lumplist[l+4].name ~= "VERTEXES"  then return false end
+                    if lumplist[l+5].name ~= "SEGS"      then return false end
+                    if lumplist[l+6].name ~= "SSECTORS"  then return false end
+                    if lumplist[l+7].name ~= "NODES"     then return false end
+                    if lumplist[l+8].name ~= "SECTORS"   then return false end
+                    if lumplist[l+9].name ~= "REJECT"    then return false end
                     if lumplist[l+10].name ~= "BLOCKMAP" then return false end
                     return true
                 end
@@ -945,14 +949,14 @@ function wad:addExtraMarkers()
                     end
 
                     if t == "Doom" then
-                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DM_START", data = ""}
+                        addLumpListItem("DM_START")
                         for ll = l, l+10 do
                             lumplist_new[#lumplist_new+1] = lumplist[ll]
                         end
-                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DM_END", data = ""}
+                        addLumpListItem("DM_END")
 
                     elseif t == "Hexen" then
-                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "HM_START", data = ""}
+                        addLumpListItem("HM_START")
                         for ll = l, l+10 do
                             lumplist_new[#lumplist_new+1] = lumplist[ll]
                         end
@@ -962,7 +966,7 @@ function wad:addExtraMarkers()
                                 lumplist_new[#lumplist_new+1] = lumplist[l+12]
                             end
                         end
-                        lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "HM_END", data = ""}
+                        addLumpListItem("HM_END")
                     end
 
                     utils:printf(2, "\t\tFound %s Format Map: %s", t, lumplist[l].name)
@@ -973,12 +977,12 @@ function wad:addExtraMarkers()
                 if lumplist[l+1].name == "TEXTMAP" then
                     for ll = l, #lumplist do
                         if lumplist[ll].name == "ENDMAP" then
-                            lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_START", data = ""}
+                            addLumpListItem("UM_START")
                             for lll = l, ll do
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
                             utils:printf(5)
-                            lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "UM_END", data = ""}
+                            addLumpListItem("UM_END")
                             t = "UDMF"
                             break;
                         end
@@ -989,7 +993,7 @@ function wad:addExtraMarkers()
         --end
     end
     -- make the MM_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MM_END", data = ""}
+    addLumpListItem("MM_END")
 
     ------------------
     -- doom sounds
@@ -997,7 +1001,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Doom Sounds Namespace...", name)
 
     -- make the DS_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DS_START", data = ""}
+    addLumpListItem("DS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name:sub(1, 2) == "DS" then
@@ -1007,7 +1011,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the DS_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "DS_END", data = ""}
+    addLumpListItem("DS_END")
 
     ------------------
     -- wave sounds
@@ -1015,7 +1019,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Wave Sounds Namespace...", name)
 
     -- make the WS_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "WS_START", data = ""}
+    addLumpListItem("WS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name:sub(1, 4) == "RIFF" then
@@ -1025,7 +1029,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the WS_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "WS_END", data = ""}
+    addLumpListItem("WS_END")
 
     ------------------
     -- ogg sounds
@@ -1033,7 +1037,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Ogg Sounds Namespace...", name)
 
     -- make the OS_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "OS_START", data = ""}
+    addLumpListItem("OS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 3) == "Ogg" then
@@ -1043,7 +1047,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the OS_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "OS_END", data = ""}
+    addLumpListItem("OS_END")
 
     ------------------
     -- flac sounds
@@ -1051,7 +1055,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Flac Sounds Namespace...", name)
 
     -- make the CS_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "CS_START", data = ""}
+    addLumpListItem("CS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 4) == "fLaC" then
@@ -1061,7 +1065,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the CS_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "CS_END", data = ""}
+    addLumpListItem("CS_END")
 
     ------------------
     -- music
@@ -1069,7 +1073,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Music Namespace...", name)
 
     -- make the MS_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MS_START", data = ""}
+    addLumpListItem("MS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.data:sub(1, 3) == "MUS" then
@@ -1083,7 +1087,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the MS_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "MS_END", data = ""}
+    addLumpListItem("MS_END")
 
     ------------------
     -- texture
@@ -1091,7 +1095,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Textures Namespace...", name)
 
     -- make the TX_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "TX_START", data = ""}
+    addLumpListItem("TX_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name == "TX_START" then
@@ -1108,7 +1112,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the TX_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "TX_END", data = ""}
+    addLumpListItem("TX_END")
 
     ------------------
     -- sprites
@@ -1116,7 +1120,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Sprites Namespace...", name)
 
     -- make the S_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SS_START", data = ""}
+    addLumpListItem("SS_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name == "S_START" or lump.name == "SS_START" then
@@ -1133,7 +1137,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the S_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "SS_END", data = ""}
+    addLumpListItem("SS_END")
 
     ------------------
     -- flats
@@ -1141,7 +1145,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Flats Namespace...", name)
 
     -- make the F_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "FF_START", data = ""}
+    addLumpListItem("FF_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name == "F_START" or lump.name == "FF_START" then
@@ -1162,7 +1166,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the F_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "FF_END", data = ""}
+    addLumpListItem("FF_END")
 
     ------------------
     -- patches
@@ -1170,7 +1174,7 @@ function wad:addExtraMarkers()
     utils:printf(1, "\tCreating Patches Namespace...", name)
 
     -- make the P_START marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "PP_START", data = ""}
+    addLumpListItem("PP_START")
 
     for l, lump in ipairs(lumplist) do
         if lump.name == "P_START" or lump.name == "PP_START" then
@@ -1191,7 +1195,7 @@ function wad:addExtraMarkers()
     end
 
     -- make the P_END marker
-    lumplist_new[#lumplist_new+1] = {filepos = 0, size = 0, name = "PP_END", data = ""}
+    addLumpListItem("PP_END")
 
     -- lump data
     local pos = {}
@@ -1217,7 +1221,8 @@ function wad:addExtraMarkers()
     local dirsb = stringbuilder()
 
     for lump = 1, #lumplist_new do
-        dirsb:append(love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplist_new[lump].data, lumplist_new[lump].name))
+        local lumplistitem = lumplist_new[lump]
+        dirsb:append(love.data.pack("string", "<i4i4c8", pos[lump]+12, #lumplistitem.data, lumplistitem.name))
     end
 
     self.raw = header .. lumpchunk .. dirsb:toString()
@@ -1655,80 +1660,75 @@ function wad:processTexturesX(num)
 end
 
 function wad:processAnimated()
-
 	-- find ANIMATED
 	local data = self:findLump("SP", "ANIMATED")
 
 	-- if ANIMATED found
-	if(data ~= "") then
-
+	if (data ~= "") then
 		local t = love.data.unpack("<B", data)
 		local count = 0
-		while(t ~= 255) do
 
+		while (t ~= 255) do
 			local last = utils:removePadding(love.data.unpack("<c8", data, 2+count)):upper()
 			local first = utils:removePadding(love.data.unpack("<c8", data, 11+count)):upper()
 			local speed = love.data.unpack("<i4", data, 20+count)
 
 			local isdup = false
 			for d = 1, #self.animlist do
-				if(self.animlist[d][2] == first) then
-					if(self.animlist[d][3] == last) then
-                        utils:printf(2, "\tFound Duplicate ANIMATED define: %s %s to %s with speed %s", t, first, last, speed)
-						isdup = true
-					end
+				local anim = self.animlist[d]
+
+				if (anim.first == first and anim.last == last) then
+					utils:printf(2, "\tFound Duplicate ANIMATED define: %s %s to %s with speed %s", t, first, last, speed)
+					isdup = true
+					break
 				end
 			end
 
-			if(isdup == false) then
-				local index = #self.animlist+1
-				self.animlist[index] = {}
-				if(t == 0) then self.animlist[index][1] = "flat" end
-				if(t == 1) then self.animlist[index][1] = "texture" end
+			if (isdup == false) then
+				local newanim = {first = first, last = last}
 
-				self.animlist[index][2] = first
-				self.animlist[index][3] = last
+				if (t == 0) then newanim.typ = "flat"
+				elseif (t == 1) then newanim.typ = "texture" end
+
+				self.animlist[#self.animlist+1] = newanim
                 utils:printf(2, "\tFound ANIMATED define: %s to %s with speed %s", first, last, speed)
 			end
 
 			count = count + 23
 			t = love.data.unpack("<B", data, 1+count)
 		end
-        utils:printf(1, "\tFound '%d' ANIMATED defines.", #self.animlist)
+		utils:printf(1, "\tFound '%d' ANIMATED defines.", #self.animlist)
 	end
 end
 
 function wad:processSwitches()
-
 	-- find SWITCHES
 	local data = self:findLump("SP", "SWITCHES")
 
 	-- if SWITCHES found
-	if(data ~= "") then
-
+	if (data ~= "") then
 		local t = 1
 		local count = 0
-		while(t ~= 0) do
 
+		while (t ~= 0) do
 			local off = utils:removePadding(love.data.unpack("<c8", data, 1+count)):upper()
 			local on = utils:removePadding(love.data.unpack("<c8", data, 10+count)):upper()
 			t = love.data.unpack("<H", data, 19+count)
 
 			local isdup = false
 			for d = 1, #self.switchlist do
-				if(self.switchlist[d][1] == off) then
-					if(self.switchlist[d][2] == on) then
-						isdup = true
-					end
+				local switch = self.switchlist[d]
+
+				if (switch.off == off and switch.on == on) then
+					isdup = true
+					break
 				end
 			end
-            utils:printf(2, "\tFound SWITCH define: %s, %s, %s", off, on, t)
-			if(isdup == false) then
-				local index = #self.switchlist+1
-				self.switchlist[index] = {}
-				self.switchlist[index][1] = off
-				self.switchlist[index][2] = on
 
+			utils:printf(2, "\tFound SWITCH define: %s, %s, %s", off, on, t)
+
+			if (isdup == false) then
+				self.switchlist[#self.switchlist+1] = {off = off, on = on}
 			end
 
 			count = count + 20
@@ -1873,21 +1873,24 @@ function wad:renameAsset(asset)
 end
 
 function wad:renameSprites()
-	if(self.base ~= self) then
+	if (self.base ~= self) then
+		local spritesets = {}
+		local setcount = 0
 
-        local spritesets = {}
-        local setcount = 0
-        for s = 1, #self.sprites do
-            local set = self.sprites[s].name:sub(1, 4)
-            if(spritesets[set] == nil) then
-                spritesets[set] = {}
-                setcount = setcount + 1
-                utils:printf(1, "\tFound Sprite Set: %s", set)
-            end
-            self.sprites[s].newname = string.format("%s%02d%s", self.acronym_sprite, setcount, self.sprites[s].name:sub(5))
-            utils:printf(2, "\tRenamed %s to %s", self.sprites[s].name, self.sprites[s].newname)
-        end
-        utils:printf(1, "\tFound %d Sprite Sets.", setcount)
+		for s = 1, #self.sprites do
+			local sprite = self.sprites[s]
+			local set = sprite.name:sub(1, 4)
+
+			if (spritesets[set] == nil) then
+				spritesets[set] = {}
+				setcount = setcount + 1
+				utils:printf(1, "\tFound Sprite Set: %s", set)
+			end
+
+			sprite.newname = string.format("%s%02d%s", self.acronym_sprite, setcount, sprite.name:sub(5))
+			utils:printf(2, "\tRenamed %s to %s", sprite.name, sprite.newname)
+		end
+		utils:printf(1, "\tFound %d Sprite Sets.", setcount)
 	else
 		utils:printf(1, "\tNot renaming base wad patches.\n")
 	end
@@ -1919,23 +1922,28 @@ function wad:renameSoundsForType(sounds)
 end
 
 function wad:renameSongs()
-    if self.base ~= self then
-        for l = 1, #self.music_list do
-            local lump = self:findLump("MS", self.music_list[l])
-            if lump ~= "" then
-                for s = 1, #self.songs do
-                    if self.songs[s].data == lump then
-                        self.songs[s].newname = string.format("%s%.2d", self.acronym, l)
+	if self.base ~= self then
+		for l = 1, #self.music_list do
+			local lump = self:findLump("MS", self.music_list[l])
+
+			if lump ~= "" then
+				for s = 1, #self.songs do
+					local song = self.songs[s]
+
+					if song.data == lump then
+						song.newname = string.format("%s%.2d", self.acronym, l)
+
 						if l == 33 then
-							self.songs[s].newname = string.format("%sIN", self.acronym)
+							song.newname = string.format("%sIN", self.acronym)
 						end
-                        utils:printf(2, "\tRenamed %s to %s", self.songs[s].name, self.songs[s].newname)
-                        break
-                    end
-                end
-            end
-        end
-    end
+
+						utils:printf(2, "\tRenamed %s to %s", song.name, song.newname)
+						break
+					end
+				end
+			end
+		end
+	end
 end
 
 function wad:filterOTexAssets()
@@ -1989,8 +1997,7 @@ function wad:processTextLump(name)
 end
 
 function wad:buildAnimdefs()
-	if(self.base ~= self) then
-
+	if (self.base ~= self) then
 		-- animations
 		self.animdefs.anims = {}
 
@@ -2016,21 +2023,21 @@ function wad:buildAnimdefsForAssets(assets, assettype)
 			if (not asset.ignore) then
 				local animlist = self.animlist[al]
 
-				if (animlist[2] == asset.name and animlist[1] == assettype) then
-					utils:printf(2, "\tBuilding Animation: %s %s to %s", assettype, asset.name, animlist[3])
+				if (animlist.first == asset.name and animlist.typ == assettype) then
+					utils:printf(2, "\tBuilding Animation: %s %s to %s", assettype, asset.name, animlist.last)
 
 					local a = #self.animdefs.anims + 1
 					local anim = {}
 
 					self.animdefs.anims[a] = anim
 					anim.text1 = asset.newname
-					anim.typ = animlist[1]
-					anim.decal = animlist[4]
+					anim.typ = animlist.typ
+					anim.decal = animlist.flags
 
 					for ast2 = 1, #assets do
 						local asset2 = assets[ast2]
 
-						if (asset2.name == animlist[3]) then
+						if (asset2.name == animlist.last) then
 							anim.text2 = asset2.newname
 						end
 					end
@@ -2049,8 +2056,8 @@ function wad:buildSwitchesForAssets(assets, assettype)
 			for sl = 1, #self.switchlist do
 				local switchlist = self.switchlist[sl]
 
-				if (switchlist[1] == asset.name) then
-					utils:printf(2, "\tBuilding Switch From %s: %s to %s", assettype, asset.name, switchlist[2])
+				if (switchlist.off == asset.name) then
+					utils:printf(2, "\tBuilding Switch From %s: %s to %s", assettype, asset.name, switchlist.on)
 
 					local s = #self.animdefs.switches + 1
 					local switch = {}
@@ -2061,7 +2068,7 @@ function wad:buildSwitchesForAssets(assets, assettype)
 					for a2 = 1, #assets do
 						local asset2 = assets[a2]
 
-						if (switchlist[2] == asset2.name) then
+						if (switchlist.on == asset2.name) then
 							switch.text2 = asset2.newname
 						end
 					end
