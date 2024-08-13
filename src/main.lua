@@ -37,123 +37,123 @@
 log = {}
 timeTaken = ""
 
-function love.load(arg)
-    local startTime = love.timer.getTime()
+local main = {}
 
+function main:load(args)
+    self.args = args
+    self:setupArgs()
+    self:setupPaths()
+    self:setupLogging()
+    self:logEverything()
+    self:startExtration()
+end
+
+function main:setupArgs()
+    self.iwad_filename = self.args[1]
+    self.pwad_filename = self.args[2]
+    self.acronym = self.args[3]
+    self.verbose = self.args[4]
+    self.acronym_sprites = self.args[5]
+    self.things = self.args[6]
+    self.patches = self.args[7]
+    utils.verbose = tonumber(self.verbose)
+end
+
+function main:setupPaths()
+    self.app_path = love.filesystem.getSourceBaseDirectory()
+    self.pk3_path = self.app_path ..  "/pk3"
+    self.tools_path = self.app_path .. "/tools"
+    self.iwad_path = self.app_path .. "/" .. self.iwad_filename
+    self.pwad_path = self.app_path .. "/" .. self.pwad_filename
+
+    self.date = os.date("%c")
+    self.date = self.date:gsub(" ", "_")
+    self.date = self.date:gsub(":", "-")
+    self.date = self.date:gsub("/", "-")
+    self.log_path = self.app_path .. string.format("/logs/%s_%s.txt", self.pwad_filename, self.date)
+end
+
+function main:setupLogging()
+	utils.log_file = utils:openFile(self.log_path, "w")
+end
+
+function main:logEverything()
+    utils:printf(0, "Options: ")
+    utils:printf(0, "\tIWAD Filename: %s", tostring(self.iwad_filename))
+    utils:printf(0, "\tPWAD Filename: %s", tostring(self.pwad_filename))
+    utils:printf(0, "\tAcronym: %s", tostring(self.acronym))
+    utils:printf(0, "\tVerbose: %s", tostring(self.verbose))
+    utils:printf(0, "\tAcronym Sprites: %s", tostring(self.acronym_sprites))
+    utils:printf(0, "\tThings: %s", tostring(self.things))
+    utils:printf(0, "\tPatches: %s", tostring(self.patches))
+    utils:printf(0, "")
+    utils:printf(0, "Paths: ")
+    utils:printf(0, "\tApp Path: %s", tostring(self.app_path))
+    utils:printf(0, "\tPK3 Path: %s", tostring(self.pk3_path))
+    utils:printf(0, "\tTools Path: %s", tostring(self.tools_path))
+    utils:printf(0, "\tIWAD Path: %s", tostring(self.iwad_path))
+    utils:printf(0, "\tPWAD Path: %s", tostring(self.pwad_path))
+    utils:printf(0, "\tLog Path: %s", tostring(self.log_path))
+end
+
+function main:getPWADPalette()
+    local file = utils:openFile(self.pwad_path, "rb")
+    local raw = file:read("*all")
+    file:close()
+    local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", raw, 1)
+
+    lumpcount = lumpcount - 1
+    dirpos = dirpos + 1
+
+    if not utils:checkFormat(raw, "IWAD") and not utils:checkFormat(raw, "PWAD") then
+        error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic)
+    end
+
+    local palette = nil
+    for lump = 0, lumpcount do
+        local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos + (lump * 16))
+        if utils:removePadding(name) == "PLAYPAL" then
+            palette = {}
+            local data = love.data.unpack(string.format("<c%d", size), raw, filepos + 1)
+            for c = 1, 256 * 3, 3 do
+                local r, g, b = love.data.unpack("<BBB", data, c)
+                local index = #palette + 1
+                local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
+                palette[index] = {r2,g2,b2}
+            end
+        end
+    end
+
+    return palette
+end
+
+function main:startExtration()
+    self.palette = self:getPWADPalette(self.pwad_path)
+    self.mainiwad = wad(self.iwad_path, self.palette)
+    self.mapset = wad(self.pwad_path, self.palette, self.acronym, self.patches, self.mainiwad, self.pk3_path, self.toolspath, self.sprites, self.acronym_sprites, self.things)
+end
+
+function love.load(args)
+	love.graphics.setFont(love.graphics.newFont(50))
+	love.graphics.setDefaultFilter("nearest", "nearest", 0)
+
+    ffi = require('ffi')
     class = require("mod30log")
     utils = require("utils")
     stringbuilder = require("stringbuilder")
     otex = require("otex")
     wad = require("clsWad")
-    
-    -- path stuff
-    local apppath = love.filesystem.getSourceBaseDirectory()
-    local pk3path = apppath ..  "/pk3"
-    local toolspath = apppath .. "/tools"
-    
-	-- start logging
-    local date = os.date("%c")
-    date = date:gsub(" ", "_")
-    date = date:gsub(":", "-")
-    date = date:gsub("/", "-")
-	local logpath = apppath .. string.format("/logs/%s_%s.txt", arg[2], date)
-    print("Log path: " .. logpath)
-	logfile = io.open(logpath, "w+")
--------------------------------------------------
-    
 
-	love.graphics.setFont(love.graphics.newFont(50))
-	love.graphics.setFont(love.graphics.newFont(50))
-	love.graphics.setDefaultFilter("nearest", "nearest", 0)
-
-    -- these are global because apparently the class library i use only allows 10 args for a method
-
-    -- get command line args
-    local iwad = apppath .. "/" .. arg[1]
-    local pwad = apppath .. "/" .. arg[2]
-    local acronym = arg[3]
-    local verbose = arg[4]
-    local acronym_sprites = arg[5]
-    local things = arg[6]
-    local patches = arg[7]
-
-    utils:printf(0, "Options: ")
-    utils:printf(0, "\tiwad: %s", tostring(iwad))
-    utils:printf(0, "\tpwad: %s", tostring(pwad))
-    utils:printf(0, "\tacronym: %s", tostring(acronym))
-    utils:printf(0, "\tverbose: %s", tostring(verbose))
-    utils:printf(0, "\tacronym_sprites: %s", tostring(acronym_sprites))
-    utils:printf(0, "\tthings: %s", tostring(things))
-    utils:printf(0, "\tpatches: %s", tostring(patches))
-
-    utils.verbose = tonumber(verbose)
-    local palette = nil
-
-    -- get pawd palette
-    local file = assert(io.open(pwad, "rb"))
-	local raw = file:read("*all")
-	file:close()
-    local magic, lumpcount, dirpos = love.data.unpack("<c4i4i4", raw, 1)
-
-	lumpcount = lumpcount-1
-	dirpos = dirpos+1
-
-	if(magic ~= "IWAD" and magic ~= "PWAD") then error("File is not a valid wad file, expected IWAD or PWAD, got: " .. magic) end
-
-    for lump = 0, lumpcount do
-        local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos+(lump*16))
-        if(utils:removePadding(name) == "PLAYPAL") then
-            palette = {}
-            local data = love.data.unpack(string.format("<c%d", size), raw, filepos+1)
-            for c = 1, 256*3, 3 do
-                local r, g, b = love.data.unpack("<BBB", data, c)
-                local index = #palette+1
-                local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
-                palette[index] =
-                {
-                    r2,
-                    g2,
-                    b2,
-                }
-            end
-        end
-    end
-
-	-- read iwad
-    local mainiwad = wad(iwad, palette)
-
-    ------------------------------------------------------------------------------------------
-	-- love2d doesnt allow us to read outside it's save and root dirs, lets bypass that
-	local ffi = require('ffi')
-	local l = ffi.os == 'Windows' and ffi.load('love') or ffi.C
-
-	ffi.cdef "int PHYSFS_mount(const char *newDir, const char *mountPoint, int appendToPath);"
-	l.PHYSFS_mount(string.format("%s/maps", pk3path), 'maps', 1)
-	l.PHYSFS_mount(string.format("%s/textures", pk3path), 'textures', 1)
-	l.PHYSFS_mount(string.format("%s/flats", pk3path), 'flats', 1)
-	l.PHYSFS_mount(string.format("%s/patches", pk3path), 'patches', 1)
-    l.PHYSFS_mount(string.format("%s/sprites", pk3path), 'sprites', 1)
-	-----------------------------------------
-
-    -- do all the things
-    mapset = wad(pwad, palette, acronym, patches, mainiwad, pk3path, toolspath, sprites, acronym_sprites, things)
-
-    -- log time because why not
-    local endTime = love.timer.getTime()
-    local result = (endTime - startTime) * 1000 -- in milliseconds
-    local result_seconds = result / 1000
-    utils:printf(0, "Time taken: %0.2f seconds", result_seconds)
-
-	logfile:close()
-    love.window.close()
-    love.event.quit()
+    main:load(args)
 end
-
 
 function love.update(dt)
+
 end
 
-
+function love.draw()
+    
+end
 
 ----------------------------------------------------------------------------------------
 -- Error handling

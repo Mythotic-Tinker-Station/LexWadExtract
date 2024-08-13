@@ -107,7 +107,7 @@ function utils:printf(verbose, ...)
     if(verbose <= self.verbose) then
         io.write(str)
         io.flush()
-        logfile:write(str)
+        self.log_file:write(str)
     end
 end
 
@@ -117,7 +117,7 @@ function utils:printfNoNewLine(verbose, ...)
     if(verbose <= self.verbose) then
         io.write(str)
         io.flush()
-        logfile:write(str)
+        self.log_file:write(str)
     end
 end
 
