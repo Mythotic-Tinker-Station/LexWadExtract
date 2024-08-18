@@ -183,83 +183,83 @@ local wad = class("wad",
 
 	graphicslist =
 	{
-		{"CWILV00", "V00"},
-		{"CWILV01", "V01"},
-		{"CWILV02", "V02"},
-		{"CWILV03", "V03"},
-		{"CWILV04", "V04"},
-		{"CWILV05", "V05"},
-		{"CWILV06", "V06"},
-		{"CWILV07", "V07"},
-		{"CWILV08", "V08"},
-		{"CWILV09", "V09"},
-		{"CWILV10", "V10"},
-		{"CWILV11", "V11"},
-		{"CWILV12", "V12"},
-		{"CWILV13", "V13"},
-		{"CWILV14", "V14"},
-		{"CWILV15", "V15"},
-		{"CWILV16", "V16"},
-		{"CWILV17", "V17"},
-		{"CWILV18", "V18"},
-		{"CWILV19", "V19"},
-		{"CWILV20", "V20"},
-		{"CWILV21", "V21"},
-		{"CWILV22", "V22"},
-		{"CWILV23", "V23"},
-		{"CWILV24", "V24"},
-		{"CWILV25", "V25"},
-		{"CWILV26", "V26"},
-		{"CWILV27", "V27"},
-		{"CWILV28", "V28"},
-		{"CWILV29", "V29"},
-		{"CWILV30", "V30"},
-		{"CWILV31", "V31"},
-		{"CWILV32", "V32"},
-		{"WILV00", "UV00"},
-		{"WILV01", "UV01"},
-		{"WILV02", "UV02"},
-		{"WILV03", "UV03"},
-		{"WILV04", "UV04"},
-		{"WILV05", "UV05"},
-		{"WILV06", "UV06"},
-		{"WILV07", "UV07"},
-		{"WILV08", "UV08"},
-		{"WILV09", "UV09"},
-		{"WILV10", "UV10"},
-		{"WILV11", "UV11"},
-		{"WILV12", "UV12"},
-		{"WILV13", "UV13"},
-		{"WILV14", "UV14"},
-		{"WILV15", "UV15"},
-		{"WILV16", "UV16"},
-		{"WILV17", "UV17"},
-		{"WILV18", "UV18"},
-		{"WILV19", "UV19"},
-		{"WILV20", "UV20"},
-		{"WILV21", "UV21"},
-		{"WILV22", "UV22"},
-		{"WILV23", "UV23"},
-		{"WILV24", "UV24"},
-		{"WILV25", "UV25"},
-		{"WILV26", "UV26"},
-		{"WILV27", "UV27"},
-		{"WILV28", "UV28"},
-		{"WILV29", "UV29"},
-		{"WILV30", "UV30"},
-		{"WILV31", "UV31"},
-		{"WILV32", "UV32"},
-		{"WILV33", "UV33"},
-		{"WILV34", "UV34"},
-		{"WILV35", "UV35"},
-		{"WILV36", "UV36"},
-		{"WILV37", "UV37"},
-		{"WILV38", "UV38"},
-		{"INTERPIC", "INT"},
-		{"TITLEPIC", "TITL"},
-		{"HELP", "HELP"},
-		{"CREDIT", "CRED"},
-		{"BOSSBACK", "BOSS"}
+		{lumpname = "CWILV00",  suffix = "V00"},
+		{lumpname = "CWILV01",  suffix = "V01"},
+		{lumpname = "CWILV02",  suffix = "V02"},
+		{lumpname = "CWILV03",  suffix = "V03"},
+		{lumpname = "CWILV04",  suffix = "V04"},
+		{lumpname = "CWILV05",  suffix = "V05"},
+		{lumpname = "CWILV06",  suffix = "V06"},
+		{lumpname = "CWILV07",  suffix = "V07"},
+		{lumpname = "CWILV08",  suffix = "V08"},
+		{lumpname = "CWILV09",  suffix = "V09"},
+		{lumpname = "CWILV10",  suffix = "V10"},
+		{lumpname = "CWILV11",  suffix = "V11"},
+		{lumpname = "CWILV12",  suffix = "V12"},
+		{lumpname = "CWILV13",  suffix = "V13"},
+		{lumpname = "CWILV14",  suffix = "V14"},
+		{lumpname = "CWILV15",  suffix = "V15"},
+		{lumpname = "CWILV16",  suffix = "V16"},
+		{lumpname = "CWILV17",  suffix = "V17"},
+		{lumpname = "CWILV18",  suffix = "V18"},
+		{lumpname = "CWILV19",  suffix = "V19"},
+		{lumpname = "CWILV20",  suffix = "V20"},
+		{lumpname = "CWILV21",  suffix = "V21"},
+		{lumpname = "CWILV22",  suffix = "V22"},
+		{lumpname = "CWILV23",  suffix = "V23"},
+		{lumpname = "CWILV24",  suffix = "V24"},
+		{lumpname = "CWILV25",  suffix = "V25"},
+		{lumpname = "CWILV26",  suffix = "V26"},
+		{lumpname = "CWILV27",  suffix = "V27"},
+		{lumpname = "CWILV28",  suffix = "V28"},
+		{lumpname = "CWILV29",  suffix = "V29"},
+		{lumpname = "CWILV30",  suffix = "V30"},
+		{lumpname = "CWILV31",  suffix = "V31"},
+		{lumpname = "CWILV32",  suffix = "V32"},
+		{lumpname = "WILV00",   suffix = "UV00"},
+		{lumpname = "WILV01",   suffix = "UV01"},
+		{lumpname = "WILV02",   suffix = "UV02"},
+		{lumpname = "WILV03",   suffix = "UV03"},
+		{lumpname = "WILV04",   suffix = "UV04"},
+		{lumpname = "WILV05",   suffix = "UV05"},
+		{lumpname = "WILV06",   suffix = "UV06"},
+		{lumpname = "WILV07",   suffix = "UV07"},
+		{lumpname = "WILV08",   suffix = "UV08"},
+		{lumpname = "WILV09",   suffix = "UV09"},
+		{lumpname = "WILV10",   suffix = "UV10"},
+		{lumpname = "WILV11",   suffix = "UV11"},
+		{lumpname = "WILV12",   suffix = "UV12"},
+		{lumpname = "WILV13",   suffix = "UV13"},
+		{lumpname = "WILV14",   suffix = "UV14"},
+		{lumpname = "WILV15",   suffix = "UV15"},
+		{lumpname = "WILV16",   suffix = "UV16"},
+		{lumpname = "WILV17",   suffix = "UV17"},
+		{lumpname = "WILV18",   suffix = "UV18"},
+		{lumpname = "WILV19",   suffix = "UV19"},
+		{lumpname = "WILV20",   suffix = "UV20"},
+		{lumpname = "WILV21",   suffix = "UV21"},
+		{lumpname = "WILV22",   suffix = "UV22"},
+		{lumpname = "WILV23",   suffix = "UV23"},
+		{lumpname = "WILV24",   suffix = "UV24"},
+		{lumpname = "WILV25",   suffix = "UV25"},
+		{lumpname = "WILV26",   suffix = "UV26"},
+		{lumpname = "WILV27",   suffix = "UV27"},
+		{lumpname = "WILV28",   suffix = "UV28"},
+		{lumpname = "WILV29",   suffix = "UV29"},
+		{lumpname = "WILV30",   suffix = "UV30"},
+		{lumpname = "WILV31",   suffix = "UV31"},
+		{lumpname = "WILV32",   suffix = "UV32"},
+		{lumpname = "WILV33",   suffix = "UV33"},
+		{lumpname = "WILV34",   suffix = "UV34"},
+		{lumpname = "WILV35",   suffix = "UV35"},
+		{lumpname = "WILV36",   suffix = "UV36"},
+		{lumpname = "WILV37",   suffix = "UV37"},
+		{lumpname = "WILV38",   suffix = "UV38"},
+		{lumpname = "INTERPIC", suffix = "INT"},
+		{lumpname = "TITLEPIC", suffix = "TITL"},
+		{lumpname = "HELP",     suffix = "HELP"},
+		{lumpname = "CREDIT",   suffix = "CRED"},
+		{lumpname = "BOSSBACK", suffix = "BOSS"}
 	},
 
 	switchlist =
@@ -896,9 +896,9 @@ function wad:addExtraMarkers()
     -- copy all the graphics lumps below the GG_START marker
     for l, lump in ipairs(lumplist) do
         for g, graphic in ipairs(self.graphicslist) do
-            if lump.name == graphic[1] then
-                local newname = self.acronym .. graphic[2]
-                utils:printf(2, "\t\tFound %s; renaming to %s", graphic[1], newname)
+            if lump.name == graphic.lumpname then
+                local newname = self.acronym .. graphic.suffix
+                utils:printf(2, "\t\tFound %s; renaming to %s", graphic.lumpname, newname)
                 lump.name = newname
                 lumplist_new[#lumplist_new+1] = lump
             end
@@ -1976,20 +1976,22 @@ function wad:filterOTexAssets()
 end
 
 function wad:processTextLump(name)
-
-	-- find ANIMDEFS
+	-- find file with name
 	local data = self:findLump("SP", name)
 
-	-- if ANIMDEFS found
-	if(data ~= "") then
+	-- if file exists
+	if (data ~= "") then
 		for p = 1, #self.patches do
-			data = data:gsub(self.patches[p].name, getPatchName(self.patches[p]))
+			local patch = self.patches[p]
+			data = data:gsub(patch.name, getPatchName(patch))
 		end
 		for c = 1, #self.composites do
-			data = data:gsub(self.composites[c].name, self.composites[c].newname)
+			local composite = self.composites[c]
+			data = data:gsub(composite.name, composite.newname)
 		end
 		for f = 1, #self.flats do
-			data = data:gsub(self.flats[f].name, self.flats[f].newname)
+			local flat = self.flats[f]
+			data = data:gsub(flat.name, flat.newname)
 		end
 	end
 
@@ -2779,30 +2781,23 @@ function wad:extractAnimdefs()
 end
 
 function wad:extractSNDINFO()
-	if(self.base ~= self) then
-
+	if (self.base ~= self) then
 		local txtsb = stringbuilder()
 		self.snddefs = {}
 
-		for s = 1, #self.doomsounds do
-			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.doomsounds[s].name, self.doomsounds[s].newname))
-			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.doomsounds[s].name),  self.doomsounds[s].name }
+		local function createSNDINFODefs(sounditems)
+			for s = 1, #sounditems do
+				local sounditem = sounditems[s]
+
+				txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, sounditem.name, sounditem.newname))
+				self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, sounditem.name),  sounditem.name }
+			end
 		end
 
-		for s = 1, #self.wavesounds do
-			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.wavesounds[s].name, self.wavesounds[s].newname))
-			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.wavesounds[s].name),  self.wavesounds[s].name }
-		end
-
-		for s = 1, #self.oggsounds do
-			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.oggsounds[s].name, self.oggsounds[s].newname))
-			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.oggsounds[s].name),  self.oggsounds[s].name }
-		end
-
-		for s = 1, #self.flacsounds do
-			txtsb:append(string.format("%s/%s\t\t\t\t%s\n", self.acronym, self.flacsounds[s].name, self.flacsounds[s].newname))
-			self.snddefs[#self.snddefs+1] = { string.format("%s/%s", self.acronym, self.flacsounds[s].name),  self.flacsounds[s].name }
-		end
+		createSNDINFODefs(self.doomsounds)
+		createSNDINFODefs(self.wavesounds)
+		createSNDINFODefs(self.oggsounds)
+		createSNDINFODefs(self.flacsounds)
 
         if (not txtsb:empty()) then
             local file = utils:openFile(string.format("%s/sndinfo.%s.txt", self.pk3path, self.acronym), "w")
@@ -2817,35 +2812,28 @@ function wad:extractSNDINFO()
 end
 
 function wad:extractSounds()
-	if(self.base ~= self) then
+	if (self.base ~= self) then
+		local function createSoundFiles(sounditems, fileextension)
+			for s = 1, #sounditems do
+				local sounditem = sounditems[s]
+
+				local snd = utils:openFile(string.format("%s/sounds/%s/%s.%s", self.pk3path, self.acronym, string.lower(sounditem.newname), fileextension), "w+b")
+				snd:write(sounditem.data)
+				snd:close()
+			end
+		end
 
 		--LMP
-		for s = 1, #self.doomsounds do
-			local snd = utils:openFile(string.format("%s/sounds/%s/%s.lmp", self.pk3path, self.acronym, string.lower(self.doomsounds[s].newname)), "w+b")
-			snd:write(self.doomsounds[s].data)
-			snd:close()
-		end
+		createSoundFiles(self.doomsounds, "lmp")
 
 		--WAV
-		for s = 1, #self.wavesounds do
-			local snd = utils:openFile(string.format("%s/sounds/%s/%s.wav", self.pk3path, self.acronym, string.lower(self.wavesounds[s].newname)), "w+b")
-			snd:write(self.wavesounds[s].data)
-			snd:close()
-		end
+		createSoundFiles(self.wavesounds, "wav")
 
 		--OGG
-		for s = 1, #self.oggsounds do
-			local snd = utils:openFile(string.format("%s/sounds/%s/%s.ogg", self.pk3path, self.acronym, string.lower(self.oggsounds[s].newname)), "w+b")
-			snd:write(self.oggsounds[s].data)
-			snd:close()
-		end
+		createSoundFiles(self.oggsounds, "ogg")
 
 		--FLAC
-		for s = 1, #self.flacsounds do
-			local snd = utils:openFile(string.format("%s/sounds/%s/%s.flac", self.pk3path, self.acronym, string.lower(self.flacsounds[s].newname)), "w+b")
-			snd:write(self.flacsounds[s].data)
-			snd:close()
-		end
+		createSoundFiles(self.flacsounds, "flac")
 	else
 		utils:printf(1, "\tNot extracting base wad sounds.\n")
 	end
@@ -2944,31 +2932,36 @@ end
 ---------------------------------------------------------
 
 function wad:findLump(namespace, lumpname)
-	for l = 1, #self.namespaces[namespace].lumps do
-		if(self.namespaces[namespace].lumps[l].name == lumpname) then
-			return self.namespaces[namespace].lumps[l].data
+	local namespacedata = self.namespaces[namespace]
+
+	for l = 1, #namespacedata.lumps do
+		local namespacelump = namespacedata.lumps[l]
+
+		if (namespacelump.name == lumpname) then
+			return namespacelump.data
 		end
 	end
+
     return ""
 end
 
 function wad:findTexture(data, texture, tbl, pos)
 	pos = pos or 1
 	local correct = 0
-	while(pos < #data-8) do
+	while (pos < #data-8) do
 		correct = 0
 		for n = 1, 8 do
-			if(n <= #texture) then
-				if(data:sub(pos+n, pos+n) == texture:sub(n, n)) then
+			local texturedata = data:sub(pos+n, pos+n)
+
+			if (n <= #texture) then
+				if (texturedata == texture:sub(n, n)) then
 					correct = correct + 1
 				end
-			else
-				if(data:sub(pos+n, pos+n) == "\0") then
-					correct = correct + 1
-				end
+			elseif (texturedata == "\0") then
+				correct = correct + 1
 			end
 		end
-		if(correct == 8) then
+		if (correct == 8) then
 			tbl[#tbl+1] = pos
 			pos = pos + 8
 		end
