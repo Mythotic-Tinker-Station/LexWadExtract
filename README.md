@@ -73,34 +73,34 @@
 
         format: <acronym>_<key> = "string"
 
-	    General information
-		    ACRO_NAME               = "Woo Mapset";                 // The name of the mapset
+        General information
+            ACRO_NAME               = "Woo Mapset";                 // The name of the mapset
             ACRO_DESCRIPTION        = "Woo Mapset doesnt exist";    // A description of the mapset
-		    ACRO_MAPCOUNT           = "32";                         // Number of maps this mapset has
-		    ACRO_STARTMAP           = "ACRO01";                     // The name of the first map of this mapset
-		    ACRO_THUMBNAIL          = "IMAGENAME";                  // An image to display for the voting UI
+            ACRO_MAPCOUNT           = "32";                         // Number of maps this mapset has
+            ACRO_STARTMAP           = "ACRO01";                     // The name of the first map of this mapset
+            ACRO_THUMBNAIL          = "IMAGENAME";                  // An image to display for the voting UI
                                                                     // thumbnails are 192x108, with forced gl defaults
 
-	    Credits:
-		    ACRO_CREDITS0           = "Person1";                    // Who made the mapset
-		    ACRO_CREDITS1           = "Person2";                    // Who made the mapset
-		    ...
+        Credits:
+            ACRO_CREDITS0           = "Person1";                    // Who made the mapset
+            ACRO_CREDITS1           = "Person2";                    // Who made the mapset
+            ...
 
-	    Start Items:
-		    ACRO_STARTITEM1         = "AcroFist:1";                 // Players start with the 1 AcroFist
-		    ACRO_STARTITEM2         = "AcroPistol:1";               // Players start with the 1 AcroPistol
+        Start Items:
+            ACRO_STARTITEM1         = "AcroFist:1";                 // Players start with the 1 AcroFist
+            ACRO_STARTITEM2         = "AcroPistol:1";               // Players start with the 1 AcroPistol
             ACRO_STARTITEM3         = "Soulsphere:1";               // Players start with a Soul Sphere
-		    ...
+            ...
 
-	    Take Items:
-		    ACRO_TAKEITEM1          = "Fist":1;	                    // Remove the Doom Fist from players as they spawn
-		    ACRO_TAKEITEM2          = "Pistol":1;                   // Remove the Doom Pistol from players as they spawn
-		    ...
+        Take Items:
+            ACRO_TAKEITEM1          = "Fist":1;                        // Remove the Doom Fist from players as they spawn
+            ACRO_TAKEITEM2          = "Pistol":1;                   // Remove the Doom Pistol from players as they spawn
+            ...
 
-	    Actor Replacers:
-		    ACRO_REPLACER0          = "ZombieMan:Archvile";         // A replacement define, Archviles will spawn in the place of Zombiemen for all levels in this mapset.
-		    ACRO_REPLACER1          = "ShotgunGuy:CoolImp";         // CoolImp will spawn in the place of ShotgunGuy for all levels in this mapset.
-		    ...
+        Actor Replacers:
+            ACRO_REPLACER0          = "ZombieMan:Archvile";         // A replacement define, Archviles will spawn in the place of Zombiemen for all levels in this mapset.
+            ACRO_REPLACER1          = "ShotgunGuy:CoolImp";         // CoolImp will spawn in the place of ShotgunGuy for all levels in this mapset.
+            ...
 
 6) Run zandronum.exe with the git lexicon pk3 folder listed first, and git lexicon_base pk3 folder second
 

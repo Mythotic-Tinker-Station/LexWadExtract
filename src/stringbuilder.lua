@@ -47,13 +47,13 @@
 
 local stringbuilder = {}
 setmetatable(stringbuilder, {
-	__call = function(self)
-		return self:new()
-	end
+    __call = function(self)
+        return self:new()
+    end
 })
 
 function stringbuilder:empty()
-	return #self.buffer == 0
+    return #self.buffer == 0
 end
 
 --[[
@@ -66,51 +66,51 @@ end
     through every table until reaching the leaves.
 ]]
 function stringbuilder:append(item)
-	if (item == nil) then
-		return self
-	end
+    if (item == nil) then
+        return self
+    end
 
-	local itemtype = type(item)
+    local itemtype = type(item)
 
-	if (itemtype == "string" or itemtype == "number") then
-		table.insert(self.buffer, item)
-	elseif (itemtype == "boolean") then
-		table.insert(self.buffer, tostring(item))
-	elseif (itemtype == "table") then
-		for _, value in pairs(item) do
-			self:append(value)
-		end
-	else
-		error(string.format("Cannot append item of type %s", itemtype))
-	end
+    if (itemtype == "string" or itemtype == "number") then
+        table.insert(self.buffer, item)
+    elseif (itemtype == "boolean") then
+        table.insert(self.buffer, tostring(item))
+    elseif (itemtype == "table") then
+        for _, value in pairs(item) do
+            self:append(value)
+        end
+    else
+        error(string.format("Cannot append item of type %s", itemtype))
+    end
 
-	return self
+    return self
 end
 
 function stringbuilder:clear()
-	self.buffer = {}
-	return self
+    self.buffer = {}
+    return self
 end
 
 function stringbuilder:toString(sep)
-	sep = sep or ""
-	return table.concat(self.buffer, sep)
+    sep = sep or ""
+    return table.concat(self.buffer, sep)
 end
 
 local stringbuilder_mt = {
-	__index = stringbuilder;
-	__add = stringbuilder.append;
-	__concat = stringbuilder.append;
-	__tostring = stringbuilder.toString;
+    __index = stringbuilder;
+    __add = stringbuilder.append;
+    __concat = stringbuilder.append;
+    __tostring = stringbuilder.toString;
 }
 
 function stringbuilder:new()
-	local obj = {
-		buffer = {}
-	}
-	setmetatable(obj, stringbuilder_mt)
+    local obj = {
+        buffer = {}
+    }
+    setmetatable(obj, stringbuilder_mt)
 
-	return obj
+    return obj
 end
 
 return stringbuilder

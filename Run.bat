@@ -1,39 +1,39 @@
 @echo off
 
 echo Mapset Acronym:
-echo 	Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
-echo 	Acronym will automaticly be ALL CAPS.
+echo     Must be 4 letters, less than 4 will error, any letters over 4 will be ignored.
+echo     Acronym will automaticly be ALL CAPS.
 set /p "acronym=Enter 4 letter mapset acronym: "
 echo ---------------------------------------------------------------------------------------------
 
 echo Sprite Acronym:
-echo 	Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
-echo 	Acronym will automaticly be ALL CAPS.
+echo     Must be 2 letters, less than 2 will error, any letters over 2 will be ignored.
+echo     Acronym will automaticly be ALL CAPS.
 set /p "acronym_sprite=Enter 2 letter sprite acronym: "
 echo ---------------------------------------------------------------------------------------------
 
 echo Actor replacement:
-echo 	Must be either Y or N. Any other setting will default to N.
-echo 	Actor replacement will follow actorlist.txt.
+echo     Must be either Y or N. Any other setting will default to N.
+echo     Actor replacement will follow actorlist.txt.
 set /p "things=Enter either Y or N: "
 echo ---------------------------------------------------------------------------------------------
 
 echo Wad File Name:
-echo 	Wad files can be placed in same folder, just the filename is required.
+echo     Wad files can be placed in same folder, just the filename is required.
 set /p "wad=Enter wad to convert: "
 echo ---------------------------------------------------------------------------------------------
 
 echo Iwad File Name:
-echo 	Iwad files can be placed in same folder, just the filename is required.
+echo     Iwad files can be placed in same folder, just the filename is required.
 set /p "iwad=Enter wad to convert: "
 echo ---------------------------------------------------------------------------------------------
 
 echo Verbose settings
-echo 	0 = Basic.
-echo 	1 = Same as 0 but with a few more details.
-echo 	2 = Same as 1 but log most individual conversions/renames.
-echo 	3 = Same as 2 but logs iwad reads and every individual map change. (slow)
-echo 	Blank = Same as 0
+echo     0 = Basic.
+echo     1 = Same as 0 but with a few more details.
+echo     2 = Same as 1 but log most individual conversions/renames.
+echo     3 = Same as 2 but logs iwad reads and every individual map change. (slow)
+echo     Blank = Same as 0
 set /p "verbose=Enter verbosity(0-3 or blank): "
 echo ---------------------------------------------------------------------------------------------
 

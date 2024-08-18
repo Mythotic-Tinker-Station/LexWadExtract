@@ -47,9 +47,9 @@ Follow the instructions at the [megasource][megasource] repository page.
 ### *nix
 Run `platform/unix/automagic` from the repository root, then run ./configure and make.
 
-	$ platform/unix/automagic
-	$ ./configure
-	$ make
+    $ platform/unix/automagic
+    $ ./configure
+    $ make
 
 When using a source release, automagic has already been run, and the first step can be skipped.
 

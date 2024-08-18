@@ -1428,7 +1428,7 @@ LOVE 0.2.0 [Mini-Moose]
 LOVE 0.1.1 [Santa-Power]
 ------------------------
 
-	Initial release!
+    Initial release!
   Released: 2008-01-13
 
  * Image loading and rendering.

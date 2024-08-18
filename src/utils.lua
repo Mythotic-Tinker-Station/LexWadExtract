@@ -6,24 +6,24 @@ local utils =
 
 -- opens a file, and returns the file handle
 function utils:openFile(filepath, filemode)
-	local file, err = io.open(filepath, filemode)
+    local file, err = io.open(filepath, filemode)
 
-	if err then
-		error("[ERROR] " .. err)
-	end
+    if err then
+        error("[ERROR] " .. err)
+    end
 
-	return file
+    return file
 end
 
 -- pad a string to 8 bytes
 function utils:addPadding(str)
-	if #str >= 8 then return str end
-	local newstr = str
+    if #str >= 8 then return str end
+    local newstr = str
 
-	for i = #str+1, 8 do
-		newstr = string.format("%s%s", newstr, "\0")
-	end
-	return newstr
+    for i = #str+1, 8 do
+        newstr = string.format("%s%s", newstr, "\0")
+    end
+    return newstr
 end
 
 -- remove padding from a string
@@ -77,19 +77,19 @@ end
 
 -- check the magic(the first bytes of a file usually) of a file
 function utils:checkFormat(data, magic, offset, bigendian)
-	offset = offset or 1
-	bigendian = bigendian or false
+    offset = offset or 1
+    bigendian = bigendian or false
 
-	local m
-	if(not bigendian) then
-		m = love.data.unpack(">c" .. #magic, data, offset)
-	else
-		m = love.data.unpack("<c" .. #magic, data, offset)
-	end
+    local m
+    if(not bigendian) then
+        m = love.data.unpack(">c" .. #magic, data, offset)
+    else
+        m = love.data.unpack("<c" .. #magic, data, offset)
+    end
 
-	if(m == magic) then return true end
+    if(m == magic) then return true end
 
-	return false
+    return false
 end
 
 -- find a value in a table
@@ -123,20 +123,20 @@ end
 
 -- print a table
 function utils:printTable(tbl, indent)
-	if not indent then indent = 0 end
-	for k, v in pairs(tbl) do
-		formatting = string.rep("  ", indent) .. k .. ": "
-		if(type(v) == "table") then
-			print(formatting)
-			self:printTable(v, indent+1)
-		elseif(type(v) == 'boolean') then
-			print(formatting .. tostring(v))
-		elseif(type(v) == "string" and #v > 50) then
-			print(formatting .. tostring(k))
-		else
-			print(formatting .. v)
-		end
-	end
+    if not indent then indent = 0 end
+    for k, v in pairs(tbl) do
+        formatting = string.rep("  ", indent) .. k .. ": "
+        if(type(v) == "table") then
+            print(formatting)
+            self:printTable(v, indent+1)
+        elseif(type(v) == 'boolean') then
+            print(formatting .. tostring(v))
+        elseif(type(v) == "string" and #v > 50) then
+            print(formatting .. tostring(k))
+        else
+            print(formatting .. v)
+        end
+    end
 end
 
 function utils:bench(label, func, ...)

@@ -23,7 +23,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-#include <stddef.h>	/* for size_t */
+#include <stddef.h>    /* for size_t */
 
 #include <ogg/ogg.h>
 
@@ -204,18 +204,18 @@ typedef enum {
  * other paramters and good default settings for the encoder parameters.
  */
 typedef struct {
-  ogg_uint32_t  width;		/**< encoded frame width  */
-  ogg_uint32_t  height;		/**< encoded frame height */
-  ogg_uint32_t  frame_width;	/**< display frame width  */
-  ogg_uint32_t  frame_height;	/**< display frame height */
-  ogg_uint32_t  offset_x;	/**< horizontal offset of the displayed frame */
-  ogg_uint32_t  offset_y;	/**< vertical offset of the displayed frame */
-  ogg_uint32_t  fps_numerator;	    /**< frame rate numerator **/
+  ogg_uint32_t  width;        /**< encoded frame width  */
+  ogg_uint32_t  height;        /**< encoded frame height */
+  ogg_uint32_t  frame_width;    /**< display frame width  */
+  ogg_uint32_t  frame_height;    /**< display frame height */
+  ogg_uint32_t  offset_x;    /**< horizontal offset of the displayed frame */
+  ogg_uint32_t  offset_y;    /**< vertical offset of the displayed frame */
+  ogg_uint32_t  fps_numerator;        /**< frame rate numerator **/
   ogg_uint32_t  fps_denominator;    /**< frame rate denominator **/
   ogg_uint32_t  aspect_numerator;   /**< pixel aspect ratio numerator */
   ogg_uint32_t  aspect_denominator; /**< pixel aspect ratio denominator */
-  theora_colorspace colorspace;	    /**< colorspace */
-  int           target_bitrate;	    /**< nominal bitrate in bits per second */
+  theora_colorspace colorspace;        /**< colorspace */
+  int           target_bitrate;        /**< nominal bitrate in bits per second */
   int           quality;  /**< Nominal quality setting, 0-63 */
   int           quick_p;  /**< Quick encode/decode */
 
@@ -238,7 +238,7 @@ typedef struct {
   ogg_int32_t   noise_sensitivity;
   ogg_int32_t   sharpness;
 
-  theora_pixelformat pixelformat;	/**< chroma subsampling mode to expect */
+  theora_pixelformat pixelformat;    /**< chroma subsampling mode to expect */
 
 } theora_info;
 
@@ -770,7 +770,7 @@ extern void  theora_comment_clear(theora_comment *tc);
  * \param th     A #theora_state handle.
  * \param req    The control code to process.
  *                See \ref encctlcodes_old "the list of available 
- *			control codes" for details.
+ *            control codes" for details.
  * \param buf    The parameters for this control code.
  * \param buf_sz The size of the parameter buffer.*/
 extern int theora_control(theora_state *th,int req,void *buf,size_t buf_sz);
