@@ -1852,24 +1852,22 @@ function wad:renameAssets(assets)
         local asset = assets[a]
 
         if (not asset.ignore) then
-            self:renameAsset(asset)
+            local newname
+
+            if self.texturecount <= 9999 then
+                self.texturecount = self.texturecount + 1
+                newname = string.format("%s%.4d", self.acronym, self.texturecount)
+            else
+                self.texturecount2 = self.texturecount2 + 1
+                newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
+            end
+
+            utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
+            asset.newname = newname
         end
     end
 
     return assetcount
-end
-
-function wad:renameAsset(asset)
-    self.texturecount = self.texturecount + 1
-    local newname = string.format("%s%.4d", self.acronym, self.texturecount)
-
-    if self.texturecount > 9999 then
-        self.texturecount2 = self.texturecount2 + 1
-        newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
-    end
-
-    utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
-    asset.newname = newname
 end
 
 function wad:renameSprites()
@@ -1897,27 +1895,27 @@ function wad:renameSprites()
 end
 
 function wad:renameSounds()
-    if(self.base ~= self) then
+    if (self.base ~= self) then
+        local function renameSoundsForType(sounds)
+            for s = 1, #sounds do
+                local sound = sounds[s]
+                self.soundcount = self.soundcount + 1
+                sound.newname = string.format("%s%.4d", self.acronym, self.soundcount)
+                utils:printf(2, "\tRenamed %s to %s", sound.name, sound.newname)
+            end
+        end
+
         --LMP
-        self:renameSoundsForType(self.doomsounds)
+        renameSoundsForType(self.doomsounds)
 
         --WAV
-        self:renameSoundsForType(self.wavesounds)
+        renameSoundsForType(self.wavesounds)
 
         --OGG
-        self:renameSoundsForType(self.oggsounds)
+        renameSoundsForType(self.oggsounds)
 
         --FLAC
-        self:renameSoundsForType(self.flacsounds)
-    end
-end
-
-function wad:renameSoundsForType(sounds)
-    for s = 1, #sounds do
-        local sound = sounds[s]
-        self.soundcount = self.soundcount + 1
-        sound.newname = string.format("%s%.4d", self.acronym, self.soundcount)
-        utils:printf(2, "\tRenamed %s to %s", sound.name, sound.newname)
+        renameSoundsForType(self.flacsounds)
     end
 end
 
@@ -1991,7 +1989,7 @@ function wad:processTextLump(name)
         end
         for f = 1, #self.flats do
             local flat = self.flats[f]
-            data = data:gsub(flat.name, flat.newname)
+            data = data:gsub(composite.name, composite.newname)
         end
     end
 
@@ -2610,7 +2608,22 @@ function wad:extractAsset(dirname, assetname, assetimagedata)
 end
 
 function wad:extractMaps()
-    if(self.base ~= self) then
+    if (self.base ~= self) then
+        local function getLumpChunkAndPositions(order)
+            local pos = {}
+            local pos2 = 0
+            local lumpchunksb = stringbuilder()
+            for o = 1, #order do
+                local lump = order[o]
+
+                pos[o] = pos2
+                pos2 = pos2 + #lump
+                lumpchunksb:append(lump)
+            end
+
+            return lumpchunksb:toString(), pos
+        end
+
         for m = 1, #self.maps do
             local map = self.maps[m]
 
@@ -2698,21 +2711,6 @@ function wad:extractMaps()
     else
         utils:printf(1, "\tNot extracting base wad maps.\n")
     end
-end
-
-function getLumpChunkAndPositions(order)
-    local pos = {}
-    local pos2 = 0
-    local lumpchunksb = stringbuilder()
-    for o = 1, #order do
-        local lump = order[o]
-
-        pos[o] = pos2
-        pos2 = pos2 + #lump
-        lumpchunksb:append(lump)
-    end
-
-    return lumpchunksb:toString(), pos
 end
 
 function wad:extractAnimdefs()
@@ -2896,30 +2894,24 @@ function wad:extractMapinfo()
 end
 
 function wad:removeUnusedTextures()
-    local tex = 0
-    local flats = 0
-    local patches = 0
+    local function removeUnused(assets, dirname)
+        local count = 0
 
-    for c = 1, #self.composites do
-        if(not self.composites[c].used and animdefsIgnore[self.composites[c].newname] == nil) then
-            tex = tex + 1
-            os.remove(string.format("%s/textures/%s.png", self.pk3path, self.composites[c].newname))
+        for a = 1, #assets do
+            local asset = assets[a]
+
+            if (not asset.used and animdefsIgnore[asset.newname] == nil) then
+                count = count + 1
+                os.remove(string.format("%s/%s/%s.png", self.pk3path, dirname, asset.newname))
+            end
         end
+
+        return count
     end
 
-    for f = 1, #self.flats do
-        if(not self.flats[f].used and animdefsIgnore[self.flats[f].newname] == nil) then
-            flats = flats + 1
-            os.remove(string.format("%s/flats/%s.png", self.pk3path, self.flats[f].newname))
-        end
-    end
-
-    for p = 1, #self.patches do
-        if(not self.patches[p].used and animdefsIgnore[self.patches[p].newname] == nil) then
-            patches = patches + 1
-            os.remove(string.format("%s/patches/%s.png", self.pk3path, self.patches[p].newname))
-        end
-    end
+    local tex = removeUnused(self.composites, "textures")
+    local flats = removeUnused(self.flats, "flats")
+    local patches = removeUnused(self.patches, "patches")
 
     utils:printf(1, "\tFound: %i Unused Textures.", tex)
     utils:printf(1, "\tFound: %i Unused Flats.", flats)
