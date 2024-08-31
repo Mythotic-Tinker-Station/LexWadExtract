@@ -981,7 +981,6 @@ function wad:addExtraMarkers()
                             for lll = l, ll do
                                 lumplist_new[#lumplist_new+1] = lumplist[lll]
                             end
-                            utils:printf(5)
                             addLumpListItem("UM_END")
                             t = "UDMF"
                             break;
