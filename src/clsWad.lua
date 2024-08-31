@@ -1778,43 +1778,38 @@ function wad:filterDuplicates()
     utils:printf(1, "\tFound '%d' duplicates", count)
     count = 0
     -- filter dups from base wad
-    if(self.base ~= self) then
+    if (self.base ~= self) then
+        local function flagDuplicateAssets(pwadassets, baseassets)
+            for a = 1, #pwadassets do
+                local pwadasset = pwadassets[a]
+
+                for a2 = 1, #baseassets do
+                    local baseasset = baseassets[a2]
+
+                    if (pwadasset.md5 == baseasset.md5) then
+                        count = count + 1
+                        pwadasset.ignore = true
+                        pwadasset.doomdup = baseasset.name
+                        utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
+                    end
+                end
+            end
+        end
+
         -- composites
-        count = count + self:flagDuplicateAssets(self.composites, self.base.composites)
+        flagDuplicateAssets(self.composites, self.base.composites)
 
         -- flats
-        count = count + self:flagDuplicateAssets(self.flats, self.base.flats)
+        flagDuplicateAssets(self.flats, self.base.flats)
 
         -- patches
-        count = count + self:flagDuplicateAssets(self.patches, self.base.patches)
+        flagDuplicateAssets(self.patches, self.base.patches)
 
         -- sprites
-        count = count + self:flagDuplicateAssets(self.sprites, self.base.sprites)
-
+        flagDuplicateAssets(self.sprites, self.base.sprites)
     end
 
     utils:printf(1, "\tFound '%d' doom duplicates", count)
-end
-
-function wad:flagDuplicateAssets(pwadassets, baseassets)
-    local totalduplicates = 0
-
-    for a = 1, #pwadassets do
-        local pwadasset = pwadassets[a]
-
-        for a2 = 1, #baseassets do
-            local baseasset = baseassets[a2]
-
-            if (pwadasset.md5 == baseasset.md5) then
-                totalduplicates = totalduplicates + 1
-                pwadasset.ignore = true
-                pwadasset.doomdup = baseasset.name
-                utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
-            end
-        end
-    end
-
-    return totalduplicates
 end
 
 function wad:renamePatches()
