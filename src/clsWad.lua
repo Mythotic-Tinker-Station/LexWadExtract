@@ -2684,21 +2684,21 @@ function wad:extractMaps()
                 local header = love.data.pack("string", "<c4i4i4", "PWAD", #order+1, 12+#lumpchunk)
 
                 -- directory
-                local dir = love.data.pack("string", "<i4i4c8", 10, 0, "MAP01")
-                local count = 1
+                local dirsb = stringbuilder()
+                dirsb:append(love.data.pack("string", "<i4i4c8", 0, 0, "MAP01"))
+                dirsb:append(love.data.pack("string", "<i4i4c8", pos[1]+12, #order[1], "TEXTMAP"))
 
-                dir[1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "TEXTMAP")
-                if(map.raw.znodes) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "ZNODES") end
-                if(map.raw.reject) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "REJECT") end
-                if(map.raw.dialogue) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "DIALOGUE") end
-                if(map.raw.behavior) then count = count + 1; dir[#dir+1] =  love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "BEHAVIOR") end
-                if(map.raw.scripts) then count = count + 1; dir[#dir+1] = love.data.pack("string", "<i4i4c8", pos[count]+12, #order[count], "SCRIPTS") end
-                dir[#dir+1] = love.data.pack("string", "<i4i4c8", 22, 0, "ENDMAP")
+                if(map.raw.znodes)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "ZNODES")) end
+                if(map.raw.reject)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "REJECT")) end
+                if(map.raw.dialogue)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "DIALOGUE")) end
+                if(map.raw.behavior)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "BEHAVIOR")) end
+                if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "SCRIPT")) end
+                dirsb:append(love.data.pack("string", "<i4i4c8", pos[#order]+12, #order[#order], "ENDMAP"))
 
                 local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(map.name)), "w+b")
                 wad:write(header)
                 wad:write(lumpchunk)
-                wad:write(table.concat(dir))
+                wad:write(dirsb:toString())
                 wad:close()
             end
         end
