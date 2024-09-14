@@ -1078,11 +1078,20 @@ function wad:addExtraMarkers()
         if lump.data:sub(1, 3) == "MUS" then
             utils:printf(2, "\t\tFound MUS song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
+            goto continue
         end
         if lump.data:sub(1, 4) == "MThd" then
             utils:printf(2, "\t\tFound MIDI song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
+            goto continue
         end
+        for m, music in ipairs(self.music_list) do
+            if lump.name == music then
+                utils:printf(2, "\t\tFound song by name: %s", lumplist[l].name)
+                lumplist_new[#lumplist_new+1] = lump
+            end
+        end
+        ::continue::
     end
 
     -- make the MS_END marker
