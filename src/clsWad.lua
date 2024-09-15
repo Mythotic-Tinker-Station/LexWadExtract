@@ -703,7 +703,7 @@ local wad = class("wad",
         },
         ["TX"] =
         {
-            name = "patches",
+            name = "textures",
             lumps = {}
         },
         ["PP"] =
