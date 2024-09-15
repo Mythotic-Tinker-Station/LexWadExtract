@@ -2244,7 +2244,7 @@ function wad:ModifyMaps()
 
             utils:printf(1, "\tModifying Map: %d", m)
 
-            local actorlist = io.open(love.filesystem.getSourceBaseDirectory() .. "/actorlist.txt")
+            local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "w")
             actorlist:read("*line")
             actorlist:read("*line")
             actorlist:read("*line")
