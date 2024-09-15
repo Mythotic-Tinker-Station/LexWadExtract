@@ -89,6 +89,7 @@ local wad = class("wad",
     pnames = {},
     composites = {},
     textures = {},
+    zdoomtextures = {},
     flats = {},
     patches = {},
     graphics = {},
@@ -703,7 +704,7 @@ local wad = class("wad",
         },
         ["TX"] =
         {
-            name = "textures",
+            name = "zdoomtextures",
             lumps = {}
         },
         ["PP"] =
@@ -795,16 +796,16 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Processing Patches...",                self.buildImages,           self, self.patches, "Patch")
     utils:bench("Processing Graphics...",               self.buildImages,           self, self.graphics, "Graphic")
     utils:bench("Processing Sprites...",                self.buildImages,           self, self.sprites, "Sprite")
-    utils:bench("Processing Zdoom Textures...",         self.buildImages,           self, self.textures, "Texture")
+    utils:bench("Processing Zdoom Textures...",         self.buildImages,           self, self.zdoomtextures, "ZDoom Texture")
     utils:bench("Processing PNames...",                 self.processPnames,         self)
     utils:bench("Processing TEXTURE1...",               self.processTexturesX,      self, 1)
     utils:bench("Processing TEXTURE2...",               self.processTexturesX,      self, 2)
     utils:bench("Processing Duplicates...",             self.filterDuplicates,      self)
-    utils:bench("Move Zdoom Textures...",               self.moveZDoomTextures,     self)
     utils:bench("Renaming Flats...",                    self.renameFlats,           self)
     utils:bench("Renaming Sprites...",                  self.renameSprites,         self)
     utils:bench("Renaming Composites...",               self.renameTextures,        self)
     utils:bench("Renaming Patches...",                  self.renamePatches,         self)
+    utils:bench("Renaming Zdoom Textures...",           self.renameZDoomTextures,   self)
     utils:bench("Renaming Sounds...",                   self.renameSounds,          self)
     utils:bench("Renaming Songs...",                    self.renameSongs,           self)
     utils:bench("Filtering OTEX Assets...",             self.filterOTexAssets,      self)
@@ -816,8 +817,9 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Extracting Graphics...",               self.extractGraphics,       self)
     utils:bench("Extracting Patches...",                self.extractPatches,        self)
     utils:bench("Extracting Flats...",                  self.extractFlats,          self)
-    utils:bench("Extracting Composites...",             self.extractTextures,       self)
+    utils:bench("Extracting Composites...",             self.extractComposites,     self)
     utils:bench("Extracting Sprites...",                self.extractSprites,        self)
+    utils:bench("Extracting Zdoom Textures...",         self.extractZDoomTextures,  self)
     utils:bench("Extracting Maps...",                   self.extractMaps,           self)
     utils:bench("Extracting Sounds...",                 self.extractSounds,         self)
     utils:bench("Extracting Songs...",                  self.extractSongs,          self)
@@ -1746,20 +1748,6 @@ function wad:processSwitches()
     end
 end
 
-function wad:moveZDoomTextures()
-    if(self.base ~= self) then
-        for t = 1, #self.textures do
-            local c = #self.composites+1
-            self.composites[c] = {}
-            self.composites[c].name = self.textures[t].name
-            self.composites[c].raw = self.textures[t].data
-            self.composites[c].iszdoom = true
-        end
-    else
-        utils:printf(1, "\tNot moving base wad zdoom textures.\n")
-    end
-end
-
 function wad:filterDuplicates()
     local count = 0
     local compositecount = #self.composites
@@ -1946,6 +1934,15 @@ function wad:renameSongs()
                 end
             end
         end
+    end
+end
+
+function wad:renameZDoomTextures()
+    if(self.base ~= self) then
+        local zdoomcount = self:renameAssets(self.zdoomtextures)
+        utils:printf(1, "\tFound %d ZDoom textures.\n", zdoomcount)
+    else
+        utils:printf(1, "\tNot renaming base wad ZDoom textures.\n")
     end
 end
 
@@ -2461,7 +2458,7 @@ function wad:replaceMapTextures(map, texture, newtexturename)
     end
 end
 
-function wad:extractTextures()
+function wad:extractComposites()
     if(self.base ~= self) then
         local texturesb = stringbuilder()
         for c = 1, #self.composites do
@@ -2603,6 +2600,21 @@ function wad:extractSprites()
         end
     else
         utils:printf(1, "\tNot extracting base wad sprites.\n")
+    end
+end
+
+function wad:extractZDoomTextures()
+    if (self.base ~= self) then
+        for z = 1, #self.zdoomtextures do
+            local zdoomtexture = self.zdoomtextures[z]
+
+            if (not zdoomtexture.ignore and zdoomtexture.composite == nil and zdoomtexture.newname) then
+                utils:printf(2, "\tExtracting ZDoom Texture: %s", zdoomtexture.newname)
+                self:extractAsset("textures", zdoomtexture.newname, zdoomtexture.png)
+            end
+        end
+    else
+        utils:printf(1, "\tNot extracting base wad patches.\n")
     end
 end
 
