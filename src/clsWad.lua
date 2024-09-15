@@ -2513,7 +2513,7 @@ function wad:createTextureDefinition(composite)
                 if (patchdata) then
                     patchdata.used = true
                 end
-                texturedefsb:append(string.format("    Patch \"%s\", %d, %d\n", patchname, compositepatch.x, compositepatch.y))
+                texturedefsb:append(string.format("\tPatch \"%s\", %d, %d\n", patchname, compositepatch.x, compositepatch.y))
             end
         end
     end
