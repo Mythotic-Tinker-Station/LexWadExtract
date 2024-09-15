@@ -77,6 +77,26 @@ end
 
 -- check the magic(the first bytes of a file usually) of a file
 function utils:checkFormat(data, magic, offset, bigendian)
+
+    if #data < #magic then return false end
+
+    -- because mp3s just HAD to be complicated for no reason.
+    if magic == "mp3" then
+        -- check for ID3 tag or MP3 frame header
+        if data:sub(1, 3) == "ID3" then
+            return true 
+        end
+    
+        local byte1 = data:byte(1)
+        local byte2 = data:byte(2)
+        if byte1 == 0xFF and bit.band(byte2, 0xE0) == 0xE0 then
+            return true
+        else
+            return false
+        end
+        return false
+    end
+
     offset = offset or 1
     bigendian = bigendian or false
 

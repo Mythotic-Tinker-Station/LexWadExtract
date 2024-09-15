@@ -1021,7 +1021,7 @@ function wad:addExtraMarkers()
     addLumpListItem("WS_START")
 
     for l, lump in ipairs(lumplist) do
-        if lump.name:sub(1, 4) == "RIFF" then
+        if utils:checkFormat(lump.data, "RIFF") then
             utils:printf(2, "\t\tFound Wave Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
@@ -1039,7 +1039,7 @@ function wad:addExtraMarkers()
     addLumpListItem("OS_START")
 
     for l, lump in ipairs(lumplist) do
-        if lump.data:sub(1, 3) == "Ogg" then
+        if utils:checkFormat(lump.data, "OggS") then
             utils:printf(2, "\t\tFound OGG Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
@@ -1057,7 +1057,7 @@ function wad:addExtraMarkers()
     addLumpListItem("CS_START")
 
     for l, lump in ipairs(lumplist) do
-        if lump.data:sub(1, 4) == "fLaC" then
+        if utils:checkFormat(lump.data, "fLaC") then
             utils:printf(2, "\t\tFound FLAC Sound: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
         end
@@ -1075,12 +1075,12 @@ function wad:addExtraMarkers()
     addLumpListItem("MS_START")
 
     for l, lump in ipairs(lumplist) do
-        if lump.data:sub(1, 3) == "MUS" then
+        if utils:checkFormat(lump.data, "MUS") then
             utils:printf(2, "\t\tFound MUS song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
             goto continue
         end
-        if lump.data:sub(1, 4) == "MThd" then
+        if utils:checkFormat(lump.data, "MThd") then
             utils:printf(2, "\t\tFound MIDI song: %s", lumplist[l].name)
             lumplist_new[#lumplist_new+1] = lump
             goto continue
@@ -2841,12 +2841,20 @@ end
 
 function wad:extractSongs()
     if(self.base ~= self) then
-
         for s = 1, #self.songs do
             if self.songs[s].newname ~= nil then
-                local ext = "mus"
-                if self.songs[s].data:sub(1, 4) == "MThd" then
+                local ext = "ukn"
+                if utils:checkFormat(self.songs[s].data, "MUS") then
+                    ext = "mus"
+                end
+                if utils:checkFormat(self.songs[s].data, "OggS") then
+                    ext = "ogg"
+                end
+                if utils:checkFormat(self.songs[s].data, "MThd") then
                     ext = "mid"
+                end
+                if utils:checkFormat(self.songs[s].data, "mp3") then
+                    ext = "mp3"
                 end
 
                 local mus = utils:openFile(string.format("%s/music/%s/D_%s.%s", self.pk3path, self.acronym, self.songs[s].newname, ext), "w+b")
