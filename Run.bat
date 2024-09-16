@@ -40,13 +40,22 @@ echo ---------------------------------------------------------------------------
 if not exist %cd%\%wad% goto 20
 if not exist %cd%\%iwad% goto 25
 
+
+echo ------------------------------- Make Log Folder -------------------------------
 mkdir logs
+echo ------------------------------- Make Temp Folder -------------------------------
 mkdir temp
+echo ------------------------------- Move Actorlist to Temp -------------------------------
 move /Y pk3\actorlist.* temp\
+echo ------------------------------- Remove PK3 Folder -------------------------------
 rmdir pk3 /s /q
+echo ------------------------------- Make PK3 Folder -------------------------------
 mkdir pk3
+echo ------------------------------- Move Actorlist to PK3 -------------------------------
 move /Y temp\actorlist.* pk3\
+echo ------------------------------- Remove Temp Folder -------------------------------
 rmdir temp /s /q
+echo ------------------------------- Make PK3 Folders -------------------------------
 mkdir pk3\graphics
 mkdir pk3\flats
 mkdir pk3\patches
