@@ -41,36 +41,30 @@ if not exist %cd%\%wad% goto 20
 if not exist %cd%\%iwad% goto 25
 
 
-echo ------------------------------- Make Log Folder -------------------------------
-mkdir logs
-echo ------------------------------- Make Temp Folder -------------------------------
-mkdir temp
-echo ------------------------------- Move Actorlist to Temp -------------------------------
-move /Y pk3\actorlist.* temp\
-echo ------------------------------- Remove PK3 Folder -------------------------------
-rmdir pk3 /s /q
-echo ------------------------------- Make PK3 Folder -------------------------------
-mkdir pk3
-echo ------------------------------- Move Actorlist to PK3 -------------------------------
-move /Y temp\actorlist.* pk3\
-echo ------------------------------- Remove Temp Folder -------------------------------
-rmdir temp /s /q
-echo ------------------------------- Make PK3 Folders -------------------------------
-mkdir pk3\graphics
-mkdir pk3\flats
-mkdir pk3\patches
-mkdir pk3\sounds
-mkdir pk3\textures
-mkdir pk3\sprites
-mkdir pk3\music
+mkdir %cd%\logs
+mkdir %cd%\temp
+move /Y %cd%\pk3\actorlist.* %cd%\temp\
+rmdir %cd%\pk3 /s /q
+mkdir %cd%\pk3
+move /Y %cd%\temp\actorlist.* %cd%\pk3\
+rmdir %cd%\temp /s /q
+mkdir %cd%\pk3\graphics
+mkdir %cd%\pk3\flats
+mkdir %cd%\pk3\patches
+mkdir %cd%\pk3\sounds
+mkdir %cd%\pk3\textures
+mkdir %cd%\pk3\sprites
+mkdir %cd%\pk3\music
 
-mkdir pk3\graphics\%acronym%
-mkdir pk3\flats\%acronym%
-mkdir pk3\patches\%acronym%
-mkdir pk3\sounds\%acronym%
-mkdir pk3\textures\%acronym%
-mkdir pk3\sprites\%acronym%
-mkdir pk3\music\%acronym%
+mkdir %cd%\pk3\graphics\%acronym%
+mkdir %cd%\pk3\flats\%acronym%
+mkdir %cd%\pk3\patches\%acronym%
+mkdir %cd%\pk3\sounds\%acronym%
+mkdir %cd%\pk3\textures\%acronym%
+mkdir %cd%\pk3\sprites\%acronym%
+mkdir %cd%\pk3\music\%acronym%
+
+mkdir %cd%\pk3\maps
 
 mkdir pk3\maps
 
