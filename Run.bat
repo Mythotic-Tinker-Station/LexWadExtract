@@ -40,14 +40,10 @@ echo ---------------------------------------------------------------------------
 if not exist %cd%\%wad% goto 20
 if not exist %cd%\%iwad% goto 25
 
-
 mkdir %cd%\logs
-mkdir %cd%\temp
-move /Y %cd%\pk3\actorlist.* %cd%\temp\
 rmdir %cd%\pk3 /s /q
 mkdir %cd%\pk3
-move /Y %cd%\temp\actorlist.* %cd%\pk3\
-rmdir %cd%\temp /s /q
+copy /Y %cd%\actorlist.txt %cd%\pk3\actorlist.%acronym%.txt 
 mkdir %cd%\pk3\graphics
 mkdir %cd%\pk3\flats
 mkdir %cd%\pk3\patches
@@ -68,7 +64,7 @@ mkdir %cd%\pk3\maps
 
 mkdir pk3\maps
 
-::Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
+Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
 goto 30
 
 :20
