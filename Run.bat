@@ -41,8 +41,12 @@ if not exist %cd%\%wad% goto 20
 if not exist %cd%\%iwad% goto 25
 
 mkdir logs
-
+mkdir temp
+move /Y pk3\actorlist.* temp\
 rmdir pk3 /s /q
+mkdir pk3
+move /Y temp\actorlist.* pk3\
+rmdir temp /s /q
 mkdir pk3\graphics
 mkdir pk3\flats
 mkdir pk3\patches
