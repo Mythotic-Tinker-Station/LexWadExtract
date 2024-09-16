@@ -2241,7 +2241,7 @@ function wad:ModifyMaps()
 
             utils:printf(1, "\tModifying Map: %d", m)
 
-            local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "w")
+            local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "r")
             actorlist:read("*line")
             actorlist:read("*line")
             actorlist:read("*line")
