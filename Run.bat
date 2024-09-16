@@ -65,7 +65,7 @@ mkdir pk3\music\%acronym%
 
 mkdir pk3\maps
 
-Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
+::Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
 goto 30
 
 :20
