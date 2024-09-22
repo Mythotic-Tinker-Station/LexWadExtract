@@ -1983,15 +1983,15 @@ function wad:processTextLump(name)
     if (data ~= "") then
         for p = 1, #self.patches do
             local patch = self.patches[p]
-            data = data:gsub(patch.name, getPatchName(patch))
+            data = data:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
         end
         for c = 1, #self.composites do
             local composite = self.composites[c]
-            data = data:gsub(composite.name, composite.newname)
+            data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
         end
         for f = 1, #self.flats do
             local flat = self.flats[f]
-            data = data:gsub(composite.name, composite.newname)
+            data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
         end
     end
 
