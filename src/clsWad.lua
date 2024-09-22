@@ -1113,7 +1113,7 @@ function wad:addExtraMarkers()
         if lump.name == "TX_START" then
             for ll = l, #lumplist do
                 if lumplist[ll].name == "TX_END" then
-                    for lll = l, ll do
+                    for lll = l+1, ll-1 do
                         utils:printf(2, "\t\tFound Texture: %s", lumplist[lll].name)
                         lumplist_new[#lumplist_new+1] = lumplist[lll]
                     end
