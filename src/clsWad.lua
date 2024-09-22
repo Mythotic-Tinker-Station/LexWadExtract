@@ -1991,7 +1991,7 @@ function wad:processTextLump(name)
         end
         for f = 1, #self.flats do
             local flat = self.flats[f]
-            data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
+            data = data:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
         end
     end
 
