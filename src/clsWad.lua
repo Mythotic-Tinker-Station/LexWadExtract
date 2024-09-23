@@ -2709,12 +2709,14 @@ function wad:extractMaps()
                 -- directory
                 local dirsb = stringbuilder()
                 dirsb:append(love.data.pack("string", "<i4i4c8", 0, 0, "MAP01"))
-                dirsb:append(love.data.pack("string", "<i4i4c8", pos[1]+12, #order[1], "TEXTMAP"))
-                if(map.raw.znodes)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[2]+12, #order[2], "ZNODES")) end
-                if(map.raw.reject)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[3]+12, #order[3], "REJECT")) end
-                if(map.raw.dialogue)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[4]+12, #order[4], "DIALOGUE")) end
-                if(map.raw.behavior)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[5]+12, #order[5], "BEHAVIOR")) end
-                if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[6]+12, #order[6], "SCRIPT")) end
+                local index = 1
+                dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "TEXTMAP"))
+                index = index + 1
+                if(map.raw.znodes)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "ZNODES"))      index = index + 1 end
+                if(map.raw.reject)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "REJECT"))      index = index + 1 end
+                if(map.raw.dialogue)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "DIALOGUE"))    index = index + 1 end
+                if(map.raw.behavior)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "BEHAVIOR"))    index = index + 1 end
+                if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "SCRIPT"))      index = index + 1 end
                 dirsb:append(love.data.pack("string", "<i4i4c8", pos[#order]+12, 0, "ENDMAP"))
 
                 local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(map.name)), "w+b")
