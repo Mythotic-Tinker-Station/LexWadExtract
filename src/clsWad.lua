@@ -2368,6 +2368,37 @@ function wad:ModifyMaps()
                     local patch = self.patches[p]
                     map.raw.textmap = map.raw.textmap:gsub(patch.name, getPatchName(patch))
                 end
+
+                local lines = {}
+                local inLinedef = false
+                local inSpecial = false
+                local inArg1 = false
+
+                for line in map.raw.textmap:gmatch("[^\r\n]+") do
+                    if line:find("linedef") or line:find("sector") then
+                        inLinedef = true
+                    elseif inLinedef then
+                        if line:find("{") then
+                            inSpecial = true
+                        elseif inSpecial then
+                            if line:find("special") then
+                                inArg1 = true
+                            elseif inArg1 then
+                                if line:find("arg1") then
+                                    line = "arg1 = 0;"
+                                    inArg1 = false
+                                end
+                            elseif line:find("}") then
+                                inLinedef = false
+                                inSpecial = false
+                            end
+                        end
+                    end
+
+                    table.insert(lines, line)
+                end
+
+                map.raw.textmap = table.concat(lines, "\n")
             end
         end
     else
