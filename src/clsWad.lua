@@ -664,6 +664,20 @@ local wad = class("wad",
         {"F_SKY1", 0}
     },
 
+    ignorelist_dups =
+    {
+        "SW1BRCOM",
+        "SW1BRN1",
+        "SW1STARG",
+        "SW1STON2",
+        "SW1STONE",
+        "SW2BRCOM",
+        "SW2BRN1",
+        "SW2STARG",
+        "SW2STON2",
+        "SW2STONE",
+    },
+
     -- namespaces
     namespaces =
     {
@@ -1756,18 +1770,32 @@ function wad:filterDuplicates()
     for c = 1, compositecount do
         local composite = self.composites[c]
 
-        for c2 = c, compositecount do
-            if (c ~= c2) then
-                local composite2 = self.composites[c2]
-
-                if (composite.md5 == composite2.md5) then
-                    count = count + 1
-
-                    if (composite.dups ~= nil) then
-                        local dupcomposite = composite.dups[composite.name]
-
-                        if (dupcomposite == nil) then dupcomposite = {} end
-                        dupcomposite[#dupcomposite+1] = composite2.name
+        local ingore = false
+        for i = 1, #self.ignorelist_dups do
+            if (composite.name == self.ignorelist_dups[i]) then
+                ingore = true
+            end
+        end
+        if ignore == false then
+            for c2 = c, compositecount do
+                if (c ~= c2) then
+                    local composite2 = self.composites[c2]
+                    
+                    local ingore = false
+                    for i = 1, #self.ignorelist_dups do
+                        if (composite2.name == self.ignorelist_dups[i]) then
+                            ingore = true
+                        end
+                    end
+                    if ignore == false then
+                        if (composite.md5 == composite2.md5) then
+                            count = count + 1
+                            if (composite.dups ~= nil) then
+                                local dupcomposite = composite.dups[composite.name]
+                                if (dupcomposite == nil) then dupcomposite = {} end
+                                dupcomposite[#dupcomposite+1] = composite2.name
+                            end
+                        end
                     end
                 end
             end
@@ -1781,15 +1809,30 @@ function wad:filterDuplicates()
         local function flagDuplicateAssets(pwadassets, baseassets)
             for a = 1, #pwadassets do
                 local pwadasset = pwadassets[a]
+                local ingore = false
+                for i = 1, #self.ignorelist_dups do
+                    if (pwadasset.name == self.ignorelist_dups[i]) then
+                        ingore = true
+                    end
+                end
+                if ingore == false then
+                    for a2 = 1, #baseassets do
+                        local baseasset = baseassets[a2]
+                        local ingore = false
+                        for i = 1, #self.ignorelist_dups do
+                            if (baseasset.name == self.ignorelist_dups[i]) then
+                                ingore = true
+                            end
+                        end
 
-                for a2 = 1, #baseassets do
-                    local baseasset = baseassets[a2]
-
-                    if (pwadasset.md5 == baseasset.md5) then
-                        count = count + 1
-                        pwadasset.ignore = true
-                        pwadasset.doomdup = baseasset.name
-                        utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
+                        if ignore == false then
+                            if (pwadasset.md5 == baseasset.md5) then
+                                count = count + 1
+                                pwadasset.ignore = true
+                                pwadasset.doomdup = baseasset.name
+                                utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
+                            end
+                        end
                     end
                 end
             end
@@ -1810,6 +1853,7 @@ function wad:filterDuplicates()
 
     utils:printf(1, "\tFound '%d' doom duplicates", count)
 end
+
 
 function wad:renamePatches()
     if(self.base ~= self) then
