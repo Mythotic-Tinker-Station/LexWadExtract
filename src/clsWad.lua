@@ -2381,7 +2381,20 @@ function wad:ModifyMaps()
                         if line:find("{") then
                             inSpecial = true
                         elseif inSpecial then
-                            if line:find("special") then
+                            if  line:find("special = 80;") or 
+                                line:find("special = 81;") or
+                                line:find("special = 82;") or
+                                line:find("special = 83;") or
+                                line:find("special = 84;") or
+                                line:find("special = 85;") or
+                                line:find("special = 226;") or
+                                line:find("special = -39;") or
+                                line:find("special = -40;") or
+                                line:find("special = -41;") or
+                                line:find("special = -42;") or
+                                line:find("special = -43;") or
+                                line:find("special = -44;") or
+                                line:find("special = -45;") then
                                 inArg1 = true
                             elseif inArg1 then
                                 if line:find("arg1") then
