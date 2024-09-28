@@ -2358,15 +2358,15 @@ function wad:ModifyMaps()
 
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
-                    map.raw.textmap = map.raw.textmap:gsub(composite.name, composite.newname)
+                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
                 end
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
-                    map.raw.textmap = map.raw.textmap:gsub(flat.name, flat.newname)
+                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
                 end
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
-                    map.raw.textmap = map.raw.textmap:gsub(patch.name, getPatchName(patch))
+                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
 
                 local lines = {}
