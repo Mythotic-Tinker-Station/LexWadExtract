@@ -1770,10 +1770,10 @@ function wad:filterDuplicates()
     for c = 1, compositecount do
         local composite = self.composites[c]
 
-        local ingore = false
+        local ignore = false
         for i = 1, #self.ignorelist_dups do
             if (composite.name == self.ignorelist_dups[i]) then
-                ingore = true
+                ignore = true
             end
         end
         if ignore == false then
@@ -1781,10 +1781,10 @@ function wad:filterDuplicates()
                 if (c ~= c2) then
                     local composite2 = self.composites[c2]
                     
-                    local ingore = false
+                    local ignore = false
                     for i = 1, #self.ignorelist_dups do
                         if (composite2.name == self.ignorelist_dups[i]) then
-                            ingore = true
+                            ignore = true
                         end
                     end
                     if ignore == false then
@@ -1809,19 +1809,19 @@ function wad:filterDuplicates()
         local function flagDuplicateAssets(pwadassets, baseassets)
             for a = 1, #pwadassets do
                 local pwadasset = pwadassets[a]
-                local ingore = false
+                local ignore = false
                 for i = 1, #self.ignorelist_dups do
                     if (pwadasset.name == self.ignorelist_dups[i]) then
-                        ingore = true
+                        ignore = true
                     end
                 end
-                if ingore == false then
+                if ignore == false then
                     for a2 = 1, #baseassets do
                         local baseasset = baseassets[a2]
-                        local ingore = false
+                        local ignore = false
                         for i = 1, #self.ignorelist_dups do
                             if (baseasset.name == self.ignorelist_dups[i]) then
-                                ingore = true
+                                ignore = true
                             end
                         end
 
