@@ -90,6 +90,7 @@ local wad = class("wad",
     composites = {},
     textures = {},
     zdoomtextures = {},
+    texturedefines = {},
     flats = {},
     patches = {},
     graphics = {},
@@ -814,12 +815,14 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Processing PNames...",                 self.processPnames,         self)
     utils:bench("Processing TEXTURE1...",               self.processTexturesX,      self, 1)
     utils:bench("Processing TEXTURE2...",               self.processTexturesX,      self, 2)
+    utils:bench("Processing TEXTURES.TXT...",           self.processTexturesTXT,    self)
     utils:bench("Processing Duplicates...",             self.filterDuplicates,      self)
     utils:bench("Renaming Flats...",                    self.renameFlats,           self)
     utils:bench("Renaming Sprites...",                  self.renameSprites,         self)
     utils:bench("Renaming Composites...",               self.renameTextures,        self)
     utils:bench("Renaming Patches...",                  self.renamePatches,         self)
     utils:bench("Renaming Zdoom Textures...",           self.renameZDoomTextures,   self)
+    utils:bench("Renaming TEXTURES.TXT defines...",     self.renameTexturesTXT,     self)
     utils:bench("Renaming Sounds...",                   self.renameSounds,          self)
     utils:bench("Renaming Songs...",                    self.renameSongs,           self)
     utils:bench("Filtering OTEX Assets...",             self.filterOTexAssets,      self)
@@ -1685,6 +1688,41 @@ function wad:processTexturesX(num)
     end
 end
 
+function wad:processTexturesTXT()
+    -- find TEXTURES
+    local data = self:findLump("SP","TEXTURES")
+
+    -- if TEXTURES found
+    if data ~= "" then
+        -- Split data into lines
+        local lines = {}
+        for line in data:gmatch("[^\r\n]+") do
+            table.insert(lines, line)
+        end
+
+        -- Iterate through each line
+        for i, line in ipairs(lines) do
+            -- find any line that starts with texture
+            if line:find("texture ") then
+                -- Split the line into words
+                local words = {}
+                for word in line:gmatch("%S+") do
+                    table.insert(words, word)
+                end
+
+                -- Get the texture name
+                local textureName = words[2]:sub(1, -1)
+                self.texturedefines[#self.texturedefines+1] = {}
+                self.texturedefines[#self.texturedefines].name = textureName
+                utils:printf(2, "\tFound TEXTURES.TXT texture: %s", textureName)
+            end
+        end
+
+        -- Join the lines back into a single string
+        data = table.concat(lines, "\n")
+    end
+end
+
 function wad:processAnimated()
     -- find ANIMATED
     local data = self:findLump("SP", "ANIMATED")
@@ -1879,6 +1917,15 @@ function wad:renameFlats()
         utils:printf(1, "\tFound %d flats.\n", flatcount)
     else
         utils:printf(1, "\tNot renaming base wad flats.\n")
+    end
+end
+
+function wad:renameTexturesTXT()
+    if(self.base ~= self) then
+        local texturecount = self:renameAssets(self.texturedefines)
+        utils:printf(1, "\tFound %d TEXTURES.TXT textures.\n", texturecount)
+    else
+        utils:printf(1, "\tNot renaming base wad TEXTURES.TXT textures.\n")
     end
 end
 
@@ -2420,7 +2467,14 @@ function wad:ModifyMaps()
                     local patch = self.patches[p]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
+
+                for t = 1, #self.texturedefines do
+                    local texture = self.texturedefines[t]
+                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
+                end
+                
                 --[[
+                -- This is specificly for fixing Dark Encounters maps.
                 local lines = {}
                 local inLinedef = false
                 local inSpecial = false
