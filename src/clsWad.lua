@@ -2724,7 +2724,7 @@ function wad:extractMaps()
                 dirsb:append(love.data.pack("string", "<i4i4c8", pos[9]+12, #order[9], "REJECT"))
                 dirsb:append(love.data.pack("string", "<i4i4c8", pos[10]+12, #order[10], "BLOCKMAP"))
                 if(map.raw.behavior) then dirsb:append(love.data.pack("string", "<i4i4c8", pos[11]+12, #order[11], "BEHAVIOR")) end
-                if(map.raw.scripts) then dirsb:append(love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPT")) end
+                if(map.raw.scripts) then dirsb:append(love.data.pack("string", "<i4i4c8", pos[12]+12, #order[12], "SCRIPTS")) end
 
                 local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, map.name), "w+b")
 
@@ -2760,7 +2760,7 @@ function wad:extractMaps()
                 if(map.raw.reject)      then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "REJECT"))      index = index + 1 end
                 if(map.raw.dialogue)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "DIALOGUE"))    index = index + 1 end
                 if(map.raw.behavior)    then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "BEHAVIOR"))    index = index + 1 end
-                if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "SCRIPT"))      index = index + 1 end
+                if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "SCRIPTS"))      index = index + 1 end
                 dirsb:append(love.data.pack("string", "<i4i4c8", pos[#order]+12, 0, "ENDMAP"))
 
                 local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(map.name)), "w+b")
