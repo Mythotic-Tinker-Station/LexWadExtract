@@ -2382,23 +2382,31 @@ function wad:ModifyMaps()
             --udmf
             elseif(map.format == "UM") then
 
+                --[[
                 if(self.things == "Y") then
-                    while line ~= nil do
-
-                        -- actor replacement stuff
-                        local actornewspace = string.find(line, " ")
-                        local actor1 = string.sub(line, 1, actornewspace)
-                        local actor2 = string.sub(line, actornewspace+1)
-                        actor1 = actor1 + 0
-                        actor2 = actor2 + 0
-                        for t = 1, #self.things do
-                            map.raw.textmap = map.raw.textmap:gsub(actor1, actor2)
+                    local lines = {}
+                    local inThing = false
+                    for line in map.raw.textmap:gmatch("[^\r\n]+") do
+                        if line:find("thing") then
+                            inThing = true
+                        elseif inThing then
+                            if line:find("}") then
+                                inThing = false
+                            else
+                                local thing = tonumber(line:match("id = (%d+)"))
+                                for l = 1, #self.thinglist do
+                                    local thinglist = self.thinglist[l]
+                                    if thing == thinglist.old then
+                                        line = line:gsub("id = %d+", "id = "..thinglist.new)
+                                        utils:printf(3, "\t\t\tReplace thing #%d with #%d", thing, thinglist.new)
+                                    end
+                                end
+                            end
                         end
-
-                        line = actorlist:read("*line")
+                        table.insert(lines, line)
                     end
-                    actorlist:close()
                 end
+                ]]
 
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
@@ -2412,6 +2420,48 @@ function wad:ModifyMaps()
                     local patch = self.patches[p]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
+                --[[
+                local lines = {}
+                local inLinedef = false
+                local inSpecial = false
+                local inArg1 = false
+
+                for line in map.raw.textmap:gmatch("[^\r\n]+") do
+                    if line:find("linedef") or line:find("sector") then
+                        inLinedef = true
+                    elseif inLinedef then
+                        if line:find("{") then
+                            inSpecial = true
+                        elseif inSpecial then
+                            if  line:find("special = 80;") or 
+                                line:find("special = 81;") or
+                                line:find("special = 82;") or
+                                line:find("special = 83;") or
+                                line:find("special = 84;") or
+                                line:find("special = 85;") or
+                                line:find("special = 226;") or
+                                line:find("special = -39;") or
+                                line:find("special = -40;") or
+                                line:find("special = -41;") or
+                                line:find("special = -42;") or
+                                line:find("special = -43;") or
+                                line:find("special = -44;") or
+                                line:find("special = -45;") then
+                                inArg1 = true
+                            elseif inArg1 then
+                                if line:find("arg1") then
+                                    line = "arg1 = 0;"
+                                    inArg1 = false
+                                end
+                            elseif line:find("}") then
+                                inLinedef = false
+                                inSpecial = false
+                            end
+                        end
+                    end
+
+                    table.insert(lines, line)
+                ]]
             end
         end
     else
