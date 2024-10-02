@@ -826,7 +826,7 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Renaming Sounds...",                   self.renameSounds,          self)
     utils:bench("Renaming Songs...",                    self.renameSongs,           self)
     utils:bench("Filtering OTEX Assets...",             self.filterOTexAssets,      self)
-    self.textures.original = utils:bench("Processing TEXTURES...",                  self.processTextLump,   self, "TEXTURES")
+    self:setLumpData("SP", "TEXTURES", utils:bench("Processing TEXTURES...",                  self.processTextLump,   self, "TEXTURES"))
     self.animdefs.original = utils:bench("Processing ANIMDEFS...",                  self.processTextLump,   self, "ANIMDEFS")
     utils:bench("Processing Maps...",                   self.processMaps,           self)
     utils:bench("Modifying Maps...",                    self.ModifyMaps,            self)
@@ -3037,9 +3037,9 @@ end
 function wad:extractTexturesLump()
     if(self.base ~= self) then
 
-        if #self.textures.original > 0 then
-            local file = utils:openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w")
-            file:write(self.textures.original)
+        if #self.texturedefines > 0 then
+            local file = utils:openFile(string.format("%s/textures.%s.txt", self.pk3path, self.acronym), "w+")
+            file:write(self:findLump("SP", "TEXTURES"))
             file:close()
         else
             utils:printf(1, "\tNo textures.txt to define.\n")
