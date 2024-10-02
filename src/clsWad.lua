@@ -1715,12 +1715,12 @@ function wad:processTexturesTXT()
                 local textureName = words[2]:sub(1, -1)
                 self.texturedefines[#self.texturedefines+1] = {}
                 self.texturedefines[#self.texturedefines].name = textureName
+
                 utils:printf(2, "\tFound TEXTURES.TXT texture: %s", textureName)
             end
         end
-
-        -- Join the lines back into a single string
         data = table.concat(lines, "\n")
+        self:setLumpData("SP", "TEXTURES", data)
     end
 end
 
@@ -2085,6 +2085,10 @@ function wad:processTextLump(name)
             local flat = self.flats[f]
             data = data:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
         end
+        for t = 1, #self.texturedefines do
+            local texture = self.texturedefines[t]
+            data = data:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
+        end
     end
 
     return data
@@ -2336,7 +2340,7 @@ function wad:ModifyMaps()
 
                 -- thing replacement
                 if(self.things == "Y") then
-                    utils:printf(2, "\t\tReplacing actors.")
+                    utils:printf(2, "\t\tReplacing actors....")
                     while line ~= nil do
 
                         -- actor replacement stuff
@@ -2359,21 +2363,21 @@ function wad:ModifyMaps()
                 end
 
                 -- find textures and rename
-                utils:printf(2, "\t\tReplacing textures.")
+                utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
                     self:replaceMapTextures(map, composite, composite.newname)
                 end
 
                 -- find flats and rename
-                utils:printf(2, "\t\tReplacing flats.")
+                utils:printf(2, "\t\tReplacing flats....")
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
                     self:replaceMapTextures(map, flat, flat.newname)
                 end
 
                 -- find patches and rename
-                utils:printf(2, "\t\tReplacing patches.")
+                utils:printf(2, "\t\tReplacing patches....")
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
                     self:replaceMapTextures(map, patch, getPatchName(patch))
@@ -2447,25 +2451,31 @@ function wad:ModifyMaps()
                     end
                 end
                 ]]
-
+                
+                utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
                 end
+
+                utils:printf(2, "\t\tReplacing flats...")
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
                 end
+
+                utils:printf(2, "\t\tReplacing patches...")
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
 
+                utils:printf(2, "\t\tReplacing textures...")
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
                 end
-                
+
                 --[[
                 -- This is specificly for fixing Dark Encounters maps.
                 local lines = {}
@@ -2641,7 +2651,7 @@ end
 -- Creates a WallTexture definition for TEXTURES
 function wad:createTextureDefinition(composite)
     local texturedefsb = stringbuilder()
-    texturedefsb:append(string.format("WallTexture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height))
+    texturedefsb:append(string.format("Texture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height))
 
     for p = 1, composite.patchcount do
         local compositepatch = composite.patches[p]
@@ -2659,7 +2669,7 @@ function wad:createTextureDefinition(composite)
         end
     end
 
-    texturedefsb:append("}\n\n")
+    texturedefsb:append("}\n")
     return texturedefsb:toString()
 end
 
@@ -3102,6 +3112,19 @@ function wad:findLump(namespace, lumpname)
     end
 
     return ""
+end
+
+function wad:setLumpData(namespace, lumpname, data)
+    local namespacedata = self.namespaces[namespace]
+
+    for l = 1, #namespacedata.lumps do
+        local namespacelump = namespacedata.lumps[l]
+
+        if (namespacelump.name == lumpname) then
+            namespacelump.data = data
+            return
+        end
+    end
 end
 
 function wad:findTexture(data, texture, tbl, pos)
