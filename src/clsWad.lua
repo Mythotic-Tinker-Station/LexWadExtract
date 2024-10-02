@@ -1716,6 +1716,18 @@ function wad:processTexturesTXT()
                 self.texturedefines[#self.texturedefines+1] = {}
                 self.texturedefines[#self.texturedefines].name = textureName
 
+                local newname = ""
+                if self.texturecount <= 9999 then
+                    self.texturecount = self.texturecount + 1
+                    newname = string.format("%s%.4d", self.acronym, self.texturecount)
+                else
+                    self.texturecount2 = self.texturecount2 + 1
+                    newname = string.format("%s%s%.4d", self.acronym:sub(1, 3), "Z", self.texturecount2)
+                end
+
+                self.texturedefines[#self.texturedefines].newname = newname
+                words[2] = newname .. ","
+                lines[i] = table.concat(words, " ")
                 utils:printf(2, "\tFound TEXTURES.TXT texture: %s", textureName)
             end
         end
@@ -1944,7 +1956,7 @@ function wad:renameAssets(assets)
                 newname = string.format("%s%.4d", self.acronym, self.texturecount)
             else
                 self.texturecount2 = self.texturecount2 + 1
-                newname = string.format("%s%.4d", "ZZZZ", self.texturecount2)
+                newname = string.format("%s%s%.4d", self.acronym:sub(1, 3), "Z", self.texturecount2)
             end
 
             utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
