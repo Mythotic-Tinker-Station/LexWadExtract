@@ -822,11 +822,10 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Renaming Composites...",               self.renameTextures,        self)
     utils:bench("Renaming Patches...",                  self.renamePatches,         self)
     utils:bench("Renaming Zdoom Textures...",           self.renameZDoomTextures,   self)
-    utils:bench("Renaming TEXTURES.TXT defines...",     self.renameTexturesTXT,     self)
     utils:bench("Renaming Sounds...",                   self.renameSounds,          self)
     utils:bench("Renaming Songs...",                    self.renameSongs,           self)
     utils:bench("Filtering OTEX Assets...",             self.filterOTexAssets,      self)
-    self:setLumpData("SP", "TEXTURES", utils:bench("Processing TEXTURES...",                  self.processTextLump,   self, "TEXTURES"))
+    self:setLumpData("SP", "TEXTURES", utils:bench("Processing TEXTURES...",        self.processTextLump,   self, "TEXTURES"))
     self.animdefs.original = utils:bench("Processing ANIMDEFS...",                  self.processTextLump,   self, "ANIMDEFS")
     utils:bench("Processing Maps...",                   self.processMaps,           self)
     utils:bench("Modifying Maps...",                    self.ModifyMaps,            self)
@@ -1933,15 +1932,6 @@ function wad:renameFlats()
     end
 end
 
-function wad:renameTexturesTXT()
-    if(self.base ~= self) then
-        local texturecount = self:renameAssets(self.texturedefines)
-        utils:printf(1, "\tFound %d TEXTURES.TXT textures.\n", texturecount)
-    else
-        utils:printf(1, "\tNot renaming base wad TEXTURES.TXT textures.\n")
-    end
-end
-
 function wad:renameAssets(assets)
     local assetcount = #assets
 
@@ -2467,24 +2457,28 @@ function wad:ModifyMaps()
                 utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
+                    utils:printf(3, "\t\t\tReplacing composite %s with %s", composite.name, composite.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing flats...")
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
+                    utils:printf(3, "\t\t\tReplacing flat %s with %s", flat.name, flat.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing patches...")
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
+                    utils:printf(3, "\t\t\tReplacing patch %s with %s", patch.name, getPatchName(patch))
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
 
                 utils:printf(2, "\t\tReplacing textures...")
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
+                    utils:printf(3, "\t\t\tReplacing texture %s with %s", texture.name, texture.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
                 end
 
