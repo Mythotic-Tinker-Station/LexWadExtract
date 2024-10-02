@@ -876,14 +876,14 @@ function wad:addExtraMarkers()
 
     -- save all lumps into a table
     for lump = 0, self.header.lumpcount do
-        local lumplistitem = {}
-        lumplist[#lumplist+1] = lumplistitem
-
         local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(lump*16))
-        lumplistitem.filepos = filepos
-        lumplistitem.size = size
-        lumplistitem.name = utils:removePadding(name)
-        lumplistitem.data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
+
+        lumplist[#lumplist+1] = {
+            filepos = filepos,
+            size = size,
+            name = utils:removePadding(name),
+            data = love.data.unpack(string.format("<c%d", size), self.raw, filepos+1)
+        }
     end
     ------------------
     -- specials
@@ -1612,38 +1612,39 @@ function wad:processTexturesX(num)
         for i = 1, #offsets do
             local c = #self.composites+1
 
-            local composite = {}
+            local composite = {
+                name = utils:removePadding(love.data.unpack("<c8", data, offsets[i])),
+                flags = love.data.unpack("<H", data, offsets[i]+8),
+                scalex = love.data.unpack("<B", data, offsets[i]+0x0A),
+                scaley = love.data.unpack("<B", data, offsets[i]+0x0B),
+                width = love.data.unpack("<h", data, offsets[i]+0x0C),
+                height = love.data.unpack("<H", data, offsets[i]+0x0E),
+                unused1 = love.data.unpack("<B", data, offsets[i]+0x10),
+                unused2 = love.data.unpack("<B", data, offsets[i]+0x11),
+                unused3 = love.data.unpack("<B", data, offsets[i]+0x12),
+                unused4 = love.data.unpack("<B", data, offsets[i]+0x13),
+                patchcount = love.data.unpack("<h", data, offsets[i]+0x14),
+                patches = {},
+                dups = {},
+                ignore = false
+            }
             self.composites[c] = composite
 
-            composite.name = utils:removePadding(love.data.unpack("<c8", data, offsets[i]))
-            composite.flags = love.data.unpack("<H", data, offsets[i]+8)
-            composite.scalex = love.data.unpack("<B", data, offsets[i]+0x0A)
-            composite.scaley = love.data.unpack("<B", data, offsets[i]+0x0B)
-            composite.width = love.data.unpack("<h", data, offsets[i]+0x0C)
-            composite.height = love.data.unpack("<H", data, offsets[i]+0x0E)
-            composite.unused1 = love.data.unpack("<B", data, offsets[i]+0x10)
-            composite.unused2 = love.data.unpack("<B", data, offsets[i]+0x11)
-            composite.unused3 = love.data.unpack("<B", data, offsets[i]+0x12)
-            composite.unused4 = love.data.unpack("<B", data, offsets[i]+0x13)
-            composite.patchcount = love.data.unpack("<h", data, offsets[i]+0x14)
-            composite.patches = {}
             composite.canvas = love.graphics.newCanvas(composite.width, composite.height)
-            composite.dups = {}
-            composite.ignore = false
 
             local istexturepatch = composite.patchcount == 1
 
             -- mappatch_t
             love.graphics.setCanvas(composite.canvas)
             for p = 1, composite.patchcount do
-                local compositepatch = {}
+                local compositepatch = {
+                    x = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)),
+                    y = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+2),
+                    patch = self.pnames[love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+4)+1],
+                    stepdir = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+6),
+                    colormap = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+8)
+                }
                 composite.patches[p] = compositepatch
-
-                compositepatch.x = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10))
-                compositepatch.y = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+2)
-                compositepatch.patch = self.pnames[love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+4)+1]
-                compositepatch.stepdir = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+6)
-                compositepatch.colormap = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+8)
 
                 local patchdata = self.patches[compositepatch.patch]
 
@@ -2120,12 +2121,13 @@ function wad:buildAnimdefsForAssets(assets, assettype)
                     utils:printf(2, "\tBuilding Animation: %s %s to %s", assettype, asset.name, animlist.last)
 
                     local a = #self.animdefs.anims + 1
-                    local anim = {}
+                    local anim = {
+                        text1 = asset.newname,
+                        typ = animlist.typ,
+                        decal = animlist.flags
+                    }
 
                     self.animdefs.anims[a] = anim
-                    anim.text1 = asset.newname
-                    anim.typ = animlist.typ
-                    anim.decal = animlist.flags
 
                     for ast2 = 1, #assets do
                         local asset2 = assets[ast2]
@@ -2153,10 +2155,9 @@ function wad:buildSwitchesForAssets(assets, assettype)
                     utils:printf(2, "\tBuilding Switch From %s: %s to %s", assettype, asset.name, switchlist.on)
 
                     local s = #self.animdefs.switches + 1
-                    local switch = {}
+                    local switch = {text1 = asset.newname}
 
                     self.animdefs.switches[s] = switch
-                    switch.text1 = asset.newname
 
                     for a2 = 1, #assets do
                         local asset2 = assets[a2]
@@ -2188,14 +2189,13 @@ function wad:processMaps()
                 for s = 1, #map.raw.things, 10 do
                     count = count + 1
 
-                    local thing = {}
-                    map.things[count] = thing
-
-                    thing.x = love.data.unpack("<h", map.raw.things, s)
-                    thing.y = love.data.unpack("<h", map.raw.things, s+2)
-                    thing.angle = love.data.unpack("<H", map.raw.things, s+4)
-                    thing.typ = love.data.unpack("<H", map.raw.things, s+6)
-                    thing.flags = love.data.unpack("<H", map.raw.things, s+8)
+                    map.things[count] = {
+                        x = love.data.unpack("<h", map.raw.things, s),
+                        y = love.data.unpack("<h", map.raw.things, s+2),
+                        angle = love.data.unpack("<H", map.raw.things, s+4),
+                        typ = love.data.unpack("<H", map.raw.things, s+6),
+                        flags = love.data.unpack("<H", map.raw.things, s+8)
+                    }
                 end
 
                 -- linedefs
@@ -2204,16 +2204,15 @@ function wad:processMaps()
                 for s = 1, #map.raw.linedefs, 14 do
                     count = count + 1
 
-                    local linedef = {}
-                    map.linedefs[count] = linedef
-
-                    linedef.vertex_start = love.data.unpack("<H", map.raw.linedefs, s)
-                    linedef.vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2)
-                    linedef.flags = love.data.unpack("<H", map.raw.linedefs, s+4)
-                    linedef.line_type = love.data.unpack("<H", map.raw.linedefs, s+6)
-                    linedef.sector_tag = love.data.unpack("<H", map.raw.linedefs, s+8)
-                    linedef.sidedef_right =love.data.unpack("<H", map.raw.linedefs, s+10)
-                    linedef.sidedef_left = love.data.unpack("<H", map.raw.linedefs, s+12)
+                    map.linedefs[count] = {
+                        vertex_start = love.data.unpack("<H", map.raw.linedefs, s),
+                        vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2),
+                        flags = love.data.unpack("<H", map.raw.linedefs, s+4),
+                        line_type = love.data.unpack("<H", map.raw.linedefs, s+6),
+                        sector_tag = love.data.unpack("<H", map.raw.linedefs, s+8),
+                        sidedef_right = love.data.unpack("<H", map.raw.linedefs, s+10),
+                        sidedef_left = love.data.unpack("<H", map.raw.linedefs, s+12)
+                    }
                 end
 
                 self:processCommonMapData(map)
@@ -2222,27 +2221,25 @@ function wad:processMaps()
             elseif(map.format == "HM") then
 
                 -- things
-                map.things = {}
                 local count = 0
                 for s = 1, #map.raw.things, 20 do
                     count = count + 1
 
-                    local thing = {}
-                    map.things[count] = thing
-
-                    thing.id = love.data.unpack("<H", map.raw.things, s)
-                    thing.x = love.data.unpack("<h", map.raw.things, s+2)
-                    thing.y = love.data.unpack("<h", map.raw.things, s+4)
-                    thing.z = love.data.unpack("<h", map.raw.things, s+6)
-                    thing.angle = love.data.unpack("<H", map.raw.things, s+8)
-                    thing.typ = love.data.unpack("<H", map.raw.things, s+10)
-                    thing.flags = love.data.unpack("<H", map.raw.things, s+12)
-                    thing.special = love.data.unpack("<B", map.raw.things, s+14)
-                    thing.a1 = love.data.unpack("<B", map.raw.things, s+15)
-                    thing.a2 = love.data.unpack("<B", map.raw.things, s+16)
-                    thing.a3 = love.data.unpack("<B", map.raw.things, s+17)
-                    thing.a4 = love.data.unpack("<B", map.raw.things, s+18)
-                    thing.a5 = love.data.unpack("<B", map.raw.things, s+19)
+                    map.things[count] = {
+                        id = love.data.unpack("<H", map.raw.things, s),
+                        x = love.data.unpack("<h", map.raw.things, s+2),
+                        y = love.data.unpack("<h", map.raw.things, s+4),
+                        z = love.data.unpack("<h", map.raw.things, s+6),
+                        angle = love.data.unpack("<H", map.raw.things, s+8),
+                        typ = love.data.unpack("<H", map.raw.things, s+10),
+                        flags = love.data.unpack("<H", map.raw.things, s+12),
+                        special = love.data.unpack("<B", map.raw.things, s+14),
+                        a1 = love.data.unpack("<B", map.raw.things, s+15),
+                        a2 = love.data.unpack("<B", map.raw.things, s+16),
+                        a3 = love.data.unpack("<B", map.raw.things, s+17),
+                        a4 = love.data.unpack("<B", map.raw.things, s+18),
+                        a5 = love.data.unpack("<B", map.raw.things, s+19)
+                    }
                 end
 
                 -- linedefs
@@ -2251,20 +2248,19 @@ function wad:processMaps()
                 for s = 1, #map.raw.linedefs, 16 do
                     count = count + 1
 
-                    local linedef = {}
-                    map.linedefs[count] = linedef
-
-                    linedef.vertex_start = love.data.unpack("<H", map.raw.linedefs, s)
-                    linedef.vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2)
-                    linedef.flags = love.data.unpack("<H", map.raw.linedefs, s+4)
-                    linedef.special = love.data.unpack("<B", map.raw.linedefs, s+6)
-                    linedef.a1 = love.data.unpack("<B", map.raw.linedefs, s+7)
-                    linedef.a2 = love.data.unpack("<B", map.raw.linedefs, s+8)
-                    linedef.a3 = love.data.unpack("<B", map.raw.linedefs, s+9)
-                    linedef.a4 = love.data.unpack("<B", map.raw.linedefs, s+10)
-                    linedef.a5 = love.data.unpack("<B", map.raw.linedefs, s+11)
-                    linedef.front_sidedef = love.data.unpack("<B", map.raw.linedefs, s+12)
-                    linedef.back_sidedef = love.data.unpack("<B", map.raw.linedefs, s+14)
+                    map.linedefs[count] = {
+                        vertex_start = love.data.unpack("<H", map.raw.linedefs, s),
+                        vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2),
+                        flags = love.data.unpack("<H", map.raw.linedefs, s+4),
+                        special = love.data.unpack("<B", map.raw.linedefs, s+6),
+                        a1 = love.data.unpack("<B", map.raw.linedefs, s+7),
+                        a2 = love.data.unpack("<B", map.raw.linedefs, s+8),
+                        a3 = love.data.unpack("<B", map.raw.linedefs, s+9),
+                        a4 = love.data.unpack("<B", map.raw.linedefs, s+10),
+                        a5 = love.data.unpack("<B", map.raw.linedefs, s+11),
+                        front_sidedef = love.data.unpack("<B", map.raw.linedefs, s+12),
+                        back_sidedef = love.data.unpack("<B", map.raw.linedefs, s+14)
+                    }
                 end
 
                 self:processCommonMapData(map)
@@ -2282,15 +2278,14 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.sidedefs, 30 do
         count = count + 1
 
-        local sidedef = {}
-        map.sidedefs[count] = sidedef
-
-        sidedef.xoffset = love.data.unpack("<h", map.raw.sidedefs, s)
-        sidedef.yoffset = love.data.unpack("<h", map.raw.sidedefs, s+2)
-        sidedef.upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4)))
-        sidedef.lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+12)))
-        sidedef.middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20)))
-        sidedef.sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
+        map.sidedefs[count] = {
+            xoffset = love.data.unpack("<h", map.raw.sidedefs, s),
+            yoffset = love.data.unpack("<h", map.raw.sidedefs, s+2),
+            upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4))),
+            lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+12))),
+            middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20))),
+            sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
+        }
     end
 
     -- vertexes
@@ -2299,11 +2294,10 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.vertexes, 4 do
         count = count + 1
 
-        local vertex = {}
-        map.vertexes[count] = vertex
-
-        vertex.x = love.data.unpack("<h", map.raw.vertexes, s)
-        vertex.y = love.data.unpack("<h", map.raw.vertexes, s+2)
+        map.vertexes[count] = {
+            x = love.data.unpack("<h", map.raw.vertexes, s),
+            y = love.data.unpack("<h", map.raw.vertexes, s+2)
+        }
     end
 
     -- sectors
@@ -2312,16 +2306,15 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.sectors, 26 do
         count = count + 1
 
-        local sector = {}
-        map.sectors[count] = sector
-
-        sector.floor_height = love.data.unpack("<h", map.raw.sectors, s)
-        sector.ceiling_height = love.data.unpack("<h", map.raw.sectors, s+2)
-        sector.floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4)))
-        sector.ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+12)))
-        sector.light = love.data.unpack("<h", map.raw.sectors, s+20)
-        sector.special = love.data.unpack("<H", map.raw.sectors, s+22)
-        sector.tag = love.data.unpack("<H", map.raw.sectors, s+24)
+        map.sectors[count] = {
+            floor_height = love.data.unpack("<h", map.raw.sectors, s),
+            ceiling_height = love.data.unpack("<h", map.raw.sectors, s+2),
+            floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4))),
+            ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+12))),
+            light = love.data.unpack("<h", map.raw.sectors, s+20),
+            special = love.data.unpack("<H", map.raw.sectors, s+22),
+            tag = love.data.unpack("<H", map.raw.sectors, s+24)
+        }
     end
 end
 
