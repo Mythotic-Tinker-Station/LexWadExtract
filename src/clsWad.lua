@@ -2513,7 +2513,6 @@ function wad:ModifyMaps()
                 end
 
                 -- This is specificly for fixing Dark Encounters maps.
-                --[[
                 local lines = {}
                 local inLinedef = false
                 local inSpecial = false
@@ -2550,7 +2549,6 @@ function wad:ModifyMaps()
                     table.insert(lines, line)
                 end
                 map.raw.textmap = table.concat(lines, "\n")
-                ]]
             end
         end
     else
