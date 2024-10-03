@@ -1711,7 +1711,7 @@ function wad:processTexturesTXT()
                 end
 
                 -- Get the texture name
-                local textureName = words[2]:sub(1, -1)
+                local textureName = words[2]:sub(1, -2)
                 self.texturedefines[#self.texturedefines+1] = {}
                 self.texturedefines[#self.texturedefines].name = textureName
 
@@ -2075,18 +2075,27 @@ function wad:processTextLump(name)
 
     -- if file exists
     if (data ~= "") then
+
         for p = 1, #self.patches do
             local patch = self.patches[p]
             data = data:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
         end
+
         for c = 1, #self.composites do
             local composite = self.composites[c]
             data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
         end
+
         for f = 1, #self.flats do
             local flat = self.flats[f]
             data = data:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
         end
+
+        for z = 1, #self.zdoomtextures do
+            local zdoomtexture = self.zdoomtextures[z]
+            data = data:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname)
+        end
+
         for t = 1, #self.texturedefines do
             local texture = self.texturedefines[t]
             data = data:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
@@ -2329,7 +2338,7 @@ function wad:ModifyMaps()
         for m = 1, #self.maps do
             local map = self.maps[m]
 
-            utils:printf(1, "\tModifying Map: %d", m)
+            utils:printf(1, "\tModifying Map: %s", map.name)
 
             local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "r")
             actorlist:read("*line")
@@ -2383,6 +2392,20 @@ function wad:ModifyMaps()
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
                     self:replaceMapTextures(map, patch, getPatchName(patch))
+                end
+
+                -- find zdoom textures and rename
+                utils:printf(2, "\t\tReplacing zdoom textures....")
+                for z = 1, #self.zdoomtextures do
+                    local zdoomtexture = self.zdoomtextures[z]
+                    self:replaceMapTextures(map, zdoomtexture, zdoomtexture.newname)
+                end
+
+                -- find textures.txt textures and rename
+                utils:printf(2, "\t\tReplacing textures.txt textures....")
+                for t = 1, #self.texturedefines do
+                    local texture = self.texturedefines[t]
+                    self:replaceMapTextures(map, texture, texture.newname)
                 end
 
                 -- build raw things back
@@ -2475,20 +2498,27 @@ function wad:ModifyMaps()
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
 
-                utils:printf(2, "\t\tReplacing textures...")
+                utils:printf(2, "\t\tReplacing zdoom textures...")
+                for z = 1, #self.zdoomtextures do
+                    local zdoomtexture = self.zdoomtextures[z]
+                    utils:printf(3, "\t\t\tReplacing zdoom texture %s with %s", zdoomtexture.name, zdoomtexture.newname)
+                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname)
+                end
+
+                utils:printf(2, "\t\tReplacing textures.txt textures...")
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
-                    utils:printf(3, "\t\t\tReplacing texture %s with %s", texture.name, texture.newname)
+                    utils:printf(3, "\t\t\tReplacing textures.txt texture %s with %s", texture.name, texture.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
                 end
 
-                --[[
                 -- This is specificly for fixing Dark Encounters maps.
+                --[[
                 local lines = {}
                 local inLinedef = false
                 local inSpecial = false
                 local inArg1 = false
-
+                local special = 0
                 for line in map.raw.textmap:gmatch("[^\r\n]+") do
                     if line:find("linedef") or line:find("sector") then
                         inLinedef = true
@@ -2502,17 +2532,12 @@ function wad:ModifyMaps()
                                 line:find("special = 83;") or
                                 line:find("special = 84;") or
                                 line:find("special = 85;") or
-                                line:find("special = 226;") or
-                                line:find("special = -39;") or
-                                line:find("special = -40;") or
-                                line:find("special = -41;") or
-                                line:find("special = -42;") or
-                                line:find("special = -43;") or
-                                line:find("special = -44;") or
-                                line:find("special = -45;") then
+                                line:find("special = 226;") then
                                 inArg1 = true
+                                special = line:match("special = (%d+);")
                             elseif inArg1 then
                                 if line:find("arg1") then
+                                    utils:printf(3, "\t\t\t\tReplacing '" .. line .. "' with 0; special = " .. tostring(special))
                                     line = "arg1 = 0;"
                                     inArg1 = false
                                 end
@@ -2522,8 +2547,9 @@ function wad:ModifyMaps()
                             end
                         end
                     end
-
                     table.insert(lines, line)
+                end
+                map.raw.textmap = table.concat(lines, "\n")
                 ]]
             end
         end
