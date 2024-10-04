@@ -763,22 +763,22 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
         if (#acronym < 4) then
             error("Error: Acronym must be 4 letters.")
         end
-        self.acronym = string.upper(acronym:sub(1, 4))
+        self.acronym = acronym:sub(1, 4):upper()
     end
 
     if (acronym_sprite ~= nil) then
         if (#acronym_sprite < 2) then
             error("Error: Sprite acronym must be 2 letters.")
         end
-        self.acronym_sprite = string.upper(acronym_sprite:sub(1, 2))
+        self.acronym_sprite = acronym_sprite:sub(1, 2):upper()
     end
 
     if (things ~= nil) then
-        self.things = string.upper(things:sub(1, 1))
+        self.things = things:sub(1, 1):upper()
     end
 
     if (patches ~= nil) then
-        self.extractpatches = string.upper(patches)
+        self.extractpatches = patches:upper()
     end
 
     self.pk3path = pk3path
@@ -1266,7 +1266,7 @@ function wad:buildNamespaces()
 
         -- get file meta data
         local filepos, size, name = love.data.unpack("<i4i4c8", self.raw, self.header.dirpos+(l*16))
-        name = string.upper(utils:removePadding(name))
+        name = utils:removePadding(name):upper()
         filepos = filepos+1
 
         -- get file data
@@ -2296,9 +2296,9 @@ function wad:processCommonMapData(map)
         map.sidedefs[count] = {
             xoffset = love.data.unpack("<h", map.raw.sidedefs, s),
             yoffset = love.data.unpack("<h", map.raw.sidedefs, s+2),
-            upper_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4))),
-            lower_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+12))),
-            middle_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20))),
+            upper_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4)):upper(),
+            lower_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+12)):upper(),
+            middle_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20)):upper(),
             sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
         }
     end
@@ -2324,8 +2324,8 @@ function wad:processCommonMapData(map)
         map.sectors[count] = {
             floor_height = love.data.unpack("<h", map.raw.sectors, s),
             ceiling_height = love.data.unpack("<h", map.raw.sectors, s+2),
-            floor_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4))),
-            ceiling_texture = string.upper(utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+12))),
+            floor_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4)):upper(),
+            ceiling_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+12)):upper(),
             light = love.data.unpack("<h", map.raw.sectors, s+20),
             special = love.data.unpack("<H", map.raw.sectors, s+22),
             tag = love.data.unpack("<H", map.raw.sectors, s+24)
@@ -2334,35 +2334,34 @@ function wad:processCommonMapData(map)
 end
 
 function wad:ModifyMaps()
-    if(self.base ~= self) then
+    if (self.base ~= self) then
         for m = 1, #self.maps do
             local map = self.maps[m]
 
             utils:printf(1, "\tModifying Map: %s", map.name)
 
-            local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "r")
-            actorlist:read("*line")
-            actorlist:read("*line")
-            actorlist:read("*line")
-            local line = actorlist:read("*line")
-
             -- doom/hexen
-            if(map.format == "DM" or map.format == "HM") then
-
+            if (map.format == "DM" or map.format == "HM") then
                 -- thing replacement
-                if(self.things == "Y") then
+                if (self.things == "Y") then
+                    local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "r")
+                    actorlist:read("*line")
+                    actorlist:read("*line")
+                    actorlist:read("*line")
+                    local line = actorlist:read("*line")
+
                     utils:printf(2, "\t\tReplacing actors....")
                     while line ~= nil do
 
                         -- actor replacement stuff
-                        local actornewspace = string.find(line, " ")
-                        local actor1 = string.sub(line, 1, actornewspace)
-                        local actor2 = string.sub(line, actornewspace+1)
+                        local actornewspace = line:find(" ")
+                        local actor1 = line:sub(1, actornewspace)
+                        local actor2 = line:sub(actornewspace+1)
                         actor1 = actor1 + 0
                         actor2 = actor2 + 0
                         for t = 1, #map.things do
                             local thing = map.things[t]
-                            if(thing.typ == actor1) then
+                            if (thing.typ == actor1) then
                                 utils:printf(3, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, thing.x, thing.y, thing.angle, thing.flags, actor1, actor2)
                                 thing.typ = actor2
                             end
@@ -2663,7 +2662,7 @@ function wad:extractComposites()
                 if (composite.patchcount > 1) then
                     texturesb:append(self:createTextureDefinition(composite))
                 else
-                    local png = utils:openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, string.lower(composite.newname)), "w+b")
+                    local png = utils:openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, composite.newname:lower()), "w+b")
                     png:write(composite.raw)
                     png:close()
                 end
@@ -2680,7 +2679,7 @@ function wad:extractComposites()
     end
 end
 
--- Creates a WallTexture definition for TEXTURES
+-- Creates a Texture definition for TEXTURES
 function wad:createTextureDefinition(composite)
     local texturedefsb = stringbuilder()
     texturedefsb:append(string.format("Texture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height))
@@ -2802,7 +2801,7 @@ function wad:extractZDoomTextures()
 end
 
 function wad:extractAsset(dirname, assetname, assetimagedata)
-    local png = utils:openFile(string.format("%s/%s/%s/%s.png", self.pk3path, dirname, self.acronym, string.lower(assetname)), "w+b")
+    local png = utils:openFile(string.format("%s/%s/%s/%s.png", self.pk3path, dirname, self.acronym, assetname:lower()), "w+b")
     png:write(assetimagedata)
     png:close()
 end
@@ -2902,7 +2901,7 @@ function wad:extractMaps()
                 if(map.raw.scripts)     then dirsb:append(love.data.pack("string", "<i4i4c8", pos[index]+12, #order[index], "SCRIPTS"))      index = index + 1 end
                 dirsb:append(love.data.pack("string", "<i4i4c8", pos[#order]+12, 0, "ENDMAP"))
 
-                local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, string.lower(map.name)), "w+b")
+                local wad = utils:openFile(string.format("%s/maps/%s.wad", self.pk3path, map.name:lower()), "w+b")
                 wad:write(header)
                 wad:write(lumpchunk)
                 wad:write(dirsb:toString())
@@ -2925,8 +2924,8 @@ function wad:extractAnimdefs()
             utils:printf(2, "\t\t%s %s range %s tics 8", anim.typ, anim.text1, anim.text2)
             animsb:append(string.format("%s %s range %s tics 8", anim.typ, anim.text1, anim.text2))
 
-            texNumMin = string.sub(anim.text1, 5, 8)
-            texNumMax = string.sub(anim.text2, 5, 8)
+            texNumMin = anim.text1:sub(5, 8)
+            texNumMax = anim.text2:sub(5, 8)
 
             for i = tonumber(texNumMin), tonumber(texNumMax) do
                 lumpNameSb:append(self.acronym)
@@ -3016,7 +3015,7 @@ function wad:extractSounds()
             for s = 1, #sounditems do
                 local sounditem = sounditems[s]
 
-                local snd = utils:openFile(string.format("%s/sounds/%s/%s.%s", self.pk3path, self.acronym, string.lower(sounditem.newname), fileextension), "w+b")
+                local snd = utils:openFile(string.format("%s/sounds/%s/%s.%s", self.pk3path, self.acronym, sounditem.newname:lower(), fileextension), "w+b")
                 snd:write(sounditem.data)
                 snd:close()
             end
@@ -3082,19 +3081,19 @@ function wad:extractTexturesLump()
 end
 
 function wad:extractMapinfo()
-    if(self.base ~= self) then
-
+    if (self.base ~= self) then
         local file = utils:openFile(string.format("%s/mapinfo/%s.txt", self.pk3path, self.acronym), "w")
         file:write(self.mapinfo)
         file:close()
 
-        file = utils:openFile(string.format("%s/mapinfo.txt", self.pk3path), "r")
+        local mapinfopath = string.format("%s/mapinfo.txt", self.pk3path)
+        file = utils:openFile(mapinfopath, "r")
         local mapinfo = file:read("*all")
         file:close()
 
         mapinfo = string.format('%s\ninclude "mapinfo/%s.txt"', mapinfo, self.acronym)
 
-        file = utils:openFile(string.format("%s/mapinfo.txt", self.pk3path), "w")
+        file = utils:openFile(mapinfopath, "w")
         file:write(mapinfo)
         file:close()
     else

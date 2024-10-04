@@ -62,7 +62,7 @@ function utils:crc(data)
     sum = 65535
     local d
     for i = 1, #data do
-        d = string.byte(data, i)    -- get i-th element, like data[i] in C
+        d = data:byte(i)    -- get i-th element, like data[i] in C
         sum = bit.bxor(sum, d)
         for i = 0, 7 do     -- lua for loop includes upper bound, so 7, not 8
             if (bit.band(sum, 1) == 0) then
