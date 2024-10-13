@@ -1631,7 +1631,7 @@ function wad:processTexturesX(num)
 
             composite.canvas = love.graphics.newCanvas(composite.width, composite.height)
 
-            local istexturepatch = composite.patchcount == 1
+            local hasonepatch = composite.patchcount == 1
 
             -- mappatch_t
             love.graphics.setCanvas(composite.canvas)
@@ -1653,7 +1653,7 @@ function wad:processTexturesX(num)
                     patchdata = self.base.patches[compositepatch.patch]
 
                     if (patchdata ~= nil) then
-                        if (istexturepatch and patchdata.composite == nil) then
+                        if (hasonepatch and patchdata.composite == nil and isCompositeSameAsPatch(composite, compositepatch, patchdata)) then
                             patchdata.composite = composite
                         end
 
@@ -1666,7 +1666,7 @@ function wad:processTexturesX(num)
                         --love.graphics.draw(self.flats[compositepatch.patch].image, compositepatch.x, compositepatch.y)
                     end
                 else
-                    if (istexturepatch and patchdata.composite == nil) then
+                    if (hasonepatch and patchdata.composite == nil and isCompositeSameAsPatch(composite, compositepatch, patchdata)) then
                         patchdata.composite = composite
                     end
 
@@ -1686,6 +1686,10 @@ function wad:processTexturesX(num)
         --self.composites = self.base.composites
         --utils:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
     end
+end
+
+function isCompositeSameAsPatch(composite, compositepatch, patch)
+    return compositepatch.x == 0 and compositepatch.y == 0 and composite.width == patch.width and composite.height == patch.height
 end
 
 function wad:processTexturesTXT()
@@ -1830,7 +1834,7 @@ function wad:filterDuplicates()
             for c2 = c, compositecount do
                 if (c ~= c2) then
                     local composite2 = self.composites[c2]
-                    
+
                     local ignore = false
                     for i = 1, #self.ignorelist_dups do
                         if (composite2.name == self.ignorelist_dups[i]) then
@@ -2475,7 +2479,7 @@ function wad:ModifyMaps()
                     end
                 end
                 ]]
-                
+
                 utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
@@ -2525,7 +2529,7 @@ function wad:ModifyMaps()
                         if line:find("{") then
                             inSpecial = true
                         elseif inSpecial then
-                            if  line:find("special = 80;") or 
+                            if  line:find("special = 80;") or
                                 line:find("special = 81;") or
                                 line:find("special = 82;") or
                                 line:find("special = 83;") or
@@ -2641,8 +2645,20 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 end
 
 function wad:extractComposites()
-    if(self.base ~= self) then
+    if (self.base ~= self) then
         local texturesb = stringbuilder()
+
+        local function isCompositeDifferentFromPatches(composite)
+            if (composite.patchcount > 1) then
+                return true
+            end
+
+            local compositepatch = composite.patches[1]
+            local patchdata = self.patches[compositepatch.patch] or self.base.patches[compositepatch.patch]
+
+            return not isCompositeSameAsPatch(composite, compositepatch, patchdata)
+        end
+
         for c = 1, #self.composites do
             local composite = self.composites[c]
 
@@ -2650,7 +2666,7 @@ function wad:extractComposites()
                 if (not composite.ignore) then
                     utils:printf(2, "\tExtracting Composite: %s", composite.newname)
 
-                    if (composite.patchcount > 1) then
+                    if (isCompositeDifferentFromPatches(composite)) then
                         texturesb:append(self:createTextureDefinition(composite))
                     else
                         self:extractAsset("textures", composite.newname, composite.png)
@@ -2659,7 +2675,7 @@ function wad:extractComposites()
             else
                 utils:printf(2, "\tExtracting Texture: %s", composite.newname)
 
-                if (composite.patchcount > 1) then
+                if (isCompositeDifferentFromPatches(composite)) then
                     texturesb:append(self:createTextureDefinition(composite))
                 else
                     local png = utils:openFile(string.format("%s/textures/%s/%s.raw", self.pk3path, self.acronym, composite.newname:lower()), "w+b")
