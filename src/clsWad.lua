@@ -310,28 +310,28 @@ local wad = class("wad",
 
     animlist =
     {
-        {typ = "flat",    first = "BLOOD1",   last = "BLOOD3"},
-        {typ = "flat",    first = "FWATER1",  last = "FWATER4"},
-        {typ = "flat",    first = "LAVA1",    last = "LAVA4"},
-        {typ = "flat",    first = "NUKAGE1",  last = "NUKAGE3"},
-        {typ = "flat",    first = "RROCK05",  last = "RROCK08"},
-        {typ = "flat",    first = "SLIME01",  last = "SLIME04"},
-        {typ = "flat",    first = "SLIME05",  last = "SLIME08"},
-        {typ = "flat",    first = "SLIME09",  last = "SLIME12"},
-        {typ = "flat",    first = "SWATER1",  last = "SWATER4"},
-        {typ = "texture", first = "BFALL1",   last = "BFALL4"},
-        {typ = "texture", first = "BLODGR1",  last = "BLODGR4",  flags = "allowdecals"},
-        {typ = "texture", first = "BLODRIP1", last = "BLODRIP4", flags = "allowdecals"},
-        {typ = "texture", first = "DBRAIN1",  last = "DBRAIN4"},
-        {typ = "texture", first = "FIREBLU1", last = "FIREBLU2"},
-        {typ = "texture", first = "FIRELAV3", last = "FIRELAVA"},
-        {typ = "texture", first = "FIREMAG1", last = "FIREMAG3"},
-        {typ = "texture", first = "FIREWALA", last = "FIREWALL"},
-        {typ = "texture", first = "GSTFONT1", last = "GSTFONT3", flags = "allowdecals"},
-        {typ = "texture", first = "ROCKRED1", last = "ROCKRED3", flags = "allowdecals"},
-        {typ = "texture", first = "SFALL1",   last = "SFALL4"},
-        {typ = "texture", first = "SLADRIP1", last = "SLADRIP3", flags = "allowdecals"},
-        {typ = "texture", first = "WFALL1",   last = "WFALL4"}
+        {typ = "flat",    first = "BLOOD1",   last = "BLOOD3",   speed = 8},
+        {typ = "flat",    first = "FWATER1",  last = "FWATER4",  speed = 8},
+        {typ = "flat",    first = "LAVA1",    last = "LAVA4",    speed = 8},
+        {typ = "flat",    first = "NUKAGE1",  last = "NUKAGE3",  speed = 8},
+        {typ = "flat",    first = "RROCK05",  last = "RROCK08",  speed = 8},
+        {typ = "flat",    first = "SLIME01",  last = "SLIME04",  speed = 8},
+        {typ = "flat",    first = "SLIME05",  last = "SLIME08",  speed = 8},
+        {typ = "flat",    first = "SLIME09",  last = "SLIME12",  speed = 8},
+        {typ = "flat",    first = "SWATER1",  last = "SWATER4",  speed = 8},
+        {typ = "texture", first = "BFALL1",   last = "BFALL4",   speed = 8},
+        {typ = "texture", first = "BLODGR1",  last = "BLODGR4",  speed = 8, flags = "allowdecals"},
+        {typ = "texture", first = "BLODRIP1", last = "BLODRIP4", speed = 8, flags = "allowdecals"},
+        {typ = "texture", first = "DBRAIN1",  last = "DBRAIN4",  speed = 8},
+        {typ = "texture", first = "FIREBLU1", last = "FIREBLU2", speed = 8},
+        {typ = "texture", first = "FIRELAV3", last = "FIRELAVA", speed = 8},
+        {typ = "texture", first = "FIREMAG1", last = "FIREMAG3", speed = 8},
+        {typ = "texture", first = "FIREWALA", last = "FIREWALL", speed = 8},
+        {typ = "texture", first = "GSTFONT1", last = "GSTFONT3", speed = 8, flags = "allowdecals"},
+        {typ = "texture", first = "ROCKRED1", last = "ROCKRED3", speed = 8, flags = "allowdecals"},
+        {typ = "texture", first = "SFALL1",   last = "SFALL4",   speed = 8},
+        {typ = "texture", first = "SLADRIP1", last = "SLADRIP3", speed = 8, flags = "allowdecals"},
+        {typ = "texture", first = "WFALL1",   last = "WFALL4",   speed = 8}
     },
 
     music_list =
@@ -1757,7 +1757,7 @@ function wad:processAnimated()
             for d = 1, #self.animlist do
                 local anim = self.animlist[d]
 
-                if (anim.first == first and anim.last == last) then
+                if (anim.first == first and anim.last == last and anim.speed == speed) then
                     utils:printf(2, "\tFound Duplicate ANIMATED define: %s %s to %s with speed %s", t, first, last, speed)
                     isdup = true
                     break
@@ -1765,7 +1765,7 @@ function wad:processAnimated()
             end
 
             if (isdup == false) then
-                local newanim = {first = first, last = last}
+                local newanim = {first = first, last = last, speed = speed}
 
                 if (t == 0) then newanim.typ = "flat"
                 elseif (t == 1) then newanim.typ = "texture" end
@@ -2137,12 +2137,13 @@ function wad:buildAnimdefsForAssets(assets, assettype)
                 local animlist = self.animlist[al]
 
                 if (animlist.first == asset.name and animlist.typ == assettype) then
-                    utils:printf(2, "\tBuilding Animation: %s %s to %s", assettype, asset.name, animlist.last)
+                    utils:printf(2, "\tBuilding Animation: %s %s to %s, %u tics", assettype, asset.name, animlist.last, animlist.speed)
 
                     local a = #self.animdefs.anims + 1
                     local anim = {
                         text1 = asset.newname,
                         typ = animlist.typ,
+                        speed = animlist.speed,
                         decal = animlist.flags
                     }
 
@@ -2936,9 +2937,10 @@ function wad:extractAnimdefs()
 
         for a = 1, #self.animdefs.anims do
             local anim = self.animdefs.anims[a]
+            local animline = string.format("%s %s range %s tics %u", anim.typ, anim.text1, anim.text2, anim.speed)
 
-            utils:printf(2, "\t\t%s %s range %s tics 8", anim.typ, anim.text1, anim.text2)
-            animsb:append(string.format("%s %s range %s tics 8", anim.typ, anim.text1, anim.text2))
+            utils:printf(2, "\t\t%s", animline)
+            animsb:append(animline)
 
             texNumMin = anim.text1:sub(5, 8)
             texNumMax = anim.text2:sub(5, 8)
@@ -2972,9 +2974,10 @@ function wad:extractAnimdefs()
         local switchsb = stringbuilder()
         for s = 1, #self.animdefs.switches do
             local switch = self.animdefs.switches[s]
+            local switchline = string.format("switch %s on pic %s tics 0\n", switch.text1, switch.text2)
 
-            utils:printf(2, "\t\tswitch %s on pic %s tics 0", switch.text1, switch.text2)
-            switchsb:append(string.format("switch %s on pic %s tics 0\n", switch.text1, switch.text2))
+            utils:printf(2, "\t\t%s", switchline)
+            switchsb:append(switchline)
 
             animdefsIgnore[switch.text1] = "not nil";
             animdefsIgnore[switch.text2] = "not nil";
