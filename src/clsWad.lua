@@ -80,8 +80,7 @@ local wad = class("wad",
     things = "N",
     acronym = "DOOM",
     acronym_sprite = "XX",
-    base = false,
-    extractpatches = false;
+    base = false;
 
     lumps = {},
     header = {},
@@ -777,10 +776,6 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
         self.things = things:sub(1, 1):upper()
     end
 
-    if (patches ~= nil) then
-        self.extractpatches = patches:upper()
-    end
-
     self.pk3path = pk3path
     self.toolspath = toolspath
     self.spritesname = sprites
@@ -830,6 +825,7 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Processing Maps...",                   self.processMaps,           self)
     utils:bench("Modifying Maps...",                    self.ModifyMaps,            self)
     utils:bench("Building ANIMDEFS for Doom/Boom...",   self.buildAnimdefs,         self)
+    utils:bench("Extracting ANIMDEFS...",               self.extractAnimdefs,       self)
     utils:bench("Extracting Graphics...",               self.extractGraphics,       self)
     utils:bench("Extracting Patches...",                self.extractPatches,        self)
     utils:bench("Extracting Flats...",                  self.extractFlats,          self)
@@ -839,7 +835,6 @@ function wad:init(path, palette, acronym, patches, base, pk3path, toolspath, spr
     utils:bench("Extracting Maps...",                   self.extractMaps,           self)
     utils:bench("Extracting Sounds...",                 self.extractSounds,         self)
     utils:bench("Extracting Songs...",                  self.extractSongs,          self)
-    utils:bench("Extracting ANIMDEFS...",               self.extractAnimdefs,       self)
     utils:bench("Extracting TEXTURES...",               self.extractTexturesLump,   self)
     utils:bench("Extracting SNDINFO...",                self.extractSNDINFO,        self)
     utils:bench("Removing Unused Textures...",          self.removeUnusedTextures,  self)
@@ -2132,8 +2127,8 @@ function wad:buildAnimdefsForAssets(assets, assettype)
     for ast = 1, #assets do
         local asset = assets[ast]
 
-        for al = 1, #self.animlist do
-            if (not asset.ignore) then
+        if (not asset.ignore and asset.used) then
+            for al = 1, #self.animlist do
                 local animlist = self.animlist[al]
 
                 if (animlist.first == asset.name and animlist.typ == assettype) then
@@ -2167,7 +2162,7 @@ function wad:buildSwitchesForAssets(assets, assettype)
     for a = 1, #assets do
         local asset = assets[a]
 
-        if (not asset.ignore) then
+        if (not asset.ignore and asset.used) then
             for sl = 1, #self.switchlist do
                 local switchlist = self.switchlist[sl]
 
@@ -2662,9 +2657,10 @@ function wad:extractComposites()
 
         for c = 1, #self.composites do
             local composite = self.composites[c]
+            local isComponentUsed = not isAssetUnused(composite)
 
             if (not composite.iszdoom) then
-                if (not composite.ignore) then
+                if (not composite.ignore and isComponentUsed) then
                     utils:printf(2, "\tExtracting Composite: %s", composite.newname)
 
                     if (isCompositeDifferentFromPatches(composite)) then
@@ -2673,7 +2669,7 @@ function wad:extractComposites()
                         self:extractAsset("textures", composite.newname, composite.png)
                     end
                 end
-            else
+            elseif (isComponentUsed) then
                 utils:printf(2, "\tExtracting Texture: %s", composite.newname)
 
                 if (isCompositeDifferentFromPatches(composite)) then
@@ -3127,7 +3123,7 @@ function wad:removeUnusedTextures()
         for a = 1, #assets do
             local asset = assets[a]
 
-            if (not asset.used and animdefsIgnore[asset.newname] == nil) then
+            if (isAssetUnused(asset)) then
                 count = count + 1
                 os.remove(string.format("%s/%s/%s.png", self.pk3path, dirname, asset.newname))
             end
@@ -3149,6 +3145,10 @@ end
 ---------------------------------------------------------
 -- Helpers
 ---------------------------------------------------------
+
+function isAssetUnused(asset)
+    return not asset.used and animdefsIgnore[asset.newname] == nil
+end
 
 function wad:findLump(namespace, lumpname)
     local namespacedata = self.namespaces[namespace]
