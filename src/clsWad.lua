@@ -2331,7 +2331,7 @@ function wad:processCommonMapData(map)
             tag = love.data.unpack("<H", map.raw.sectors, s+24)
         }
 
-        -- otex floor flat fix
+        -- otex flat fix
         for i = 1, #map.sectors do
             for f = 1, #self.flats do
                 if self.flats[f].name == map.sectors[i].floor_texture then
@@ -2341,12 +2341,6 @@ function wad:processCommonMapData(map)
                         map.sectors[i].floor_texture = "0" .. map.sectors[i].floor_texture:sub(2)
                     end
                 end
-            end
-        end
-
-        -- otex ceiling flat fix
-        for i = 1, #map.sectors do
-            for f = 1, #self.flats do
                 if self.flats[f].name == map.sectors[i].ceiling_texture then
                     local flat = self.flats[f]
                     if otex:checkImageExists(flat.name, flat.md5) then
