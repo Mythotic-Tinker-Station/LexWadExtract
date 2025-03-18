@@ -1,6 +1,6 @@
 // Every line must have a thing id at the beginning of the line followed by a space, then another thing id to replace the first one.
 // For example, "3004 64" replaces every zombieman in the map with an Arch-vile. Look at https://zdoom.org/wiki/Standard_editor_numbers as a reference to what numbers belong to each actor.
-// This list should be used if a mapset has custom actors, with each of them being replaced by Lexicon's own spawners (128-236).
+// This list should be used if a mapset has custom actors, with each of them being replaced by Lexicon's own spawners (128-227).
 82 2006
 2012 83
 2049 17
