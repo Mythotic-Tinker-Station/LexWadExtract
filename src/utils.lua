@@ -141,20 +141,27 @@ function utils:printfNoNewLine(verbose, ...)
     end
 end
 
+local utf8_validator = require("utf8_validator")
+
+function hasKeys(tbl)
+    return next(tbl) ~= nil
+end
+
 -- print a table
 function utils:printTable(tbl, indent)
     if not indent then indent = 0 end
     for k, v in pairs(tbl) do
+        local vtype = type(v)
         formatting = string.rep("  ", indent) .. k .. ": "
-        if(type(v) == "table") then
-            print(formatting)
-            self:printTable(v, indent+1)
-        elseif(type(v) == 'boolean') then
-            print(formatting .. tostring(v))
-        elseif(type(v) == "string" and #v > 50) then
-            print(formatting .. tostring(k))
-        else
-            print(formatting .. v)
+        if(vtype == "table") then
+            if (hasKeys(v)) then
+                utils:printf(1, formatting)
+                self:printTable(v, indent+1)
+            end
+        elseif(vtype == "boolean") then
+            utils:printf(1, formatting .. tostring(v))
+        elseif((vtype == "string" and #v > 0 and utf8_validator(v)) or vtype == "number") then
+            utils:printf(1, formatting .. v)
         end
     end
 end

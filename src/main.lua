@@ -207,31 +207,31 @@ function love.errorhandler(msg)
 
     love.graphics.origin()
 
-    local sanitizedmsg = {}
+    local sanitizedmsg = stringbuilder()
     for char in msg:gmatch(utf8.charpattern) do
-        table.insert(sanitizedmsg, char)
+        sanitizedmsg:append(char)
     end
-    sanitizedmsg = table.concat(sanitizedmsg)
+    sanitizedmsg = sanitizedmsg:toString()
 
-    local err = {}
+    local err = stringbuilder()
 
-    table.insert(err, "Error\n")
-    table.insert(err, sanitizedmsg)
+    err:append("Error\n")
+    err:append(sanitizedmsg)
 
     if #sanitizedmsg ~= #msg then
-        table.insert(err, "Invalid UTF-8 string in error message.")
+        err:append("Invalid UTF-8 string in error message.")
     end
 
-    table.insert(err, "\n")
+    err:append("\n")
 
     for l in trace:gmatch("(.-)\n") do
         if not l:match("boot.lua") then
             l = l:gsub("stack traceback:", "Traceback\n")
-            table.insert(err, l)
+            err:append(l)
         end
     end
 
-    local p = table.concat(err, "\n")
+    local p = err:toString("\n")
 
     p = p:gsub("\t", "")
     p = p:gsub("%[string \"(.-)\"%]", "%1")
@@ -289,9 +289,4 @@ function love.errorhandler(msg)
             love.timer.sleep(0.1)
         end
     end
-
 end
-
-
-
-
