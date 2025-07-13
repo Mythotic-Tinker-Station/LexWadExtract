@@ -2236,6 +2236,7 @@ function wad:processMaps()
             elseif(map.format == "HM") then
 
                 -- things
+                map.things = {}
                 local count = 0
                 for s = 1, #map.raw.things, 20 do
                     count = count + 1
