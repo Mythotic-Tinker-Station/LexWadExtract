@@ -37,34 +37,34 @@ echo     Blank = Same as 0
 set /p "verbose=Enter verbosity(0-3 or blank): "
 echo ---------------------------------------------------------------------------------------------
 
-if not exist %cd%\%wad% goto 20
-if not exist %cd%\%iwad% goto 25
+if not exist "%cd%\%wad%" goto 20
+if not exist "%cd%\%iwad%" goto 25
 
-mkdir %cd%\logs
-rmdir %cd%\pk3 /s /q
-mkdir %cd%\pk3
-copy /Y %cd%\actorlist.txt %cd%\pk3\actorlist.%acronym%.txt 
-mkdir %cd%\pk3\graphics
-mkdir %cd%\pk3\flats
-mkdir %cd%\pk3\patches
-mkdir %cd%\pk3\sounds
-mkdir %cd%\pk3\textures
-mkdir %cd%\pk3\sprites
-mkdir %cd%\pk3\music
+mkdir "%cd%\logs"
+rmdir "%cd%\pk3" /s /q
+mkdir "%cd%\pk3"
+copy /Y "%cd%\actorlist.txt" "%cd%\pk3\actorlist.%acronym%.txt"
+mkdir "%cd%\pk3\graphics"
+mkdir "%cd%\pk3\flats"
+mkdir "%cd%\pk3\patches"
+mkdir "%cd%\pk3\sounds"
+mkdir "%cd%\pk3\textures"
+mkdir "%cd%\pk3\sprites"
+mkdir "%cd%\pk3\music"
 
-mkdir %cd%\pk3\graphics\%acronym%
-mkdir %cd%\pk3\flats\%acronym%
-mkdir %cd%\pk3\patches\%acronym%
-mkdir %cd%\pk3\sounds\%acronym%
-mkdir %cd%\pk3\textures\%acronym%
-mkdir %cd%\pk3\sprites\%acronym%
-mkdir %cd%\pk3\music\%acronym%
+mkdir "%cd%\pk3\graphics\%acronym%"
+mkdir "%cd%\pk3\flats\%acronym%"
+mkdir "%cd%\pk3\patches\%acronym%"
+mkdir "%cd%\pk3\sounds\%acronym%"
+mkdir "%cd%\pk3\textures\%acronym%"
+mkdir "%cd%\pk3\sprites\%acronym%"
+mkdir "%cd%\pk3\music\%acronym%"
 
-mkdir %cd%\pk3\maps
+mkdir "%cd%\pk3\maps"
 
-mkdir pk3\maps
+mkdir "pk3\maps"
 
-Love2D\love.exe src %iwad% %wad% %acronym% %verbose% %acronym_sprite% %things% %patches%
+"Love2D\love.exe" "src" "%iwad%" "%wad%" "%acronym%" "%verbose%" "%acronym_sprite%" "%things%" "%patches%"
 goto 30
 
 :20
