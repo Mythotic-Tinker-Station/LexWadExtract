@@ -35,8 +35,8 @@
 
 
 log = {}
-timeTaken = ""
 
+-- Main module for Lexicon Wad Converter
 local main = {}
 
 function main:load(args)
@@ -45,7 +45,12 @@ function main:load(args)
     self:setupPaths()
     self:setupLogging()
     self:logEverything()
-    self:startExtration()
+end
+
+function main:run()
+    self.palette = utils:bench("Getting PWAD Palette", self.getPWADPalette, self, self.pwad_path)
+    self.mainiwad = wad(self.iwad_path, self.palette)
+    self.mapset = wad(self.pwad_path, self.palette, self.acronym, self.patches, self.mainiwad, self.pk3_path, self.toolspath, self.sprites, self.acronym_sprites, self.things)
 end
 
 function main:setupArgs()
@@ -78,6 +83,11 @@ function main:setupLogging()
 end
 
 function main:logEverything()
+    utils:printf(0, "Misc: ")
+    utils:printf(0, "\tLove Version: %s", love.getVersion())
+    utils:printf(0, "\tDate: %s", self.date)
+    utils:printf(0, "\tFilter: %s", love.graphics.getDefaultFilter())
+    utils:printf(0, "")
     utils:printf(0, "Options: ")
     utils:printf(0, "\tIWAD Filename: %s", tostring(self.iwad_filename))
     utils:printf(0, "\tPWAD Filename: %s", tostring(self.pwad_filename))
@@ -94,9 +104,11 @@ function main:logEverything()
     utils:printf(0, "\tIWAD Path: %s", tostring(self.iwad_path))
     utils:printf(0, "\tPWAD Path: %s", tostring(self.pwad_path))
     utils:printf(0, "\tLog Path: %s", tostring(self.log_path))
+    utils:printf(0, "")
 end
 
 function main:getPWADPalette()
+    utils:printf(1, "\tLooking for PWAD palette...")
     local file = utils:openFile(self.pwad_path, "rb")
     local raw = file:read("*all")
     file:close()
@@ -113,6 +125,7 @@ function main:getPWADPalette()
     for lump = 0, lumpcount do
         local filepos, size, name = love.data.unpack("<i4i4c8", raw, dirpos + (lump * 16))
         if utils:removePadding(name) == "PLAYPAL" then
+            utils:printf(1, "\tFound PWAD palette...")
             palette = {}
             local data = love.data.unpack(string.format("<c%d", size), raw, filepos + 1)
             for c = 1, 256 * 3, 3 do
@@ -120,17 +133,16 @@ function main:getPWADPalette()
                 local index = #palette + 1
                 local r2, g2, b2 = love.math.colorFromBytes(r, g, b, 255)
                 palette[index] = {r2,g2,b2}
+                utils:printf(2, "\t\tPalette color %d: (%d, %d, %d)", index, r2, g2, b2)
             end
+            utils:printf(1, "\tPWAD palette loaded successfully.")
+            break
+        else
+            utils:printf(1, "No PLAYPAL lump found in PWAD, using default palette.")
         end
     end
 
     return palette
-end
-
-function main:startExtration()
-    self.palette = self:getPWADPalette(self.pwad_path)
-    self.mainiwad = wad(self.iwad_path, self.palette)
-    self.mapset = wad(self.pwad_path, self.palette, self.acronym, self.patches, self.mainiwad, self.pk3_path, self.toolspath, self.sprites, self.acronym_sprites, self.things)
 end
 
 function love.load(args)
@@ -145,6 +157,7 @@ function love.load(args)
     wad = require("clsWad")
 
     main:load(args)
+    utils:bench("---Lexicon Wad Converter---", main.run, main, args)
 end
 
 function love.update(dt)
@@ -152,7 +165,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    
+
 end
 
 ----------------------------------------------------------------------------------------

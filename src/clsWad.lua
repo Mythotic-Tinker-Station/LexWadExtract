@@ -33,39 +33,7 @@
         See https://love2d.org/wiki/License for license information.
 --]]
 
--- cross platform code
-function getOS()
-    -- ask LuaJIT first
-    if jit then
-        return jit.os
-    end
-    -- Unix, Linux variants
-    local fh,err = assert(io.popen("uname -o 2>/dev/null","r"))
-    if fh then
-        osname = fh:read()
-    end
-    return osname or "Windows"
-end
 
-osname = getOS()
-print("OS: "..osname)
-mac = osname=="OSX"
-
-local deleteCommand, runScriptCommand, moveCommand, scriptName, mkDirCommand
-
-if(mac) then
-    deleteCommand="rm -rf"
-    runScriptCommand="bash"
-    moveCommand="mv"
-    scriptName="LexiconWadConverter"
-    mkDirCommand="mkdir -p"
-else
-    deleteCommand="del /q"
-    runScriptCommand="cmd /c"
-    moveCommand="move /Y"
-    scriptName="zwadconv.bat"
-    mkDirCommand="mkdir"
-end
 
 -- wad object
 animdefsIgnore = {}
@@ -2204,13 +2172,15 @@ function wad:processMaps()
                 for s = 1, #map.raw.things, 10 do
                     count = count + 1
 
-                    map.things[count] = {
+                    map.things[count] =
+                    {
                         x = love.data.unpack("<h", map.raw.things, s),
                         y = love.data.unpack("<h", map.raw.things, s+2),
                         angle = love.data.unpack("<H", map.raw.things, s+4),
                         typ = love.data.unpack("<H", map.raw.things, s+6),
                         flags = love.data.unpack("<H", map.raw.things, s+8)
                     }
+                    utils:printf(3, "\t\t Doom Thing %d: X: %d, Y: %d, Angle: %d, Type: %d, Flags: %d", count, map.things[count].x, map.things[count].y, map.things[count].angle, map.things[count].typ, map.things[count].flags)
                 end
 
                 -- linedefs
@@ -2219,7 +2189,8 @@ function wad:processMaps()
                 for s = 1, #map.raw.linedefs, 14 do
                     count = count + 1
 
-                    map.linedefs[count] = {
+                    map.linedefs[count] =
+                    {
                         vertex_start = love.data.unpack("<H", map.raw.linedefs, s),
                         vertex_end = love.data.unpack("<H", map.raw.linedefs, s+2),
                         flags = love.data.unpack("<H", map.raw.linedefs, s+4),
@@ -2228,6 +2199,7 @@ function wad:processMaps()
                         sidedef_right = love.data.unpack("<H", map.raw.linedefs, s+10),
                         sidedef_left = love.data.unpack("<H", map.raw.linedefs, s+12)
                     }
+                    utils:printf(3, "\t\tDoom Linedef %d: Start: %d, End: %d, Flags: %d, Type: %d, Sector Tag: %d, Right Sidedef: %d, Left Sidedef: %d", count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].line_type, map.linedefs[count].sector_tag, map.linedefs[count].sidedef_right, map.linedefs[count].sidedef_left)
                 end
 
                 self:processCommonMapData(map)
@@ -2241,7 +2213,8 @@ function wad:processMaps()
                 for s = 1, #map.raw.things, 20 do
                     count = count + 1
 
-                    map.things[count] = {
+                    map.things[count] =
+                    {
                         id = love.data.unpack("<H", map.raw.things, s),
                         x = love.data.unpack("<h", map.raw.things, s+2),
                         y = love.data.unpack("<h", map.raw.things, s+4),
@@ -2256,6 +2229,7 @@ function wad:processMaps()
                         a4 = love.data.unpack("<B", map.raw.things, s+18),
                         a5 = love.data.unpack("<B", map.raw.things, s+19)
                     }
+                    utils:printf(3, "\t\tHexen Thing %d: ID: %d, X: %d, Y: %d, Z: %d, Angle: %d, Type: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d", count, map.things[count].id, map.things[count].x, map.things[count].y, map.things[count].z, map.things[count].angle, map.things[count].typ, map.things[count].flags, map.things[count].special, map.things[count].a1, map.things[count].a2, map.things[count].a3, map.things[count].a4, map.things[count].a5)
                 end
 
                 -- linedefs
@@ -2277,6 +2251,7 @@ function wad:processMaps()
                         front_sidedef = love.data.unpack("<B", map.raw.linedefs, s+12),
                         back_sidedef = love.data.unpack("<B", map.raw.linedefs, s+14)
                     }
+                    utils:printf(3, "\t\tHexen Linedef %d: Start: %d, End: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d, Front Sidedef: %d, Back Sidedef: %d", count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].special, map.linedefs[count].a1, map.linedefs[count].a2, map.linedefs[count].a3, map.linedefs[count].a4, map.linedefs[count].a5, map.linedefs[count].front_sidedef, map.linedefs[count].back_sidedef)
                 end
 
                 self:processCommonMapData(map)
@@ -2294,7 +2269,8 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.sidedefs, 30 do
         count = count + 1
 
-        map.sidedefs[count] = {
+        map.sidedefs[count] =
+        {
             xoffset = love.data.unpack("<h", map.raw.sidedefs, s),
             yoffset = love.data.unpack("<h", map.raw.sidedefs, s+2),
             upper_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+4)):upper(),
@@ -2302,6 +2278,7 @@ function wad:processCommonMapData(map)
             middle_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20)):upper(),
             sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
         }
+        utils:printf(3, "\t\tSidedef %d: XOffset: %d, YOffset: %d, Upper Texture: %s, Lower Texture: %s, Middle Texture: %s, Sector: %d", count, map.sidedefs[count].xoffset, map.sidedefs[count].yoffset, map.sidedefs[count].upper_texture, map.sidedefs[count].lower_texture, map.sidedefs[count].middle_texture, map.sidedefs[count].sector)
     end
 
     -- vertexes
@@ -2310,10 +2287,12 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.vertexes, 4 do
         count = count + 1
 
-        map.vertexes[count] = {
+        map.vertexes[count] =
+        {
             x = love.data.unpack("<h", map.raw.vertexes, s),
             y = love.data.unpack("<h", map.raw.vertexes, s+2)
         }
+        utils:printf(3, "\t\tVertex %d: X: %d, Y: %d", count, map.vertexes[count].x, map.vertexes[count].y)
     end
 
     -- sectors
@@ -2322,7 +2301,8 @@ function wad:processCommonMapData(map)
     for s = 1, #map.raw.sectors, 26 do
         count = count + 1
 
-        map.sectors[count] = {
+        map.sectors[count] =
+        {
             floor_height = love.data.unpack("<h", map.raw.sectors, s),
             ceiling_height = love.data.unpack("<h", map.raw.sectors, s+2),
             floor_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sectors, s+4)):upper(),
@@ -2331,27 +2311,27 @@ function wad:processCommonMapData(map)
             special = love.data.unpack("<H", map.raw.sectors, s+22),
             tag = love.data.unpack("<H", map.raw.sectors, s+24)
         }
+        utils:printf(3, "\t\tSector %d: Floor Height: %d, Ceiling Height: %d, Floor Texture: %s, Ceiling Texture: %s, Light Level: %d, Special: %d, Tag: %d", count, map.sectors[count].floor_height, map.sectors[count].ceiling_height, map.sectors[count].floor_texture, map.sectors[count].ceiling_texture, map.sectors[count].light, map.sectors[count].special, map.sectors[count].tag)
+    end
 
-        -- otex flat fix
-        for i = 1, #map.sectors do
-            for f = 1, #self.flats do
-                if self.flats[f].name == map.sectors[i].floor_texture then
-                    local flat = self.flats[f]
-                    if otex:checkImageExists(flat.name, flat.md5) then
-                        utils:printf(3, "\tFixing OTEX floor flat name for sector %d: %s to %s", i, map.sectors[i].floor_texture, flat.newname)
-                        map.sectors[i].floor_texture = "0" .. map.sectors[i].floor_texture:sub(2)
-                    end
+    -- otex flat fix
+    for i = 1, #map.sectors do
+        for f = 1, #self.flats do
+            if self.flats[f].name == map.sectors[i].floor_texture then
+                local flat = self.flats[f]
+                if otex:checkImageExists(flat.name, flat.md5) then
+                    utils:printf(3, "\tFixing OTEX floor flat name for sector %d: %s to %s", i, map.sectors[i].floor_texture, flat.newname)
+                    map.sectors[i].floor_texture = "0" .. map.sectors[i].floor_texture:sub(2)
                 end
-                if self.flats[f].name == map.sectors[i].ceiling_texture then
-                    local flat = self.flats[f]
-                    if otex:checkImageExists(flat.name, flat.md5) then
-                        utils:printf(3, "\tFixing OTEX ceiling flat name for sector %d: %s to %s", i, map.sectors[i].ceiling_texture, flat.newname)
-                        map.sectors[i].ceiling_texture = "0" .. map.sectors[i].ceiling_texture:sub(2)
-                    end
+            end
+            if self.flats[f].name == map.sectors[i].ceiling_texture then
+                local flat = self.flats[f]
+                if otex:checkImageExists(flat.name, flat.md5) then
+                    utils:printf(3, "\tFixing OTEX ceiling flat name for sector %d: %s to %s", i, map.sectors[i].ceiling_texture, flat.newname)
+                    map.sectors[i].ceiling_texture = "0" .. map.sectors[i].ceiling_texture:sub(2)
                 end
             end
         end
-
     end
 end
 
