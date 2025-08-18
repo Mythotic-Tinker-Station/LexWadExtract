@@ -138,7 +138,8 @@ function main:getPWADPalette()
             utils:printf(1, "\tPWAD palette loaded successfully.")
             break
         else
-            utils:printf(1, "No PLAYPAL lump found in PWAD, using default palette.")
+            utils:printf(1, "\tNo PLAYPAL lump found in PWAD, using default palette.")
+            break
         end
     end
 
