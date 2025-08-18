@@ -881,7 +881,7 @@ function wad:addExtraMarkers()
         for g, graphic in ipairs(self.graphicslist) do
             if lump.name == graphic.lumpname then
                 local newname = self.acronym .. graphic.suffix
-                utils:printf(2, "\t\tFound %s; renaming to %s", graphic.lumpname, newname)
+                utils:printf(2, "\t\tFound Graphic %s; renaming to %s", graphic.lumpname, newname)
                 lump.name = newname
                 lumplist_new[#lumplist_new+1] = lump
             end
@@ -1874,7 +1874,7 @@ end
 
 function wad:renamePatches()
     if(self.base ~= self) then
-        local patchcount = self:renameAssets(self.patches)
+        local patchcount = self:renameAssets(self.patches, "patch")
         utils:printf(1, "\tFound %d patches.\n", patchcount)
     else
         utils:printf(1, "\tNot renaming base wad patches.\n")
@@ -1883,7 +1883,7 @@ end
 
 function wad:renameTextures()
     if(self.base ~= self) then
-        local texturecount = self:renameAssets(self.composites)
+        local texturecount = self:renameAssets(self.composites, "composite")
         utils:printf(1, "\tFound %d composites.\n", texturecount)
     else
         utils:printf(1, "\tNot renaming base wad textures.\n")
@@ -1892,14 +1892,14 @@ end
 
 function wad:renameFlats()
     if(self.base ~= self) then
-        local flatcount = self:renameAssets(self.flats)
+        local flatcount = self:renameAssets(self.flats, "flat")
         utils:printf(1, "\tFound %d flats.\n", flatcount)
     else
         utils:printf(1, "\tNot renaming base wad flats.\n")
     end
 end
 
-function wad:renameAssets(assets)
+function wad:renameAssets(assets, name)
     local assetcount = #assets
 
     for a = 1, assetcount do
@@ -1916,7 +1916,7 @@ function wad:renameAssets(assets)
                 newname = string.format("%s%s%.4d", self.acronym:sub(1, 3), "Z", self.texturecount2)
             end
 
-            utils:printf(2, "\tRenaming %s to %s", asset.name, newname)
+            utils:printf(2, "\tRenaming %s %s to %s", name, asset.name, newname)
             asset.newname = newname
         end
     end
@@ -1940,7 +1940,7 @@ function wad:renameSprites()
             end
 
             sprite.newname = string.format("%s%02d%s", self.acronym_sprite, setcount, sprite.name:sub(5))
-            utils:printf(2, "\tRenamed %s to %s", sprite.name, sprite.newname)
+            utils:printf(2, "\tRenamed Sprite %s to %s", sprite.name, sprite.newname)
         end
         utils:printf(1, "\tFound %d Sprite Sets.", setcount)
     else
@@ -1955,7 +1955,7 @@ function wad:renameSounds()
                 local sound = sounds[s]
                 self.soundcount = self.soundcount + 1
                 sound.newname = string.format("%s%.4d", self.acronym, self.soundcount)
-                utils:printf(2, "\tRenamed %s to %s", sound.name, sound.newname)
+                utils:printf(2, "\tRenamed Sound %s to %s", sound.name, sound.newname)
             end
         end
 
@@ -1989,7 +1989,7 @@ function wad:renameSongs()
                             song.newname = string.format("%sIN", self.acronym)
                         end
 
-                        utils:printf(2, "\tRenamed %s to %s", song.name, song.newname)
+                        utils:printf(2, "\tRenamed Song %s to %s", song.name, song.newname)
                         break
                     end
                 end
@@ -2180,7 +2180,7 @@ function wad:processMaps()
                         typ = love.data.unpack("<H", map.raw.things, s+6),
                         flags = love.data.unpack("<H", map.raw.things, s+8)
                     }
-                    utils:printf(3, "\t\t Doom Thing %d: X: %d, Y: %d, Angle: %d, Type: %d, Flags: %d", count, map.things[count].x, map.things[count].y, map.things[count].angle, map.things[count].typ, map.things[count].flags)
+                    utils:printf(3, "\t\t%s: Doom Thing %d: X: %d, Y: %d, Angle: %d, Type: %d, Flags: %d", map.name, count, map.things[count].x, map.things[count].y, map.things[count].angle, map.things[count].typ, map.things[count].flags)
                 end
 
                 -- linedefs
@@ -2199,7 +2199,7 @@ function wad:processMaps()
                         sidedef_right = love.data.unpack("<H", map.raw.linedefs, s+10),
                         sidedef_left = love.data.unpack("<H", map.raw.linedefs, s+12)
                     }
-                    utils:printf(3, "\t\tDoom Linedef %d: Start: %d, End: %d, Flags: %d, Type: %d, Sector Tag: %d, Right Sidedef: %d, Left Sidedef: %d", count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].line_type, map.linedefs[count].sector_tag, map.linedefs[count].sidedef_right, map.linedefs[count].sidedef_left)
+                    utils:printf(3, "\t\t%s: Doom Linedef %d: Start: %d, End: %d, Flags: %d, Type: %d, Sector Tag: %d, Right Sidedef: %d, Left Sidedef: %d", map.name, count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].line_type, map.linedefs[count].sector_tag, map.linedefs[count].sidedef_right, map.linedefs[count].sidedef_left)
                 end
 
                 self:processCommonMapData(map)
@@ -2229,7 +2229,7 @@ function wad:processMaps()
                         a4 = love.data.unpack("<B", map.raw.things, s+18),
                         a5 = love.data.unpack("<B", map.raw.things, s+19)
                     }
-                    utils:printf(3, "\t\tHexen Thing %d: ID: %d, X: %d, Y: %d, Z: %d, Angle: %d, Type: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d", count, map.things[count].id, map.things[count].x, map.things[count].y, map.things[count].z, map.things[count].angle, map.things[count].typ, map.things[count].flags, map.things[count].special, map.things[count].a1, map.things[count].a2, map.things[count].a3, map.things[count].a4, map.things[count].a5)
+                    utils:printf(3, "\t\t%s: Hexen Thing %d: ID: %d, X: %d, Y: %d, Z: %d, Angle: %d, Type: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d", map.name, count, map.things[count].id, map.things[count].x, map.things[count].y, map.things[count].z, map.things[count].angle, map.things[count].typ, map.things[count].flags, map.things[count].special, map.things[count].a1, map.things[count].a2, map.things[count].a3, map.things[count].a4, map.things[count].a5)
                 end
 
                 -- linedefs
@@ -2251,7 +2251,7 @@ function wad:processMaps()
                         front_sidedef = love.data.unpack("<B", map.raw.linedefs, s+12),
                         back_sidedef = love.data.unpack("<B", map.raw.linedefs, s+14)
                     }
-                    utils:printf(3, "\t\tHexen Linedef %d: Start: %d, End: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d, Front Sidedef: %d, Back Sidedef: %d", count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].special, map.linedefs[count].a1, map.linedefs[count].a2, map.linedefs[count].a3, map.linedefs[count].a4, map.linedefs[count].a5, map.linedefs[count].front_sidedef, map.linedefs[count].back_sidedef)
+                    utils:printf(3, "\t\t%s: Hexen Linedef %d: Start: %d, End: %d, Flags: %d, Special: %d, A1: %d, A2: %d, A3: %d, A4: %d, A5: %d, Front Sidedef: %d, Back Sidedef: %d", map.name, count, map.linedefs[count].vertex_start, map.linedefs[count].vertex_end, map.linedefs[count].flags, map.linedefs[count].special, map.linedefs[count].a1, map.linedefs[count].a2, map.linedefs[count].a3, map.linedefs[count].a4, map.linedefs[count].a5, map.linedefs[count].front_sidedef, map.linedefs[count].back_sidedef)
                 end
 
                 self:processCommonMapData(map)
@@ -2278,7 +2278,7 @@ function wad:processCommonMapData(map)
             middle_texture = utils:removePadding(love.data.unpack("<c8", map.raw.sidedefs, s+20)):upper(),
             sector = love.data.unpack("<H", map.raw.sidedefs, s+28)
         }
-        utils:printf(3, "\t\tSidedef %d: XOffset: %d, YOffset: %d, Upper Texture: %s, Lower Texture: %s, Middle Texture: %s, Sector: %d", count, map.sidedefs[count].xoffset, map.sidedefs[count].yoffset, map.sidedefs[count].upper_texture, map.sidedefs[count].lower_texture, map.sidedefs[count].middle_texture, map.sidedefs[count].sector)
+        utils:printf(3, "\t\t%s: Sidedef %d: XOffset: %d, YOffset: %d, Upper Texture: %s, Lower Texture: %s, Middle Texture: %s, Sector: %d", map.name, count, map.sidedefs[count].xoffset, map.sidedefs[count].yoffset, map.sidedefs[count].upper_texture, map.sidedefs[count].lower_texture, map.sidedefs[count].middle_texture, map.sidedefs[count].sector)
     end
 
     -- vertexes
@@ -2292,7 +2292,7 @@ function wad:processCommonMapData(map)
             x = love.data.unpack("<h", map.raw.vertexes, s),
             y = love.data.unpack("<h", map.raw.vertexes, s+2)
         }
-        utils:printf(3, "\t\tVertex %d: X: %d, Y: %d", count, map.vertexes[count].x, map.vertexes[count].y)
+        utils:printf(3, "\t\t%s: Vertex %d: X: %d, Y: %d", map.name, count, map.vertexes[count].x, map.vertexes[count].y)
     end
 
     -- sectors
@@ -2311,7 +2311,7 @@ function wad:processCommonMapData(map)
             special = love.data.unpack("<H", map.raw.sectors, s+22),
             tag = love.data.unpack("<H", map.raw.sectors, s+24)
         }
-        utils:printf(3, "\t\tSector %d: Floor Height: %d, Ceiling Height: %d, Floor Texture: %s, Ceiling Texture: %s, Light Level: %d, Special: %d, Tag: %d", count, map.sectors[count].floor_height, map.sectors[count].ceiling_height, map.sectors[count].floor_texture, map.sectors[count].ceiling_texture, map.sectors[count].light, map.sectors[count].special, map.sectors[count].tag)
+        utils:printf(3, "\t\t%s: Sector %d: Floor Height: %d, Ceiling Height: %d, Floor Texture: %s, Ceiling Texture: %s, Light Level: %d, Special: %d, Tag: %d", map.name, count, map.sectors[count].floor_height, map.sectors[count].ceiling_height, map.sectors[count].floor_texture, map.sectors[count].ceiling_texture, map.sectors[count].light, map.sectors[count].special, map.sectors[count].tag)
     end
 
     -- otex flat fix
@@ -2320,14 +2320,14 @@ function wad:processCommonMapData(map)
             if self.flats[f].name == map.sectors[i].floor_texture then
                 local flat = self.flats[f]
                 if otex:checkImageExists(flat.name, flat.md5) then
-                    utils:printf(3, "\tFixing OTEX floor flat name for sector %d: %s to %s", i, map.sectors[i].floor_texture, flat.newname)
+                    utils:printf(3, "\t%s: Fixing OTEX floor flat name for sector %d: %s to %s", map.name, i, map.sectors[i].floor_texture, flat.newname)
                     map.sectors[i].floor_texture = "0" .. map.sectors[i].floor_texture:sub(2)
                 end
             end
             if self.flats[f].name == map.sectors[i].ceiling_texture then
                 local flat = self.flats[f]
                 if otex:checkImageExists(flat.name, flat.md5) then
-                    utils:printf(3, "\tFixing OTEX ceiling flat name for sector %d: %s to %s", i, map.sectors[i].ceiling_texture, flat.newname)
+                    utils:printf(3, "\t%s: Fixing OTEX ceiling flat name for sector %d: %s to %s", map.name, i, map.sectors[i].ceiling_texture, flat.newname)
                     map.sectors[i].ceiling_texture = "0" .. map.sectors[i].ceiling_texture:sub(2)
                 end
             end
@@ -2364,7 +2364,7 @@ function wad:ModifyMaps()
                         for t = 1, #map.things do
                             local thing = map.things[t]
                             if (thing.typ == actor1) then
-                                utils:printf(3, "\t\t\tReplace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", t, thing.x, thing.y, thing.angle, thing.flags, actor1, actor2)
+                                utils:printf(3, "\t\t\t%s: Replace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", map.name, t, thing.x, thing.y, thing.angle, thing.flags, actor1, actor2)
                                 thing.typ = actor2
                             end
                         end
@@ -2375,42 +2375,42 @@ function wad:ModifyMaps()
                 end
 
                 -- find textures and rename
-                utils:printf(2, "\t\tReplacing composites...")
+                utils:printf(2, "\t\tReplacing %s composites...", map.name)
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
                     self:replaceMapTextures(map, composite, composite.newname)
                 end
 
                 -- find flats and rename
-                utils:printf(2, "\t\tReplacing flats....")
+                utils:printf(2, "\t\tReplacing %s flats....", map.name)
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
                     self:replaceMapTextures(map, flat, flat.newname)
                 end
 
                 -- find patches and rename
-                utils:printf(2, "\t\tReplacing patches....")
+                utils:printf(2, "\t\tReplacing %s patches....", map.name)
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
                     self:replaceMapTextures(map, patch, getPatchName(patch))
                 end
 
                 -- find zdoom textures and rename
-                utils:printf(2, "\t\tReplacing zdoom textures....")
+                utils:printf(2, "\t\tReplacing %s zdoom textures....", map.name)
                 for z = 1, #self.zdoomtextures do
                     local zdoomtexture = self.zdoomtextures[z]
                     self:replaceMapTextures(map, zdoomtexture, zdoomtexture.newname)
                 end
 
                 -- find textures.txt textures and rename
-                utils:printf(2, "\t\tReplacing textures.txt textures....")
+                utils:printf(2, "\t\tReplacing %s textures.txt textures....", map.name)
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
                     self:replaceMapTextures(map, texture, texture.newname)
                 end
 
                 -- build raw things back
-                utils:printf(2, "\t\tBuilding things lump...")
+                utils:printf(2, "\t\tBuilding %s things lump...", map.name)
                 count = 0
                 map.raw.things = ""
                 local sb = stringbuilder()
@@ -2426,7 +2426,7 @@ function wad:ModifyMaps()
                 map.raw.things = sb:toString()
 
                 -- build raw sidedefs back
-                utils:printf(2, "\t\tBuilding sidedefs lump...")
+                utils:printf(2, "\t\tBuilding %s sidedefs lump...", map.name)
                 count = 0
                 map.raw.sidedefs = ""
                 sb:clear()
@@ -2438,7 +2438,7 @@ function wad:ModifyMaps()
                 map.raw.sidedefs = sb:toString()
 
                 -- build raw sectors back
-                utils:printf(2, "\t\tBuilding sectors lump...")
+                utils:printf(2, "\t\tBuilding %s sectors lump...", map.name)
                 count = 0
                 map.raw.sectors = ""
                 sb:clear()
@@ -2481,35 +2481,35 @@ function wad:ModifyMaps()
                 utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
-                    utils:printf(3, "\t\t\tReplacing composite %s with %s", composite.name, composite.newname)
+                    utils:printf(3, "\t\t\tReplacing %s composite %s with %s", map.name, composite.name, composite.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing flats...")
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
-                    utils:printf(3, "\t\t\tReplacing flat %s with %s", flat.name, flat.newname)
+                    utils:printf(3, "\t\t\tReplacing %s flat %s with %s", map.name, flat.name, flat.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing patches...")
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
-                    utils:printf(3, "\t\t\tReplacing patch %s with %s", patch.name, getPatchName(patch))
+                    utils:printf(3, "\t\t\tReplacing %s patch %s with %s", map.name, patch.name, getPatchName(patch))
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
                 end
 
                 utils:printf(2, "\t\tReplacing zdoom textures...")
                 for z = 1, #self.zdoomtextures do
                     local zdoomtexture = self.zdoomtextures[z]
-                    utils:printf(3, "\t\t\tReplacing zdoom texture %s with %s", zdoomtexture.name, zdoomtexture.newname)
+                    utils:printf(3, "\t\t\tReplacing %s zdoom texture %s with %s", map.name, zdoomtexture.name, zdoomtexture.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname)
                 end
 
-                utils:printf(2, "\t\tReplacing textures.txt textures...")
+                utils:printf(2, "\t\tReplacing %s textures.txt textures...", map.name)
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
-                    utils:printf(3, "\t\t\tReplacing textures.txt texture %s with %s", texture.name, texture.newname)
+                    utils:printf(3, "\t\t\tReplacing %s textures.txt texture %s with %s", map.name, texture.name, texture.newname)
                     map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
                 end
 
@@ -2565,19 +2565,19 @@ function wad:replaceMapTextures(map, texture, newtexturename)
         for s = 1, #map.sidedefs do
             local sidedef = map.sidedefs[s]
             if (sidedef.upper_texture == texture.name) then
-                utils:printf(3, "\t\t\tReplacing sidedef #%d upper texture '%s' with '%s'", s, sidedef.upper_texture, texture.newname)
+                utils:printf(3, "\t\t\tReplacing %s sidedef #%d upper texture '%s' with '%s'", map.name, s, sidedef.upper_texture, texture.newname)
                 sidedef.upper_texture = newtexturename
                 texture.used = true
             end
 
             if (sidedef.lower_texture == texture.name) then
-                utils:printf(3, "\t\t\tReplacing sidedef #%d lower texture '%s' with '%s'", s, sidedef.lower_texture, texture.newname)
+                utils:printf(3, "\t\t\tReplacing %s sidedef #%d lower texture '%s' with '%s'", map.name, s, sidedef.lower_texture, texture.newname)
                 sidedef.lower_texture = newtexturename
                 texture.used = true
             end
 
             if (sidedef.middle_texture == texture.name) then
-                utils:printf(3, "\t\t\tReplacing sidedef #%d middle texture '%s' with '%s'", s, sidedef.middle_texture, texture.newname)
+                utils:printf(3, "\t\t\tReplacing %s sidedef #%d middle texture '%s' with '%s'", map.name, s, sidedef.middle_texture, texture.newname)
                 sidedef.middle_texture = newtexturename
                 texture.used = true
             end
@@ -2588,13 +2588,13 @@ function wad:replaceMapTextures(map, texture, newtexturename)
             local sector = map.sectors[ss]
 
             if (sector.floor_texture == texture.name) then
-                utils:printf(3, "\t\t\tReplacing sector #%d floor texture '%s' with '%s'", ss, sector.floor_texture, texture.newname)
+                utils:printf(3, "\t\t\tReplacing %s sector #%d floor texture '%s' with '%s'", map.name, ss, sector.floor_texture, texture.newname)
                 sector.floor_texture = newtexturename
                 texture.used = true
             end
 
             if (sector.ceiling_texture == texture.name) then
-                utils:printf(3, "\t\t\tReplacing sector #%d ceiling texture '%s' with '%s'", ss, sector.ceiling_texture, texture.newname)
+                utils:printf(3, "\t\t\tReplacing %s sector #%d ceiling texture '%s' with '%s'", map.name, ss, sector.ceiling_texture, texture.newname)
                 sector.ceiling_texture = newtexturename
                 texture.used = true
             end
@@ -2606,19 +2606,19 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
             if (sidedef.upper_texture == texture.name) then
                 local newname = texture.doomdup or texture.name
-                utils:printf(3, "\t\t\tKeeping sidedef #%d upper texture %s", s, newname)
+                utils:printf(3, "\t\t\tKeeping %s, sidedef #%d upper texture %s", map.name, s, newname)
                 sidedef.upper_texture = newname
             end
 
             if (sidedef.lower_texture == texture.name) then
                 local newname = texture.doomdup or texture.name
-                utils:printf(3, "\t\t\tKeeping sidedef #%d lower texture %s", s, newname)
+                utils:printf(3, "\t\t\tKeeping %s sidedef #%d lower texture %s", map.name, s, newname)
                 sidedef.lower_texture = newname
             end
 
             if (sidedef.middle_texture == texture.name) then
                 local newname = texture.doomdup or texture.name
-                utils:printf(3, "\t\t\tKeeping sidedef #%d middle texture %s", s, newname)
+                utils:printf(3, "\t\t\tKeeping %s sidedef #%d middle texture %s", map.name, s, newname)
                 sidedef.middle_texture = newname
             end
         end
@@ -2629,13 +2629,13 @@ function wad:replaceMapTextures(map, texture, newtexturename)
 
             if (sector.floor_texture == texture.name) then
                 local newname = texture.doomdup or texture.name
-                utils:printf(3, "\t\t\tKeeping sector #%d floor texture %s", ss, newname)
+                utils:printf(3, "\t\t\tKeeping %s sector #%d floor texture %s", map.name, ss, newname)
                 sector.floor_texture = newname
             end
 
             if (sector.ceiling_texture == texture.name) then
                 local newname = texture.doomdup or texture.name
-                utils:printf(3, "\t\t\tKeeping sector #%d ceiling texture %s", ss, newname)
+                utils:printf(3, "\t\t\tKeeping %s sector #%d ceiling texture %s", map.name, ss, newname)
                 sector.ceiling_texture = newname
             end
         end
