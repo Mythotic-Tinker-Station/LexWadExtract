@@ -2560,7 +2560,7 @@ function wad:ModifyMaps()
 end
 
 function wad:replaceMapTextures(map, texture, newtexturename)
-    if (not texture.ignore) then
+    if (not texture.ignore and texture.name ~= "AASHITTY" and texture.name ~= "AASTINKY") then
         -- walls
         for s = 1, #map.sidedefs do
             local sidedef = map.sidedefs[s]
