@@ -2255,7 +2255,12 @@ function wad:processMaps()
                 end
 
                 self:processCommonMapData(map)
+            elseif(map.format == "UM") then
+
+            else
+                utils:printf(0, "\tUnknown map format for map %s", map.name)
             end
+
         end
     else
         utils:printf(1, "\tNot processing base wad maps.")
@@ -2359,8 +2364,6 @@ function wad:ModifyMaps()
                         local actornewspace = line:find(" ")
                         local actor1 = line:sub(1, actornewspace)
                         local actor2 = line:sub(actornewspace+1)
-                        actor1 = actor1 + 0
-                        actor2 = actor2 + 0
                         for t = 1, #map.things do
                             local thing = map.things[t]
                             if (thing.typ == actor1) then
@@ -2452,65 +2455,68 @@ function wad:ModifyMaps()
             --udmf
             elseif(map.format == "UM") then
 
-                --[[
                 if(self.things == "Y") then
-                    local lines = {}
-                    local inThing = false
-                    for line in map.raw.textmap:gmatch("[^\r\n]+") do
-                        if line:find("thing") then
-                            inThing = true
-                        elseif inThing then
-                            if line:find("}") then
-                                inThing = false
-                            else
-                                local thing = tonumber(line:match("id = (%d+)"))
-                                for l = 1, #self.thinglist do
-                                    local thinglist = self.thinglist[l]
-                                    if thing == thinglist.old then
-                                        line = line:gsub("id = %d+", "id = "..thinglist.new)
-                                        utils:printf(3, "\t\t\tReplace thing #%d with #%d", thing, thinglist.new)
-                                    end
+                    local actorlist = utils:openFile(string.format("%s/actorlist.%s.txt", self.pk3path, self.acronym), "r")
+                    actorlist:read("*line")
+                    actorlist:read("*line")
+                    actorlist:read("*line")
+                    local line = actorlist:read("*line")
+                    utils:printf(2, "\t\tReplacing actors....")
+                    while line ~= nil do
+                        -- actor replacement stuff
+                        local actornewspace = line:find(" ")
+                        if actornewspace then
+                            local actor1 = tonumber(line:sub(1, actornewspace-1))
+                            local actor2 = tonumber(line:sub(actornewspace+1))
+                            if actor1 and actor2 then
+                                local pattern = "(id%s*=%s*)" .. actor1 .. "(%s*;)"
+                                local replaced, n = map.raw.textmap:gsub(pattern, function(prefix, suffix)
+                                    utils:printf(3, "\t\t\t%s: Replace actor id: %d with %d", map.name, actor1, actor2)
+                                    return prefix .. actor2 .. suffix
+                                end)
+                                if n > 0 then
+                                    map.raw.textmap = replaced
                                 end
                             end
                         end
-                        table.insert(lines, line)
+                        line = actorlist:read("*line")
                     end
+                    actorlist:close()
                 end
-                ]]
 
                 utils:printf(2, "\t\tReplacing composites...")
                 for c = 1, #self.composites do
                     local composite = self.composites[c]
                     utils:printf(3, "\t\t\tReplacing %s composite %s with %s", map.name, composite.name, composite.newname)
-                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
+                    self:replaceUDMFMapTextures(map, composite, composite.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing flats...")
                 for f = 1, #self.flats do
                     local flat = self.flats[f]
                     utils:printf(3, "\t\t\tReplacing %s flat %s with %s", map.name, flat.name, flat.newname)
-                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
+                    self:replaceUDMFMapTextures(map, flat, flat.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing patches...")
                 for p = 1, #self.patches do
                     local patch = self.patches[p]
                     utils:printf(3, "\t\t\tReplacing %s patch %s with %s", map.name, patch.name, getPatchName(patch))
-                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..patch.name..'%f[%W]', getPatchName(patch))
+                    self:replaceUDMFMapTextures(map, patch, getPatchName(patch))
                 end
 
                 utils:printf(2, "\t\tReplacing zdoom textures...")
                 for z = 1, #self.zdoomtextures do
                     local zdoomtexture = self.zdoomtextures[z]
                     utils:printf(3, "\t\t\tReplacing %s zdoom texture %s with %s", map.name, zdoomtexture.name, zdoomtexture.newname)
-                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname)
+                    self:replaceUDMFMapTextures(map, zdoomtexture, zdoomtexture.newname)
                 end
 
                 utils:printf(2, "\t\tReplacing %s textures.txt textures...", map.name)
                 for t = 1, #self.texturedefines do
                     local texture = self.texturedefines[t]
                     utils:printf(3, "\t\t\tReplacing %s textures.txt texture %s with %s", map.name, texture.name, texture.newname)
-                    map.raw.textmap = map.raw.textmap:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
+                    self:replaceUDMFMapTextures(map, texture, texture.newname)
                 end
 
                 -- This is specificly for fixing Dark Encounters maps.
@@ -2641,6 +2647,27 @@ function wad:replaceMapTextures(map, texture, newtexturename)
         end
     end
 end
+
+function wad:replaceUDMFMapTextures(map, texture, newtexturename)
+    if not texture.ignore and texture.name ~= "AASHITTY" and texture.name ~= "AASTINKY" then
+        local pattern = '%f[%w]'..texture.name..'%f[%W]'
+        local replaced, n = map.raw.textmap:gsub(pattern, newtexturename)
+        if n > 0 then
+            utils:printf(3, "\t\t\tReplacing %d occurrences of '%s' with '%s' in UDMF map %s", n, texture.name, newtexturename, map.name)
+            texture.used = true
+        end
+        map.raw.textmap = replaced
+    else
+        local newname = texture.doomdup or texture.name
+        local pattern = '%f[%w]'..texture.name..'%f[%W]'
+        local replaced, n = map.raw.textmap:gsub(pattern, newname)
+        if n > 0 then
+            utils:printf(3, "\t\t\tKeeping %d occurrences of '%s' as '%s' in UDMF map %s", n, texture.name, newname, map.name)
+        end
+        map.raw.textmap = replaced
+    end
+end
+
 
 function wad:extractComposites()
     if (self.base ~= self) then
