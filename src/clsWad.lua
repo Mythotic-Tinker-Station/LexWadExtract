@@ -1599,7 +1599,8 @@ function wad:processTexturesX(num)
             -- mappatch_t
             love.graphics.setCanvas(composite.canvas)
             for p = 1, composite.patchcount do
-                local compositepatch = {
+                local compositepatch =
+                {
                     x = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)),
                     y = love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+2),
                     patch = self.pnames[love.data.unpack("<h", data, offsets[i]+0x16+((p-1)*10)+4)+1],
@@ -2050,22 +2051,22 @@ function wad:processTextLump(name)
 
         for c = 1, #self.composites do
             local composite = self.composites[c]
-            data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname)
+            data = data:gsub('%f[%w]'..composite.name..'%f[%W]', composite.newname or composite.name)
         end
 
         for f = 1, #self.flats do
             local flat = self.flats[f]
-            data = data:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname)
+            data = data:gsub('%f[%w]'..flat.name..'%f[%W]', flat.newname or flat.name)
         end
 
         for z = 1, #self.zdoomtextures do
             local zdoomtexture = self.zdoomtextures[z]
-            data = data:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname)
+            data = data:gsub('%f[%w]'..zdoomtexture.name..'%f[%W]', zdoomtexture.newname or zdoomtexture.name)
         end
 
         for t = 1, #self.texturedefines do
             local texture = self.texturedefines[t]
-            data = data:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname)
+            data = data:gsub('%f[%w]'..texture.name..'%f[%W]', texture.newname or texture.name)
         end
     end
 
