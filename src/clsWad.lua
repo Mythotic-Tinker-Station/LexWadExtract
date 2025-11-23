@@ -2364,16 +2364,22 @@ function wad:ModifyMaps()
 
                     utils:printf(2, "\t\tReplacing actors....")
                     while line ~= nil do
+                        if (line:match("%S")) then
+                            local actor1, actor2 = line:match("^%s*(-?%d+)%s+(-?%d+)%s*$")
 
-                        -- actor replacement stuff
-                        local actornewspace = line:find(" ")
-                        local actor1 = line:sub(1, actornewspace)
-                        local actor2 = line:sub(actornewspace+1)
-                        for t = 1, #map.things do
-                            local thing = map.things[t]
-                            if (thing.typ == actor1) then
-                                utils:printf(3, "\t\t\t%s: Replace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", map.name, t, thing.x, thing.y, thing.angle, thing.flags, actor1, actor2)
-                                thing.typ = actor2
+                            if (actor1 and actor2) then
+                                actor1 = tonumber(actor1)
+                                actor2 = tonumber(actor2)
+
+                                for t = 1, #map.things do
+                                    local thing = map.things[t]
+                                    if (thing.typ == actor1) then
+                                        utils:printf(3, "\t\t\t%s: Replace actor #%d: X: %d; Y: %d; Angle: %d; Flags: %d; Old Type: %d; New Type: %d", map.name, t, thing.x, thing.y, thing.angle, thing.flags, actor1, actor2)
+                                        thing.typ = actor2
+                                    end
+                                end
+                            else
+                                utils:printf(2, "\t\tSkipping invalid actor replacement line: %s", line)
                             end
                         end
 
@@ -2468,12 +2474,13 @@ function wad:ModifyMaps()
                     local line = actorlist:read("*line")
                     utils:printf(2, "\t\tReplacing actors....")
                     while line ~= nil do
-                        -- actor replacement stuff
-                        local actornewspace = line:find(" ")
-                        if actornewspace then
-                            local actor1 = tonumber(line:sub(1, actornewspace-1))
-                            local actor2 = tonumber(line:sub(actornewspace+1))
-                            if actor1 and actor2 then
+                        local sanitized = line:gsub("//.*$", "")
+                        if (sanitized:match("%S")) then
+                            local actor1, actor2 = sanitized:match("^%s*(-?%d+)%s+(-?%d+)%s*$")
+                            if (actor1 and actor2) then
+                                actor1 = tonumber(actor1)
+                                actor2 = tonumber(actor2)
+
                                 local pattern = "(id%s*=%s*)" .. actor1 .. "(%s*;)"
                                 local replaced, n = map.raw.textmap:gsub(pattern, function(prefix, suffix)
                                     utils:printf(3, "\t\t\t%s: Replace actor id: %d with %d", map.name, actor1, actor2)
@@ -2482,6 +2489,8 @@ function wad:ModifyMaps()
                                 if n > 0 then
                                     map.raw.textmap = replaced
                                 end
+                            else
+                                utils:printf(2, "\t\tSkipping invalid actor replacement line: %s", line)
                             end
                         end
                         line = actorlist:read("*line")
