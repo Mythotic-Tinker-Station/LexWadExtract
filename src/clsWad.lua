@@ -1326,8 +1326,13 @@ function wad:organizeMaps()
                     self.maps[index].pos = {l}
                     self.maps[index].format = namespace
 					self.maps[index].raw = {}
+
 					if(namespacedata.lumps[l+1].name:sub(1,1):lower() == "e") then
-						self.maps[index].name = self.acronym .. index
+						local numappend = ""
+						if(index < 10) then
+							numappend = "0"
+						end
+						self.maps[index].name = self.acronym .. numappend .. index
 					else
 						self.maps[index].name = self.acronym .. namespacedata.lumps[l+1].name:sub(-2)
 					end
@@ -1828,7 +1833,7 @@ function wad:filterDuplicates()
     count = 0
     -- filter dups from base wad
     if (self.base ~= self) then
-        local function flagDuplicateAssets(pwadassets, baseassets)
+        local function flagDuplicateAssets(pwadassets, baseassets, lumpscomposites)
             for a = 1, #pwadassets do
                 local pwadasset = pwadassets[a]
                 local ignore = false
@@ -1848,29 +1853,40 @@ function wad:filterDuplicates()
                         end
 
                         if ignore == false then
-                            if (pwadasset.md5 == baseasset.md5) then
-                                count = count + 1
-                                pwadasset.ignore = true
-                                pwadasset.doomdup = baseasset.name
-                                utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
-                            end
-                        end
+							if(lumpscomposites ~= nil) then
+								for a3 = 1, #lumpscomposites do
+									local origcomp = lumpscomposites[a3]
+									if (pwadasset.name == origcomp.name) then
+										count = count + 1
+										pwadasset.ignore = true
+										pwadasset.doomdup = origcomp.name
+									end
+								end
+							end
+						end
+						
+						if (pwadasset.md5 == baseasset.md5) then
+							count = count + 1
+							pwadasset.ignore = true
+							pwadasset.doomdup = baseasset.name
+							utils:printf(2, "\tFound pwad '%s' and base '%s' duplicates.", pwadasset.name, baseasset.name)
+						end
                     end
                 end
             end
         end
 
         -- composites
-        flagDuplicateAssets(self.composites, self.base.composites)
+        flagDuplicateAssets(self.composites, self.base.composites, nil)
 
         -- flats
-        flagDuplicateAssets(self.flats, self.base.flats)
+        flagDuplicateAssets(self.flats, self.base.flats, self.composites)
 
         -- patches
-        flagDuplicateAssets(self.patches, self.base.patches)
+        flagDuplicateAssets(self.patches, self.base.patches, self.composites)
 
         -- sprites
-        flagDuplicateAssets(self.sprites, self.base.sprites)
+        flagDuplicateAssets(self.sprites, self.base.sprites, nil)
     end
 
     utils:printf(1, "\tFound '%d' doom duplicates", count)
