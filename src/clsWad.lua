@@ -1328,11 +1328,7 @@ function wad:organizeMaps()
 					self.maps[index].raw = {}
 
 					if(namespacedata.lumps[l+1].name:sub(1,1):lower() == "e") then
-						local numappend = ""
-						if(index < 10) then
-							numappend = "0"
-						end
-						self.maps[index].name = self.acronym .. numappend .. index
+						self.maps[index].name = self.acronym .. namespacedata.lumps[l+1].name
 					else
 						self.maps[index].name = self.acronym .. namespacedata.lumps[l+1].name:sub(-2)
 					end
