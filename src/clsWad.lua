@@ -1649,6 +1649,11 @@ function wad:processTexturesX(num)
             composite.md5 = love.data.hash("md5", composite.png)
 
             utils:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
+            utils:print(3, "\t\tWidth: %d; Height: %d; Patches: %d;", composite.width, composite.height, composite.patchcount)
+            for p = 1, composite.patchcount do
+                local compositepatch = composite.patches[p]
+                utils:print(3, "\t\tPatch %d: %s; Xoff: %d; Yoff: %d; Stepdir: %d; Colormap: %d;", p, compositepatch.patch, compositepatch.x, compositepatch.y, compositepatch.stepdir, compositepatch.colormap)
+            end
         end
         utils:printf(1, "\tFound '%d' composite textures.", numtextures)
     else
@@ -1860,7 +1865,7 @@ function wad:filterDuplicates()
 								end
 							end
 						end
-						
+
 						if (pwadasset.md5 == baseasset.md5) then
 							count = count + 1
 							pwadasset.ignore = true
