@@ -1649,10 +1649,10 @@ function wad:processTexturesX(num)
             composite.md5 = love.data.hash("md5", composite.png)
 
             utils:printf(2, "\tBuilding Composite Texture: %s, Checksum: %s", composite.name, love.data.encode("string", "hex", composite.md5))
-            utils:print(3, "\t\tWidth: %d; Height: %d; Patches: %d;", composite.width, composite.height, composite.patchcount)
+            utils:printf(3, "\t\tWidth: %d; Height: %d; Patches: %d;", composite.width, composite.height, composite.patchcount)
             for p = 1, composite.patchcount do
                 local compositepatch = composite.patches[p]
-                utils:print(3, "\t\tPatch %d: %s; Xoff: %d; Yoff: %d; Stepdir: %d; Colormap: %d;", p, compositepatch.patch, compositepatch.x, compositepatch.y, compositepatch.stepdir, compositepatch.colormap)
+                utils:printf(3, "\t\tPatch %d: %s; Xoff: %d; Yoff: %d; Stepdir: %d; Colormap: %d;", p, compositepatch.patch, compositepatch.x, compositepatch.y, compositepatch.stepdir, compositepatch.colormap)
             end
         end
         utils:printf(1, "\tFound '%d' composite textures.", numtextures)
@@ -1661,6 +1661,7 @@ function wad:processTexturesX(num)
         --utils:printf(1, "\tNo %s found. using base wad %s", lumpname, lumpname)
     end
 end
+
 
 function isCompositeSameAsPatch(composite, compositepatch, patch)
     return compositepatch.x == 0 and compositepatch.y == 0 and composite.width == patch.width and composite.height == patch.height
@@ -2706,13 +2707,22 @@ function wad:extractComposites()
 
         local function isCompositeDifferentFromPatches(composite)
             if (composite.patchcount > 1) then
+                utils:printf(3, "\t\t\tComposite '%s' has %d patches, treated as different", composite.newname, composite.patchcount)
                 return true
             end
 
             local compositepatch = composite.patches[1]
             local patchdata = self.patches[compositepatch.patch] or self.base.patches[compositepatch.patch]
 
-            return not isCompositeSameAsPatch(composite, compositepatch, patchdata)
+            if not patchdata then
+                utils:printf(3, "\t\t\tWARNING: Composite '%s' references patch '%s' which was not found!", composite.newname, compositepatch.patch)
+                return true
+            end
+
+            local isSame = isCompositeSameAsPatch(composite, compositepatch, patchdata)
+            utils:printf(3, "\t\t\tComposite '%s' is %s its single patch '%s'", composite.newname, isSame and "same as" or "different from", compositepatch.patch)
+
+            return not isSame
         end
 
         for c = 1, #self.composites do
@@ -2757,11 +2767,25 @@ function wad:createTextureDefinition(composite)
     local texturedefsb = stringbuilder()
     texturedefsb:append(string.format("Texture \"%s\", %d, %d\n{\n", composite.newname, composite.width, composite.height))
 
+    utils:printf(3, "\t\t\tCreating texture definition for '%s' (%dx%d) with %d patches", composite.newname, composite.width, composite.height, composite.patchcount)
+
     for p = 1, composite.patchcount do
         local compositepatch = composite.patches[p]
+        utils:printf(3, "\t\t\t\tProcessing patch %d/%d: name='%s', x=%d, y=%d", p, composite.patchcount, compositepatch.patch, compositepatch.x, compositepatch.y)
+
         local patchdata = self.patches[compositepatch.patch]
         local basepatchdata = self.base.patches[compositepatch.patch]
+
+        utils:printf(3, "\t\t\t\t\tPatch lookup: patchdata=%s, basepatchdata=%s", patchdata and "found" or "nil", basepatchdata and "found" or "nil")
+        if patchdata then
+            utils:printf(3, "\t\t\t\t\tpatchdata.name='%s', patchdata.ignore=%s, patchdata.composite=%s", patchdata.name or "nil", tostring(patchdata.ignore), patchdata.composite and patchdata.composite.name or "nil")
+        end
+        if basepatchdata then
+            utils:printf(3, "\t\t\t\t\tbasepatchdata.name='%s', basepatchdata.composite=%s", basepatchdata.name or "nil", basepatchdata.composite and basepatchdata.composite.name or "nil")
+        end
+
         local patchname = getPatchName(patchdata, basepatchdata)
+        utils:printf(3, "\t\t\t\t\tResolved patch name: '%s' (length: %d)", patchname, #patchname)
 
         if (#patchname > 0) then
             if (patchdata or basepatchdata) then
@@ -2769,12 +2793,19 @@ function wad:createTextureDefinition(composite)
                     patchdata.used = true
                 end
                 texturedefsb:append(string.format("\tPatch \"%s\", %d, %d\n", patchname, compositepatch.x, compositepatch.y))
+                utils:printf(3, "\t\t\t\t\tAdded patch to definition: '%s' at (%d, %d)", patchname, compositepatch.x, compositepatch.y)
+            else
+                utils:printf(3, "\t\t\t\t\tWARNING: Patch name exists but both patchdata and basepatchdata are nil!")
             end
+        else
+            utils:printf(3, "\t\t\t\t\tWARNING: Empty patch name - patch will be skipped!")
         end
     end
 
     texturedefsb:append("}\n")
-    return texturedefsb:toString()
+    local result = texturedefsb:toString()
+    utils:printf(3, "\t\t\tFinal texture definition has %d lines", select(2, result:gsub("\n", "\n")))
+    return result
 end
 
 function getPatchName(patch, basepatch)
@@ -2784,14 +2815,23 @@ function getPatchName(patch, basepatch)
         -- If this patch is a standalone texture, then use the composite texture name instead
         if (patch.composite) then
             patchname = patch.composite.newname
+            utils:printf(3, "\t\t\t\t\t\tUsing composite name from patch: '%s'", patchname)
         else
             patchname = patch.newname
+            utils:printf(3, "\t\t\t\t\t\tUsing patch newname: '%s'", patchname)
         end
+    elseif (patch and patch.ignore) then
+        utils:printf(3, "\t\t\t\t\t\tPatch is marked as ignored")
     end
 
     -- If patch was not defined or somehow did not have a name, then attempt to get name from basepatch (if it exists)
     if (basepatch and patchname == nil) then
         patchname = basepatch.name or (basepatch.composite and basepatch.composite.name)
+        if patchname then
+            utils:printf(3, "\t\t\t\t\t\tUsing basepatch name: '%s'", patchname)
+        else
+            utils:printf(3, "\t\t\t\t\t\tBasepatch exists but has no valid name")
+        end
     end
 
     return patchname or ""
