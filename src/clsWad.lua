@@ -1845,6 +1845,26 @@ function wad:filterDuplicates()
                     end
                 end
                 if ignore == false then
+					if(lumpscomposites ~= nil) then
+						local patchUsed = false
+						for a3 = 1, #lumpscomposites do
+							local origcomp = lumpscomposites[a3]
+							if (pwadasset.name == origcomp.name) then
+								for a4 = 1, #origcomp.patches do
+									local currentPatch = origcomp.patches[a4]
+									if (pwadasset.name == currentPatch.patch) then
+										patchUsed = true
+									end
+								end
+								if(not patchUsed) then
+									count = count + 1
+									pwadasset.ignore = true
+									pwadasset.doomdup = origcomp.name
+								end
+							end
+						end
+					end
+				
                     for a2 = 1, #baseassets do
                         local baseasset = baseassets[a2]
                         local ignore = false
@@ -1853,19 +1873,6 @@ function wad:filterDuplicates()
                                 ignore = true
                             end
                         end
-
-                        if ignore == false then
-							if(lumpscomposites ~= nil) then
-								for a3 = 1, #lumpscomposites do
-									local origcomp = lumpscomposites[a3]
-									if (pwadasset.name == origcomp.name) then
-										count = count + 1
-										pwadasset.ignore = true
-										pwadasset.doomdup = origcomp.name
-									end
-								end
-							end
-						end
 
 						if (pwadasset.md5 == baseasset.md5) then
 							count = count + 1
